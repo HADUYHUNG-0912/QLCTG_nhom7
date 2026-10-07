@@ -72,13 +72,6 @@ QLCTG_nhom7/
 ├── requirements.txt                      # Danh sách các thư viện phụ thuộc
 └── LAB2/
     ├── README.md                         # TÀI LIỆU CHUẨN HÓA KIẾN TRÚC & ĐỀ BÀI (File này)
-    ├── assets/                           # Hình ảnh, sơ đồ minh họa lý thuyết
-    │   ├── fig_1_bia_chuong_2.jpeg
-    │   ├── fig_2_acf_pacf_bieu_do.jpeg
-    │   ├── fig_3_white_noise_cong_thuc.jpeg
-    │   ├── fig_4_white_noise_acf.png
-    │   ├── fig_5_data_quality_dimensions.png
-    │   └── fig_6_data_quality_lifecycle.png
     ├── data/
     │   ├── raw/                          # Dữ liệu gốc (AirPassengers.csv, Daily-Min-Temperatures.csv)
     │   └── processed/                    # Dữ liệu đã làm sạch & tiền xử lý
