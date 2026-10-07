@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches and checkpoints
+.ipynb_checkpoints/
+.pytest_cache/
+.vscode/
+.idea/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+clean_chapter2_temp.md
