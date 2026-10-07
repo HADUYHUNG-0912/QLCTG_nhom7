@@ -115,8 +115,6 @@ Dự án sử dụng Python 3.10+ cùng hệ sinh thái Data Science / Time Seri
 <a name="phan-2-co-so-ly-thuyet--phuong-phap-luan"></a>
 # PHẦN 2: CƠ SỞ LÝ THUYẾT & PHƯƠNG PHÁP LUẬN (THEORETICAL FOUNDATIONS)
 
-![Hình bìa chương 2](assets/fig_1_bia_chuong_2.jpeg)
-
 <a name="21-ham-tu-tuong-quan-autocorrelation--acf"></a>
 ### 2.1. Hàm tự tương quan (Autocorrelation / ACF)
 
@@ -170,8 +168,6 @@ $$\operatorname{Cov}(X, Y) = \frac{1}{n}\sum_{t=1}^{n}(x_t - \bar{x})(y_t - \bar
 <a name="23-cach-doc-va-phan-tich-bieu-do-acf--pacf"></a>
 ### 2.3. Cách đọc và phân tích biểu đồ ACF & PACF
 
-![Biểu đồ ACF và PACF](assets/fig_2_acf_pacf_bieu_do.jpeg)
-
 #### A. Hàm tự tương quan toàn phần (ACF - Autocorrelation Function)
 - Đo lường tương quan giữa $y_t$ và $y_{t-k}$, **bao gồm cả tác động gián tiếp** truyền qua các mốc trung gian ($y_{t-1}, y_{t-2}, \dots$).
 - **Ứng dụng nhận diện:**
@@ -200,9 +196,6 @@ $$\operatorname{Cov}(X, Y) = \frac{1}{n}\sum_{t=1}^{n}(x_t - \bar{x})(y_t - \bar
 
 <a name="24-khai-niem-va-kiem-dinh-nhieu-trang-white-noise"></a>
 ### 2.4. Khái niệm và Kiểm định Nhiễu trắng (White Noise)
-
-![Công thức White Noise](assets/fig_3_white_noise_cong_thuc.jpeg)  
-![Kiểm định White Noise qua ACF](assets/fig_4_white_noise_acf.png)
 
 - **Định nghĩa:** White Noise (Nhiễu trắng) là chuỗi thời gian mà tất cả các quan sát hoàn toàn độc lập và phân phối đồng nhất ngẫu nhiên. Chuỗi không mang bất kỳ quy luật, xu hướng hay cấu trúc chu kỳ nào.
 - **Mô hình toán học:**
@@ -256,9 +249,6 @@ Phân rã chuỗi thời gian là phương pháp chia tách chuỗi dữ liệu 
 ### 2.6. 11 Vấn đề chất lượng dữ liệu Time Series & Giải pháp kỹ thuật
 
 Dữ liệu chuỗi thời gian thực tế thường xuyên đối mặt với các suy giảm chất lượng dữ liệu nghiêm trọng. Dưới đây là 11 vấn đề cốt lõi cùng giải pháp kỹ thuật cụ thể:
-
-![Các chiều chất lượng dữ liệu](assets/fig_5_data_quality_dimensions.png)  
-![Vòng đời làm sạch dữ liệu](assets/fig_6_data_quality_lifecycle.png)
 
 *(6 chiều chất lượng dữ liệu cốt lõi: Completeness, Uniqueness, Timeliness, Validity, Accuracy, Consistency)*
 
