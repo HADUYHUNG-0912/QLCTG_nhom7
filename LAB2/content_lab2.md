@@ -44,6 +44,10 @@ Tự tương quan là mức độ tương quan giữa một chuỗi thời gian 
 
 Công thức tự tương quan tại độ trễ k:
 
+$$
+\rho_k = \frac{\operatorname{Cov}(y_t, y_{t-k})}{\operatorname{Var}(y_t)}
+$$
+
 ## Giá trị của autocorrelation nằm trong [-1, 1]:
 
 - +1 → tương quan dương mạnh (giá trị tăng → giá trị sau cũng tăng)
@@ -71,13 +75,15 @@ Phương sai (Variance). Phương sai đo mức độ một biến dao động q
 
 ## Công thức:
 
-- © yy: gid tri tai thai diém t
+$$
+\operatorname{Var}(Y) = \frac{1}{n}\sum_{t=1}^{n}(y_t - \bar{y})^2
+$$
 
 ## Trong đó:
 
-- \* tri trung binh
-
-- (y: — binh phudng db so véi trung binh
+- $y_t$: giá trị tại thời điểm $t$
+- $\bar{y}$: giá trị trung bình
+- $(y_t - \bar{y})^2$: bình phương độ lệch so với trung bình
 
 ## Ý nghĩa:
 
@@ -99,13 +105,17 @@ Hiệp phương sai (Covariance). Hiệp phương sai đo mức độ hai biến
 
 ## Công thức:
 
+$$
+\operatorname{Cov}(X, Y) = \frac{1}{n}\sum_{t=1}^{n}(x_t - \bar{x})(y_t - \bar{y})
+$$
+
 ## Trong đó:
 
-- lech clia X so véi trung binh
+- $(x_t - \bar{x})$: độ lệch của $X$ so với trung bình
 
-- (y+ — dd léch cia Y so véi trung binh
+- $(y_t - \bar{y})$: độ lệch của $Y$ so với trung bình
 
-- « Tich hai do léch cho biét thay déi clia X va Y
+- Tích hai độ lệch cho biết hướng thay đổi của $X$ và $Y$
 
 ## Ý nghĩa dấu:
 
@@ -128,11 +138,11 @@ Ví dụ: X tăng → Y giảm.
 
 - Dùng để nhận dạng:
 
-- Trend (ACF gi£m ch­m)
+- Trend (ACF giảm chậm)
 
-- Seasonality (ACF có —Énh nh£y theo chu kó)
+- Seasonality (ACF có đỉnh nhảy theo chu kỳ)
 
-- Thành ph§n MA (Moving Average)
+- Thành phần MA (Moving Average)
 
 PACF (Partial Autocorrelation Function)
 
@@ -140,9 +150,9 @@ PACF (Partial Autocorrelation Function)
 
 - Dùng để nhận dạng:
 
-- Thành ph§n AR (Autoregressive)
+- Thành phần AR (Autoregressive)
 
-- Xác —Ënh sÑ lag c§n thi¿t trong mô hình AR(p)
+- Xác định số lag cần thiết trong mô hình AR(p)
 
 
 ## Ứng dụng trong việc xác định tính mùa vụ và chọn mô hình
@@ -153,33 +163,33 @@ PACF (Partial Autocorrelation Function)
 
 - Ví dụ:
 
-- Dï liÇu bán l» theo tháng  peak t¡i lag=12
+- Dữ liệu bán lẻ theo tháng → peak tại lag=12
 
-- Dï liÇu nhiÇt -Ù ngày  peak t¡i lag=7 (chu kó tu§n)
+- Dữ liệu nhiệt độ ngày → peak tại lag=7 (chu kỳ tuần)
 
 ## • Chọn mô hình ARIMA
 
 - Biểu đồ ACF và PACF hỗ trợ chọn tham số (p, d, q).
 
-- N¿u PACF c¯t cåt  t-ng p (AR)
+- Nếu PACF cắt cụt → tăng p (AR)
 
-- N¿u ACF c¯t cåt  t-ng q (MA)
+- Nếu ACF cắt cụt → tăng q (MA)
 
-- N¿u ACF gi£m ch­m  c§n d (difference) -Ã khí trend
+- Nếu ACF giảm chậm → cần d (difference) để khử trend
 
 - Ví dụ:
 
-- ACF gi£m ch­m, PACF có -Énh lÛn t¡i lag=1  ARIMA(1,1,0)
+- ACF giảm chậm, PACF có đỉnh lớn tại lag=1 → ARIMA(1,1,0)
 
-- ACF có 2 lag c¯t cåt  ARIMA(0,0,2)
+- ACF có 2 lag cắt cụt → ARIMA(0,0,2)
 
 ## • Chọn mô hình Seasonal ARIMA (SARIMA)
 
-- N¿u xu¥t hiÇn ‐Énh t¡i lag=12  ta thêm ph§n mùa vå: (P, D, Q, 12)
+- Nếu xuất hiện đỉnh tại lag=12 → ta thêm phần mùa vụ: (P, D, Q, 12)
 
 - Kiểm tra dữ liệu có cấu trúc hay chỉ là noise?
 
-- N¿u ACF toàn n±m trong kho£ng tin c­y  chu×i g§n nh° white noise  không dñ báo ‒°ãc.
+- Nếu ACF toàn nằm trong khoảng tin cậy → chuỗi gần như white noise → không dự báo được.
 
 
 ## Khái niệm White Noise (Nhiễu trắng)
@@ -187,6 +197,10 @@ PACF (Partial Autocorrelation Function)
 White Noise là một chuỗi thời gian mà các giá trị hoàn toàn ngẫu nhiên, không có bất kỳ cấu trúc hay quy luật nào. Nói cách khác, mỗi giá trị trong chuỗi là độc lập và không bị ảnh hưởng bởi các giá trị trước đó.
 
 ## Mô hình toán học của White Noise:
+
+$$
+y_t \sim \mathcal{N}(0, \sigma^2)
+$$
 
 - White noise như những dao động hoàn toàn vô nghĩa, không có mẫu hình lặp lại, không có xu hướng, không có mùa vụ và không thể dự đoán ( Mean = 0, variance = constant, No Autocorrelation, biểu đồ ACF sẽ nằm hoàn toàn trong dải tin cậy 95% )
 
@@ -359,7 +373,7 @@ Các dạng phân rã (theo cách các thành phần kết hợp với nhau):
 
 - Backward fill (bfill): Dùng giá trị gần nhất về sau.
 
-- Interpolation (N ội suy): Linear, Time-based, Polynomial, Spline.
+- Interpolation (Nội suy): Linear, Time-based, Polynomial, Spline.
 
 - Model-based imputation: dùng ARIMA, Kalman Filter, Prophet, RandomForest để dự đoán giá trị bị thiếu.
 
@@ -415,7 +429,7 @@ Các dạng phân rã (theo cách các thành phần kết hợp với nhau):
 
 - Reindex toàn bộ timeline: Tạo timeline chuẩn rồi fill dữ liệu.
 
-- c. Loại bỏ timestamp trùng: group và aggregate (mean / sum / max tùy ngữ cảnh).
+- Loại bỏ timestamp trùng:
 
 ## 6. Latency & Delay —Trễ ghi nhận
 
