@@ -1,0 +1,23 @@
+
+=================================================================================
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 3 (PHÂN RÃ CHUỖI THỜI GIAN)
+=================================================================================
+1. XU HƯỚNG (TREND):
+   - Đường xu hướng tăng trưởng liên tục và mạnh mẽ qua toàn bộ giai đoạn 1949 - 1960.
+   - Tốc độ tăng trưởng đạt khoảng +274.7%, phản ánh sự bùng nổ của ngành hàng không sau Thế chiến 2.
+
+2. MÙA VỤ (SEASONALITY):
+   - Tính mùa vụ diễn ra cực kỳ mạnh và ổn định với chu kỳ 12 tháng.
+   - Đỉnh điểm (Peak) luôn rơi vào Tháng 7 (Mùa cao điểm du lịch hè).
+   - Đáy chạm mức thấp nhất vào Tháng 11 hàng năm.
+
+3. SO SÁNH ADDITIVE VS MULTIPLICATIVE:
+   - Dạng Nhân (Multiplicative: Y = T * S * R) phù hợp vượt trội so với dạng Cộng (Additive).
+   - Lý do: Biên độ dao động giữa mùa cao điểm và thấp điểm mở rộng theo thời gian tỷ lệ thuận với xu hướng
+     (Năm 1949 biên độ chỉ chênh ~40 khách, đến 1960 biên độ chênh lệch tăng lên hơn 150 khách).
+
+4. ĐÁNH GIÁ THÀNH PHẦN PHẦN DƯ (RESIDUAL):
+   - Thành phần Residual dao động ổn định quanh giá trị 1.0 (đối với dạng nhân).
+   - Residual không còn chứa các bước sóng chu kỳ rõ rệt, tiệm cận với tính chất của White Noise,
+     chứng minh mô hình phân rã đã trích xuất thành công gần như toàn bộ thông tin có cấu trúc.
+=================================================================================

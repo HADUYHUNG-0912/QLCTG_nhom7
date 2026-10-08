@@ -25,3 +25,10 @@ Desktop.ini
 *.tmp
 *.bak
 clean_chapter2_temp.md
+
+# Office lock files
+~$*
+
+# Progress management sheets (Local only - Khong push len Git theo yeu cau)
+*.xlsx
+*.xls

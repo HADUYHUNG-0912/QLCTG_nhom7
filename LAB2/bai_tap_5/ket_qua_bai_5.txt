@@ -1,0 +1,27 @@
+=================================================================================
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 5 (TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN)
+=================================================================================
+1. PHÂN TÍCH XU HƯỚNG VÀ DẢI BIẾN THIÊN (ROLLING STATISTICS):
+   - Đường trung bình trượt 12 tháng (Rolling Mean) làm mịn hoàn toàn các dao động sóng ngắn,
+     cho thấy rõ ràng xu hướng tăng trưởng tuyến tính dốc mạnh qua từng năm.
+   - Dải biên độ dao động ±2 Rolling Std mở rộng rõ rệt theo thời gian:
+     + Độ lệch chuẩn nội năm 1949: 13.72
+     + Độ lệch chuẩn nội năm 1960: 77.74 (Gấp 5.67 lần so với 1949).
+   - Kết luận phương sai: Chuỗi vi phạm giả định phương sai đồng nhất (Heteroskedasticity).
+     Biên độ dao động tăng tỷ lệ thuận với mức độ lớn của chuỗi, minh chứng dạng mô hình nhân (Multiplicative)
+     hoặc phép biến đổi Box-Cox / Log-transform là tối cần thiết khi xây dựng mô hình dự báo.
+
+2. QUY LUẬT MÙA VỤ THEO THÁNG (MONTHLY SEASONALITY):
+   - Biểu đồ Seasonal Plot cho thấy các đường cong qua từng năm có hình dáng (pha dao động)
+     đồng dạng gần như tuyệt đối, chứng minh tính mùa vụ mang tính quy luật tự nhiên rất cao.
+   - Đỉnh điểm hành khách (Peak): Tháng 7 (Tháng 7 - mùa nghỉ hè quốc tế) luôn đạt lưu lượng cao nhất.
+   - Đáy thấp nhất (Trough): Tháng 11 (Tháng 11 - giai đoạn chuyển giao mùa thấp điểm du lịch).
+   - Mỗi năm đường cong mùa vụ tịnh tiến đều lên phía trên mà không làm đảo lộn cấu trúc sóng.
+
+3. ĐÁNH GIÁ MẬT ĐỘ QUA HEATMAP (YEAR X MONTH):
+   - Bản đồ nhiệt thể hiện rõ sự chuyển màu từ tông vàng nhạt (năm 1949, lưu lượng ~100-150)
+     sang tông xanh lục đậm (năm 1960, lưu lượng vượt ngưỡng 500-600).
+   - "Dải màu nóng" (nồng độ hành khách cao nhất) tập trung liên tục vào cột Tháng 7 và Tháng 8 qua mọi năm.
+   - Sự kết hợp trực quan giữa Heatmap và Rolling Statistics cung cấp bức tranh toàn diện
+     về cả 2 chiều không gian (thời điểm trong năm) và thời gian (xu hướng liên năm).
+=================================================================================

@@ -1,0 +1,20 @@
+
+=================================================================================
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯỢNG DỮ LIỆU)
+=================================================================================
+1. SO SÁNH PHƯƠNG PHÁP XỬ LÝ DỮ LIỆU THIẾU (MISSING IMPUTATION):
+   - Phương pháp Forward-fill (ffill) cho sai số MAE = 23.31.
+     Nhược điểm của ffill là tạo ra các đoạn nằm ngang bậc thang, không bắt kịp xu hướng tăng trưởng của chuỗi.
+   - Phương pháp Time-based Interpolation cho sai số MAE = 16.43 (giảm đáng kể sai số).
+     Nội suy thời gian khôi phục độ dốc tự nhiên của chuỗi mượt mà và chính xác hơn nhiều.
+
+2. HIỆU QUẢ CỦA BỘ LỌC NGOẠI LAI (HAMPEL FILTER):
+   - Đã phát hiện và đưa về mức bình thường thành công 21 điểm ngoại lai đột biến.
+   - Hampel Filter sử dụng Trung vị trượt (Rolling Median) và MAD (Median Absolute Deviation),
+     do đó có tính kháng ngoại lai cực cao, không bị giá trị đột biến làm lệch ngưỡng phát hiện như Z-score hay Mean truyền thống.
+
+3. ĐÁNH GIÁ CHẤT LƯỢNG PHỤC HỒI TOÀN DIỆN:
+   - Sai số toàn chuỗi sau khi làm sạch: RMSE = 20.24, MAE = 7.35.
+   - Đồ thị đối chứng chứng minh chuỗi sau phục hồi bám sát gần như hoàn hảo với chuỗi gốc,
+     đảm bảo dữ liệu sẵn sàng cho các mô hình dự báo thống kê và học máy.
+=================================================================================

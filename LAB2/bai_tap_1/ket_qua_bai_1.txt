@@ -1,0 +1,21 @@
+
+=================================================================================
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 1 (ACF & PACF)
+=================================================================================
+1. TÍNH CHẤT TỰ TƯƠNG QUAN:
+   - Chuỗi AirPassengers có tự tương quan RẤT MẠNH.
+   - Hệ số ACF tại Lag 1 đạt mức cao (0.9480) và suy giảm rất chậm qua các lag
+     (tail-off / decaying slowly), phản ánh tính 'ghi nhớ' dài hạn của dữ liệu.
+
+2. DẤU HIỆU XU HƯỚNG (TREND) VÀ MÙA VỤ (SEASONALITY):
+   - Xu hướng (Trend): Thể hiện rõ nét qua việc các hệ số ACF dương lớn suy giảm từ từ qua thời gian.
+     Chuỗi này là chuỗi không dừng (Non-stationary), cần lấy sai phân bậc 1 (d = 1) để khử xu hướng.
+   - Mùa vụ (Seasonality): Biểu đồ ACF xuất hiện các đỉnh nhô cao vượt dải tin cậy lặp lại theo chu kỳ 
+     đều đặn tại các bội số của 12 (Lag 12, Lag 24, Lag 36). Điều này khẳng định chuỗi có chu kỳ mùa vụ 12 tháng.
+
+3. CÁC LAG CÓ Ý NGHĨA QUAN TRỌNG NHẤT:
+   - Lag 1: Đo lường tương quan trễ ngắn hạn mạnh nhất.
+   - Lag 12 (0.7604): Lag phản ánh đỉnh chu kỳ mùa vụ hàng năm.
+   - Biểu đồ PACF cắt cụt (cut-off) sau Lag 1 và có xung đáng chú ý tại Lag 12/13, gợi ý việc xây dựng
+     mô hình SARIMA với thành phần tự hồi quy p = 1 và mùa vụ P = 1.
+=================================================================================
