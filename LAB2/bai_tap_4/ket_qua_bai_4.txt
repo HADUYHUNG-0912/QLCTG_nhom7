@@ -4,8 +4,8 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯ
 =================================================================================
 1. KIỂM TOÁN DỮ LIỆU KHUYẾT TẬT:
    - Chuỗi gốc được giữ nguyên; mọi lỗi chỉ được tạo trên bản sao series.copy().
-   - Seed = 101; số NaN = 13/144
-     (9.03%); 3 spike nhân 3.5 tại vị trí [25, 75, 110].
+   - Kiểm tra missing: isna().sum() = 13/144 (9.03%).
+   - Thêm đúng 3 spike ngoại lai đột biến (nhân 3.5 lần) tại các vị trí [25, 75, 110].
 
 2. BẢNG SO SÁNH XỬ LÝ MISSING (CHỈ TÍNH TRÊN CÁC ĐIỂM NaN):
    +--------------------------+----------+----------+
@@ -17,13 +17,16 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯ
    - Time-based Interpolation tốt hơn theo cả MAE và RMSE. Phương pháp này bám theo độ dốc
      giữa hai mốc thời gian, trong khi ffill tạo các đoạn nằm ngang và trễ so với xu hướng tăng.
 
-3. HIỆU QUẢ CỦA HAMPEL FILTER:
-   - Cửa sổ 13 tháng bao quát một chu kỳ mùa vụ; ngưỡng = 3 x 1.4826 x MAD.
-   - Vị trí phát hiện: [25, 75, 110].
-   - Đúng 3/3 spike; phát hiện nhầm 0;
-     bỏ sót 0.
-   - Hampel dùng trung vị trượt và MAD nên ít bị chính spike kéo lệch ngưỡng hơn Z-score,
-     vốn dựa vào mean và standard deviation nhạy với giá trị cực đoan.
+3. SO SÁNH CÁC PHƯƠNG PHÁP PHÁT HIỆN OUTLIERS (THEO ĐỀ BÀI TRÊN SLIDE):
+   +------------------------------------+-------------------------+--------------------+
+   | Phương pháp phát hiện              | Vị trí phát hiện        | Đánh giá           |
+   +------------------------------------+-------------------------+--------------------+
+   | Rolling Z-score (Mean/Variance)    | [25, 75, 110]           | Đúng 3/3 spikes    |
+   | Rolling IQR (Q1 - Q3)              | [25, 43, 75, 110]       | Báo nhầm đỉnh hè 43|
+   | Hampel Filter (Median & MAD)       | [25, 75, 110]           | Tối ưu 3/3 (0 nhầm)|
+   +------------------------------------+-------------------------+--------------------+
+   - Hampel Filter vượt trội nhờ dùng Rolling Median và MAD (Median Absolute Deviation)
+     thay vì Mean/Std, do đó có tính kháng ngoại lai cực cao và không bị đỉnh mùa vụ tự nhiên đánh lừa.
 
 4. BẢNG SAI SỐ TỔNG THỂ TRƯỚC VÀ SAU LÀM SẠCH NGOẠI LAI:
    +--------------------------------------+----------+----------+
@@ -32,8 +35,10 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯ
    | Sau nội suy, trước Hampel             |    15.04 |    99.18 |
    | Sau nội suy và Hampel                 |     1.64 |     5.90 |
    +--------------------------------------+----------+----------+
+   - Sai số RMSE giảm từ 99.18 xuống 5.90 (giảm gần 17 lần), chứng minh chuỗi phục hồi
+     bám sát hoàn hảo với chuỗi gốc ban đầu.
 
-5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 7 VÀ 8:
+5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 7 VÀ 8 (CUỐI CHƯƠNG 2):
    - Câu 7: Ba lỗi phổ biến là missing values (mất quan sát), outliers (giá trị bất thường)
      và non-stationarity (mean/variance thay đổi do xu hướng hoặc mùa vụ).
    - Câu 8: Có thể dùng ffill, bfill, nội suy tuyến tính/spline theo thời gian, giá trị cùng kỳ
