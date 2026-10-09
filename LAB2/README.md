@@ -62,36 +62,40 @@ flowchart TD
 <a name="12-cau-truc-thu-muc-chuan-hoa"></a>
 ### 1.2. Cấu trúc thư mục chuẩn hóa (Project Structure)
 
-Toàn bộ mã nguồn, dữ liệu và báo cáo của Nhóm 7 được tổ chức theo tiêu chuẩn như sau:
+Toàn bộ mã nguồn, dữ liệu, bảng phân công và báo cáo nghiệm thu của Nhóm 7 được tổ chức chuẩn hóa theo từng bài tập riêng biệt:
 
 ```text
 QLCTG_nhom7/
-├── .git/                                 # Cấu hình Git repository
-├── .gitignore                            # Khai báo file bỏ qua (cache, venv, data lớn)
-├── README.md                             # Tổng quan dự án nhóm
+├── .gitignore                            # Khai báo file bỏ qua (cache, venv, file sheet nội bộ *.xlsx)
+├── README.md                             # Tổng quan dự án Nhóm 7
 ├── requirements.txt                      # Danh sách các thư viện phụ thuộc
 └── LAB2/
     ├── README.md                         # TÀI LIỆU CHUẨN HÓA KIẾN TRÚC & ĐỀ BÀI (File này)
+    ├── KE_HOACH_PHAN_CONG_NHOM7.md       # Bảng phân công chi tiết 6 thành viên & tiến độ
     ├── data/
-    │   ├── raw/                          # Dữ liệu gốc (AirPassengers.csv, Daily-Min-Temperatures.csv)
-    │   └── processed/                    # Dữ liệu đã làm sạch & tiền xử lý
-    ├── notebooks/
-    │   └── Lab2_TimeSeries_EDA.ipynb     # Jupyter Notebook thực hành toàn bộ bài tập 1-6
-    ├── src/                              # Mã nguồn Python tái sử dụng
-    │   ├── __init__.py
-    │   ├── data_loader.py                # Đọc dữ liệu, thiết lập DatetimeIndex
-    │   ├── quality_audit.py              # Kiểm tra missing, outlier, duplicate
-    │   ├── decomposition_utils.py        # Hàm phân rã Classical & STL
-    │   └── visualization.py              # Vẽ biểu đồ rolling, seasonal plot, heatmap
-    └── reports/
-        ├── Lab2_Report_Group7.pdf        # Báo cáo kỹ thuật hoàn chỉnh
-        └── figures/                      # Các biểu đồ xuất ra từ notebook
-            ├── acf_pacf_plot.png
-            ├── white_noise_comparison.png
-            ├── decomposition_components.png
-            ├── data_cleaning_before_after.png
-            └── seasonality_heatmap.png
+    │   └── raw/
+    │       └── AirPassengers.csv         # Dữ liệu chuẩn quốc tế (144 quan sát, 1949-1960)
+    ├── bai_tap_1/                        # BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH ACF & PACF
+    │   ├── bai_tap_1.py                  # Mã nguồn phân tích ACF & PACF (40 lags, chuẩn 4 bước)
+    │   └── ket_qua_bai_1.txt             # Báo cáo kết quả nghiệm thu Bài 1
+    ├── bai_tap_2/                        # BÀI TẬP 2: KIỂM ĐỊNH CHUỖI NHIỄU TRẮNG
+    │   ├── bai_tap_2.py                  # Mô phỏng 1000 điểm White Noise & Ljung-Box test
+    │   └── ket_qua_bai_2.txt             # Nhận xét so sánh 5 dòng chuẩn đề bài
+    ├── bai_tap_3/                        # BÀI TẬP 3: PHÂN RÃ CHUỖI THỜI GIAN
+    │   ├── bai_tap_3.py                  # Phân rã Classical (Additive/Multiplicative) & STL
+    │   └── ket_qua_bai_3.txt             # Phân tích xu hướng, mùa vụ và phần dư
+    ├── bai_tap_4/                        # BÀI TẬP 4: KIỂM TRA & XỬ LÝ CHẤT LƯỢNG DỮ LIỆU
+    │   ├── bai_tap_4.py                  # Giả lập 10% NaN & Hampel Filter lọc outlier
+    │   └── ket_qua_bai_4.txt             # Đánh giá sai số phục hồi MAE/RMSE
+    └── bai_tap_5/                        # BÀI TẬP 5: TRỰC QUAN HÓA CHUYÊN SÂU
+        ├── bai_tap_5.py                  # Rolling Statistics (±2σ) & Seasonality Heatmap
+        └── ket_qua_bai_5.txt             # Phân tích quy luật mùa vụ & phương sai
 ```
+
+> **Nguyên tắc Quản lý Tinh gọn của Nhóm 7:**  
+> - Không tự ý xuất hoặc lưu các tệp hình ảnh (`.png`/`.jpg`) ra ổ đĩa nhằm giữ repository luôn nhẹ, sạch và tránh xung đột Git khi làm việc nhóm.  
+> - Toàn bộ mã nguồn hiển thị biểu đồ trực quan tương tác trực tiếp (`plt.show()`) khi cần quan sát và tự động giải phóng bộ nhớ.  
+> - Mọi tệp `.py` đều tích hợp sẵn khối **`AI_AGENT_INSTRUCTIONS`** ở đầu tệp để kiểm soát chất lượng code khi thành viên sử dụng Cursor, Copilot hoặc ChatGPT.
 
 <a name="13-ngan-xep-cong-nghe--thu-vien"></a>
 ### 1.3. Ngăn xếp công nghệ & Thư viện (Tech Stack)
@@ -389,9 +393,8 @@ series = df['Passengers']
 # 2. Vẽ biểu đồ ACF & PACF
 fig, axes = plt.subplots(1, 2, figsize=(16, 5))
 plot_acf(series, lags=40, ax=axes[0], title='Autocorrelation Function (ACF)')
-plot_pacf(series, lags=40, ax=axes[1], title='Partial Autocorrelation Function (PACF)', method='yule_walker')
+plot_pacf(series, lags=40, ax=axes[1], title='Partial Autocorrelation Function (PACF)', method='ywm')
 plt.tight_layout()
-plt.savefig('reports/figures/acf_pacf_plot.png', dpi=300)
 plt.show()
 ```
 
@@ -418,7 +421,6 @@ white_noise = np.random.normal(loc=0.0, scale=1.0, size=1000)
 # 2. Vẽ ACF của White Noise
 fig, ax = plt.subplots(figsize=(10, 4))
 plot_acf(white_noise, lags=30, ax=ax, title='ACF of Simulated White Noise')
-plt.savefig('reports/figures/white_noise_acf.png', dpi=300)
 plt.show()
 
 # 3. Kiểm định Ljung-Box
@@ -455,7 +457,6 @@ decomp_mul = seasonal_decompose(series, model='multiplicative', period=12)
 fig = decomp_mul.plot()
 fig.set_size_inches(12, 8)
 plt.suptitle('Multiplicative Classical Decomposition', y=1.02)
-plt.savefig('reports/figures/decomp_classical_multiplicative.png', dpi=300)
 plt.show()
 
 # 2. STL Decomposition
@@ -464,7 +465,6 @@ res_stl = stl.fit()
 fig_stl = res_stl.plot()
 fig_stl.set_size_inches(12, 8)
 plt.suptitle('STL Decomposition (Robust)', y=1.02)
-plt.savefig('reports/figures/decomp_stl.png', dpi=300)
 plt.show()
 ```
 
