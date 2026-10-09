@@ -13,11 +13,14 @@ hãy TUÂN THỦ NGHIÊM NGẶT các quy tắc kiến trúc sau:
    - File bắt buộc phải chia thành 4 hàm tuần tự:
      + step1_load_data(data_path: Path) -> pd.Series
      + step2_execute_analysis(series: pd.Series, window: int = 12) -> Dict[str, Any]
-     + step3_visualize(analysis_results: Dict[str, Any], show_plot: bool = False) -> None
-     + step4_conclude_and_report(analysis_results: Dict[str, Any], output_path: Path) -> str
-   - Hàm main() điều phối toàn bộ luồng thực thi, in log rõ ràng và lưu file kết quả.
++ step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False, figures_dir: Path = None) -> None
+      + step4_conclude_and_report(analysis_results: Dict[str, Any], output_path: Path) -> str
+    - Hàm main() điều phối toàn bộ luồng thực thi, in log rõ ràng và lưu file kết quả.
 2. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - KHÔNG tự ý lưu tệp hình ảnh (.png/.jpg) ra ổ đĩa để tránh làm nặng repository.
+   - Theo lựa chọn của thành viên CV06, bài này ĐƯỢC PHÉP lưu 3 biểu đồ PNG vào
+     `LAB2/bai_tap_5/figures/` để nộp kèm báo cáo kỹ thuật:
+     bai5_1_rolling_statistics.png, bai5_2_seasonal_plot.png, bai5_3_seasonality_heatmap.png (150 dpi).
+     Chạy với cờ `--no-figures` để tắt lưu ảnh nếu cần giữ repo tinh gọn.
    - Phân tích đầy đủ 3 góc nhìn trực quan:
      (a) Rolling Statistics (Mean & Band ±2 Std): Đánh giá xu hướng và tính biến thiên phương sai (heteroskedasticity).
      (b) Monthly Seasonal Plot (Từng năm qua 12 tháng): Quan sát pha sóng và sự dịch chuyển tăng trưởng liên năm.
@@ -173,10 +176,17 @@ def step2_execute_analysis(series: pd.Series, window: int = 12) -> Dict[str, Any
     }
 
 
-def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False) -> None:
+def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False,
+                    figures_dir: Path = None) -> None:
     """
     Bước 3: Trực quan hóa dữ liệu gồm Rolling Statistics, Seasonal Lines và Heatmap.
-    Lưu ý: Không tự ý xuất file ảnh ra ổ đĩa theo quy định tinh gọn của dự án.
+
+    Mặc định KHÔNG xuất tệp ảnh ra đĩa (quy định tinh gọn repo của Nhóm 7).
+    Nếu truyền `figures_dir` (thư mục đích), hàm sẽ lưu 3 biểu đồ PNG ở độ phân giải 150 dpi
+    để nộp kèm báo cáo kỹ thuật:
+        1. bai5_1_rolling_statistics.png   -> Line chart + Rolling Mean + dải ±2σ
+        2. bai5_2_seasonal_plot.png        -> Seasonal Plot 12 đường cong (đỉnh T7, đáy T11)
+        3. bai5_3_seasonality_heatmap.png  -> Seasonality Heatmap (Năm x Tháng)
     """
     series = analysis_results["series"]
     rmean = analysis_results["rolling_mean"]
@@ -187,42 +197,64 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
 
     print("[BƯỚC 3] Đang khởi tạo đồ thị trực quan chuyên sâu...")
     # =========================================================================
-    # ĐỒ THỊ 1: ROLLING STATISTICS & MONTHLY SEASONAL LINES
+    # ĐỒ THỊ 1: BIỂU ĐỒ ĐƯỜNG TOÀN BỘ CHUỖI + ROLLING MEAN & DẢI ±2σ
     # =========================================================================
-    fig1, axes = plt.subplots(2, 1, figsize=(14, 10))
-    
-    # Subplot 1: Rolling Mean & Bands
-    axes[0].plot(series.index, series.values, label='Chuỗi gốc (AirPassengers)', color='#2b5c8f', linewidth=1.5, alpha=0.85)
-    axes[0].plot(rmean.index, rmean.values, label='12-Month Rolling Mean (Trend dài hạn)', color='#d95f02', linewidth=2.5)
-    axes[0].plot(analysis_results["rolling_std"].index, analysis_results["rolling_std"].values,
-                 label='12-Month Rolling Std (σ)', color='#2e7d32', linewidth=1.2, linestyle=':')
-    axes[0].fill_between(series.index, lower_band, upper_band, color='#fdc086', alpha=0.35, label='Dải biên độ dao động ±2 Rolling Std')
-    axes[0].set_title("1. Phân tích Thống kê Trượt 12 Tháng & Dải Biến thiên Độ lệch chuẩn (±2σ)", fontsize=13, fontweight='bold', pad=10)
-    axes[0].set_xlabel("Thời gian (Năm)", fontsize=11)
-    axes[0].set_ylabel("Số lượng hành khách (nghìn người)", fontsize=11)
-    axes[0].grid(True, linestyle="--", alpha=0.5)
-    axes[0].legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none")
-    
-    # Subplot 2: Monthly Seasonal Plot (Từng năm qua 12 tháng)
+    fig1, ax1 = plt.subplots(figsize=(14, 6))
+
+    ax1.plot(series.index, series.values, label='Chuỗi gốc (AirPassengers)', color='#2b5c8f', linewidth=1.5, alpha=0.85)
+    ax1.plot(rmean.index, rmean.values, label='12-Month Rolling Mean (Trend dài hạn)', color='#d95f02', linewidth=2.5)
+    ax1.plot(analysis_results["rolling_std"].index, analysis_results["rolling_std"].values,
+             label='12-Month Rolling Std (σ)', color='#2e7d32', linewidth=1.2, linestyle=':')
+    ax1.fill_between(series.index, lower_band, upper_band, color='#fdc086', alpha=0.35, label='Dải biên độ dao động ±2 Rolling Std')
+    ax1.set_title("1. Biểu đồ đường toàn bộ chuỗi AirPassengers (1949-1960)\n"
+                  "kèm 12-Month Rolling Mean và dải biên độ ±2 Rolling Std",
+                  fontsize=13, fontweight='bold', pad=12)
+    ax1.set_xlabel("Thời gian (Năm)", fontsize=11)
+    ax1.set_ylabel("Số lượng hành khách (nghìn người)", fontsize=11)
+    ax1.grid(True, linestyle="--", alpha=0.5)
+    ax1.legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none")
+
+    plt.tight_layout()
+    if figures_dir is not None:
+        figures_dir.mkdir(parents=True, exist_ok=True)
+        fig1.savefig(figures_dir / "bai5_1_rolling_statistics.png", dpi=150)
+        print(f" -> Đã lưu biểu đồ 1 (Rolling Statistics): {figures_dir / 'bai5_1_rolling_statistics.png'}")
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig1)
+
+    # =========================================================================
+    # ĐỒ THỊ 2: SEASONAL PLOT THEO THÁNG (12 ĐƯỜNG CONG QUA CÁC NĂM)
+    # =========================================================================
+    fig_seasonal, ax2 = plt.subplots(figsize=(12, 6))
     colors = plt.cm.viridis(np.linspace(0, 1, len(years)))
     for i, yr in enumerate(years):
         row_data = pivot_table.loc[yr]
-        axes[1].plot(row_data.index, row_data.values, marker='o', markersize=4, label=str(yr), color=colors[i], linewidth=1.6, alpha=0.85)
-    
-    axes[1].set_title("2. Biểu đồ Mùa vụ Theo Tháng Qua Các Năm (1949 - 1960)", fontsize=13, fontweight='bold', pad=10)
-    axes[1].set_xlabel("Tháng trong năm (1 đến 12)", fontsize=11)
-    axes[1].set_ylabel("Số lượng hành khách (nghìn người)", fontsize=11)
-    axes[1].set_xticks(range(1, 13))
-    axes[1].set_xticklabels([f"T{m}" for m in range(1, 13)])
-    axes[1].grid(True, linestyle="--", alpha=0.5)
-    axes[1].legend(title="Năm", bbox_to_anchor=(1.01, 1), loc="upper left", ncol=1, frameon=True)
-    
+        ax2.plot(row_data.index, row_data.values, marker='o', markersize=4, label=str(yr),
+                 color=colors[i], linewidth=1.6, alpha=0.85)
+
+    ax2.set_title("2. Biểu đồ Mùa vụ (Seasonal Plot) theo tháng qua các năm 1949-1960\n"
+                  f"(Đỉnh mùa vụ: T{analysis_results['peak_month']} | Đáy: T{analysis_results['trough_month']})",
+                  fontsize=13, fontweight='bold', pad=12)
+    ax2.set_xlabel("Tháng trong năm (1 đến 12)", fontsize=11)
+    ax2.set_ylabel("Số lượng hành khách (nghìn người)", fontsize=11)
+    ax2.set_xticks(range(1, 13))
+    ax2.set_xticklabels([f"T{m}" for m in range(1, 13)])
+    ax2.grid(True, linestyle="--", alpha=0.5)
+    ax2.legend(title="Năm", bbox_to_anchor=(1.01, 1), loc="upper left", ncol=1, frameon=True)
+
     plt.tight_layout()
-    if not show_plot:
-        plt.close(fig1)
-    
+    if figures_dir is not None:
+        fig_seasonal.savefig(figures_dir / "bai5_2_seasonal_plot.png", dpi=150)
+        print(f" -> Đã lưu biểu đồ 2 (Seasonal Plot): {figures_dir / 'bai5_2_seasonal_plot.png'}")
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig_seasonal)
+
     # =========================================================================
-    # ĐỒ THỊ 2: SEASONALITY HEATMAP (BẢN ĐỒ NHIỆT NĂM X THÁNG)
+    # ĐỒ THỊ 3: SEASONALITY HEATMAP (BẢN ĐỒ NHIỆT NĂM X THÁNG)
     # =========================================================================
     fig2 = plt.figure(figsize=(13, 7))
     sns.heatmap(
@@ -239,14 +271,17 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
     plt.ylabel("Năm quan sát", fontsize=12)
     plt.xticks(ticks=[i + 0.5 for i in range(12)], labels=[f"Tháng {m}" for m in range(1, 13)], rotation=0)
     plt.yticks(rotation=0)
-    
+
     plt.tight_layout()
+    if figures_dir is not None:
+        fig2.savefig(figures_dir / "bai5_3_seasonality_heatmap.png", dpi=150)
+        print(f" -> Đã lưu biểu đồ 3 (Seasonality Heatmap): {figures_dir / 'bai5_3_seasonality_heatmap.png'}")
     if show_plot:
         plt.show()
     else:
         plt.close(fig2)
-    
-    print(" -> Đã hoàn thành trực quan hóa Rolling Statistics và Heatmap (không xuất tệp ảnh ra đĩa).")
+
+    print(" -> Đã hoàn thành trực quan hóa Rolling Statistics và Heatmap.")
     return None
 
 
@@ -376,14 +411,22 @@ Du lieu: AirPassengers.csv | 144 quan sat thang | 1949-01 -> 1960-12
 def main():
     """
     Hàm thực thi chính của Bài tập 5.
+
+    Mặc định lưu 3 biểu đồ PNG vào `LAB2/bai_tap_5/figures/` để nộp kèm báo cáo
+    kỹ thuật (lựa chọn B của thành viên CV06).
+    Truyền cờ `--no-figures` khi chạy nếu muốn giữ chế độ tinh gọn repo cũ
+    (không lưu ảnh ra đĩa).
     """
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 5: TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN")
     print("=" * 80)
-    
+
+    save_figures = "--no-figures" not in sys.argv[1:]
+
     current_dir = Path(__file__).resolve().parent
     data_path = current_dir.parent / "data" / "raw" / "AirPassengers.csv"
     report_file = current_dir / "ket_qua_bai_5.txt"
+    figures_dir = current_dir / "figures" if save_figures else None
 
     # Bước 1
     series = step1_load_data(data_path)
@@ -392,13 +435,16 @@ def main():
     analysis_results = step2_execute_analysis(series, window=12)
 
     # Bước 3
-    step3_visualize(series, analysis_results)
+    step3_visualize(series, analysis_results, figures_dir=figures_dir)
 
     # Bước 4
     print("\n[BƯỚC 4] TỔNG HỢP KẾT QUẢ VÀ TRẢ LỜI CÂU HỎI NGHIỆM THU + LÝ THUYẾT 9, 12:\n")
     report = step4_conclude_and_report(analysis_results, report_file)
     print(report)
     print(f" -> Đã lưu báo cáo phân tích tại: {report_file}")
+    if figures_dir is not None:
+        print(f" -> Đã lưu 3 biểu đồ PNG tại thư mục: {figures_dir}")
+        print("    (bai5_1_rolling_statistics.png, bai5_2_seasonal_plot.png, bai5_3_seasonality_heatmap.png)")
     print("\n[HOÀN THÀNH BÀI TẬP 5 THÀNH CÔNG]")
 
 
