@@ -1,80 +1,80 @@
 =================================================================================
-BAO CAO PHAN TICH KET QUA BAI TAP 5 (TRUC QUAN HOA CHUYEN SAU CHUOI THOI GIAN)
-Thanh vien thuc hien: Bui Tran Ngoc Khai (CV06) - Mon QLCTG (UTH), Nhom 7
-Du lieu: AirPassengers.csv | 144 quan sat thang | 1949-01 -> 1960-12
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 5 (TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN)
+Thành viên thực hiện: Bùi Trần Ngọc Khải (CV06) - Môn QLCTG (UTH), Nhóm 7
+Dữ liệu: AirPassengers.csv | 144 quan sát tháng | 1949-01 -> 1960-12
 =================================================================================
-1. PHAN TICH XU HUONG VA DAI BIEN THIEN (ROLLING STATISTICS, window=12):
-   - Duong trung binh truot 12 thang (Rolling Mean) lam min hoan toan cac dao dong
-     song ngan, cho thay ro rang xu huong tang truong doc manh qua tung nam.
-   - Tong luong hanh khach hang nam: 1520 (1949) -> 5714 (1960),
-     tuong duong gap 3.76 lan (+275.9%). Tang truong YoY: 1950: +10.3%; 1951: +21.8%; 1952: +15.8%; 1953: +14.2%; 1954: +6.2%; 1955: +18.9%; 1956: +15.6%; 1957: +12.2%; 1958: +3.4%; 1959: +12.4%; 1960: +11.2%.
-   - Dai bien do dao dong ±2 Rolling Std mo rong ro ret theo thoi gian:
-     + Do lech chuan noi nam 1949: 13.72
-     + Do lech chuan noi nam 1960: 77.74 (Gap 5.67 lan so voi 1949).
-     + Bien do mua vu noi nam (max-min): 44 (1949) -> 232 (1960),
-       gap 5.27 lan - tang ty le thuan voi muc do lon cua chuoi.
-   - Ty le diem nam trong dai ±2 Std: 95.5% (~95%, phu hop ky vong thong ke).
-   - Ket luan phuong sai: Chuoi vi pham gia dinh phuong sai dong nhat
-     (Heteroskedasticity). Mo hinh dang nhan (Multiplicative) hoac phep bien doi
-     Box-Cox / Log-transform la toi can thiet khi xay dung mo hinh du bao.
+1. PHÂN TÍCH XU HƯỚNG VÀ DẢI BIẾN THIÊN (ROLLING STATISTICS, window=12):
+   - Đường trung bình trượt 12 tháng (Rolling Mean) làm mịn hoàn toàn các dao động
+     mùa vụ nội năm ngắn hạn, thể hiện rõ xu hướng tăng trưởng dốc và liên tục qua từng năm.
+   - Tổng lượng hành khách hàng năm: 1520 (1949) -> 5714 (1960),
+     tương đương tăng gấp 3.76 lần (+275.9%). Tăng trưởng YoY: 1950: +10.3%; 1951: +21.8%; 1952: +15.8%; 1953: +14.2%; 1954: +6.2%; 1955: +18.9%; 1956: +15.6%; 1957: +12.2%; 1958: +3.4%; 1959: +12.4%; 1960: +11.2%.
+   - Dải biên độ dao động ±2 Rolling Std mở rộng rõ rệt theo thời gian:
+     + Độ lệch chuẩn nội năm 1949: 13.72
+     + Độ lệch chuẩn nội năm 1960: 77.74 (Gấp 5.67 lần so với năm 1949).
+     + Biên độ mùa vụ nội năm (Max - Min): 44 (1949) -> 232 (1960),
+       gấp 5.27 lần - biên độ tăng tỷ lệ thuận với độ lớn của chuỗi thời gian.
+   - Tỷ lệ số điểm nằm trọn trong dải ±2 Std: 95.5% (~95%, phù hợp quy tắc thực nghiệm thống kê).
+   - Kết luận phương sai: Chuỗi vi phạm giả định phương sai đồng nhất
+     (Heteroskedasticity). Mô hình dạng nhân (Multiplicative) hoặc phép biến đổi
+     Box-Cox / Log-transform là tối cần thiết khi xây dựng mô hình dự báo.
 
-2. QUY LUAT MUA VU THEO THANG (MONTHLY SEASONAL PLOT):
-   - Bieu do Seasonal Plot cho thay cac duong cong qua tung nam co hinh dang
-     (pha dao dong) dong dang gan nhu tuyet doi, chung minh tinh mua vu mang
-     quy luat tu nhien rat cao va on dinh.
-   - Dinh diem hanh khach (Peak): Thang 7 (TB 351.3 nghin nguoi;
-     ky luc 622 tai 1960-07).
-   - Day thap nhat (Trough): Thang 11 (TB 232.8 nghin nguoi;
-     thap nhat lich su 104 tai 1949-11).
-   - Moi nam duong cong mua vu tinh tien deu len phia tren ma khong lam dao lon
-     cau truc song -> xu huong dai han + mua vu 12 thang song song ton tai.
+2. QUY LUẬT MÙA VỤ THEO THÁNG (MONTHLY SEASONAL PLOT):
+   - Biểu đồ Seasonal Plot cho thấy các đường cong qua từng năm có hình dạng
+     (pha dao động) đồng dạng gần như tuyệt đối, chứng minh tính mùa vụ mang
+     quy luật tự nhiên rất cao và ổn định.
+   - Đỉnh điểm hành khách (Peak): Tháng 7 (TB 351.3 nghìn người;
+     kỷ lục 622 nghìn người tại 1960-07).
+   - Đáy thấp nhất (Trough): Tháng 11 (TB 232.8 nghìn người;
+     thấp nhất lịch sử 104 nghìn người tại 1949-11).
+   - Mỗi năm đường cong mùa vụ tịnh tiến đều lên phía trên mà không làm đảo lộn
+     cấu trúc sóng -> Xu hướng dài hạn và mùa vụ chu kỳ 12 tháng cùng song song tồn tại.
 
-3. DANH GIA MAT DO QUA HEATMAP (YEAR x MONTH):
-   - Ban do nhiet the hien ro su chuyen mau tu tong nhat (nam 1949, ~100-150)
-     sang tong dam (nam 1960, vuot nguong 500-622).
-   - "Dai mau nong" tap trung lien tuc vao cot Thang 7 va Thang 8 qua moi nam
-     (TB T7=351.3, TB T8=351.1).
-   - Cot Thang 11 luon la "o lanh" xuyen suot 12 nam (TB 232.8).
-   - Su ket hop truc quan giua Heatmap va Rolling Statistics cung cap buc tranh
-     toan dien ve ca 2 chieu: thoi diem trong nam (seasonality) va xu huong lien nam (trend).
+3. ĐÁNH GIÁ MẬT ĐỘ QUA BẢN ĐỒ NHIỆT (SEASONALITY HEATMAP: NĂM x THÁNG):
+   - Bản đồ nhiệt thể hiện rõ sự chuyển dịch tông màu từ nhạt (giai đoạn 1949: ~100-150 nghìn khách)
+     sang tông đậm (giai đoạn 1960: vượt ngưỡng 500-622 nghìn khách).
+   - "Dải màu nóng" (mật độ cao nhất) tập trung liên tục vào cột Tháng 7 và Tháng 8 qua mọi năm
+     (TB T7 = 351.3, TB T8 = 351.1 nghìn người).
+   - Cột Tháng 11 luôn là "vùng lạnh nhất" xuyên suốt 12 năm quan sát (TB 232.8 nghìn người).
+   - Sự kết hợp trực quan giữa Heatmap và Rolling Statistics cung cấp góc nhìn
+     toàn diện theo cả 2 chiều: thời điểm trong năm (seasonality) và xu hướng liên năm (trend).
 
-4. TRA LOI CAU HOI NGHIEM THU BAI 5 (5 CAU CHUAN DE BAI):
-   Cau 1 - Line chart toan bo chuoi cho thay gi?
-     -> Chuoi tang truong lien tuc tu 1949 den 1960 (tong nam gap 3.76 lan),
-        dao dong hinh quat mo rong dan, co 12 dinh song mua vu lap lai deu dan.
-   Cau 2 - Rolling Mean (window=12) va Rolling Std co vai tro gi?
-     -> Rolling Mean lam min chu ky 12 thang, lo ro trend dai han; Rolling Std
-        va dai ±2 Std kiem tra tinh thuan nhat phuong sai. Dai mo rong dan
-        (Std gap 5.67 lan) chung minh heteroskedasticity.
-   Cau 3 - Seasonal Plot theo thang rut ra dieu gi?
-     -> 12 duong cong dong dang, tinh tien deu len tren; dinh T7, day T11
-        on dinh qua moi nam -> mua vu chu ky 12 manh va on dinh.
-   Cau 4 - Heatmap Seasonality (Month x Year) phat hien gi?
-     -> Ma tran 12x12 lam noi bat "vung nong" T7-T8 va "vung lanh" T11,
-        dong thoi cho thay gradient tang dan theo truc nam - bang chung truc quan
-        cho ca trend va seasonality.
-   Cau 5 - Ket luan: xu huong chung, mua vu noi bat, bat thuong?
-     -> Xu huong: tang manh, khong co diem gay cau truc lon. Mua vu: chu ky 12 thang
-        cuc ky ro, dinh he (T7) - day cuoi thu (T11). Bat thuong: khong co outlier
-        cuc doan nao vuot dai ±2 Std mot cach he thong (95.5% nam trong dai).
+4. TRẢ LỜI CÂU HỎI NGHIỆM THU BÀI 5 (5 CÂU CHUẨN ĐỀ BÀI):
+   Câu 1 - Line chart toàn bộ chuỗi cho thấy gì?
+     -> Chuỗi tăng trưởng liên tục từ 1949 đến 1960 (tổng năm tăng gấp 3.76 lần),
+        dao động hình cánh quạt mở rộng dần, có 12 đỉnh sóng mùa vụ lặp lại đều đặn mỗi năm.
+   Câu 2 - Rolling Mean (window=12) và Rolling Std có vai trò gì?
+     -> Rolling Mean làm mịn chu kỳ 12 tháng để làm nổi bật Trend dài hạn; Rolling Std
+        và dải ±2 Std kiểm tra tính thuần nhất phương sai. Dải mở rộng dần
+        (Std tăng gấp 5.67 lần) chứng minh hiện tượng phương sai thay đổi (Heteroskedasticity).
+   Câu 3 - Seasonal Plot theo tháng rút ra điều gì?
+     -> 12 đường cong đồng dạng, tịnh tiến đều đặn lên trên qua từng năm; đỉnh Tháng 7
+        và đáy Tháng 11 ổn định qua mọi năm -> Mùa vụ chu kỳ 12 tháng rất mạnh và bền vững.
+   Câu 4 - Heatmap Seasonality (Month x Year) phát hiện gì?
+     -> Ma trận 12x12 làm nổi bật "vùng nóng" Tháng 7 - Tháng 8 và "vùng lạnh" Tháng 11,
+        đồng thời thể hiện gradient tăng dần theo trục năm – bằng chứng trực quan
+        cho cả Trend và Seasonality.
+   Câu 5 - Kết luận: xu hướng chung, mùa vụ nổi bật, bất thường?
+     -> Xu hướng: Tăng trưởng mạnh mẽ, không có điểm gãy cấu trúc lớn. Mùa vụ: Chu kỳ 12 tháng
+        cực kỳ rõ nét (đỉnh du lịch hè T7 - đáy cuối thu T11). Bất thường: Không xuất hiện ngoại lai
+        cực đoan nào vi phạm dải ±2 Std một cách hệ thống (95.5% nằm trong dải).
 
-5. TRA LOI CAU HOI LY THUYET 9 & 12 + DINH HUONG MO HINH HOA:
-   Cau 9 - Rolling mean duoc dung de kiem tra dieu gi trong du lieu?
-     -> Rolling mean lam muot cac dao dong ngan han de lam noi bat DUONG XU HUONG
-        DAI HAN (Trend) va kiem tra xem ky vong cua chuoi co on dinh theo thoi gian
-        hay khong (kiem tra tinh dung ve trung binh). Voi AirPassengers, Rolling Mean
-        12 thang tang don dieu -> chuoi KHONG DUNG (non-stationary ve mean), can lay
-        sai phan (d>=1) truoc khi mo hinh hoa ARIMA.
-   Cau 12 - Vi sao truc quan hoa du lieu la buoc quan trong trong phan tich
-     chuoi thoi gian?
-     -> (a) Phat hien tu nhien trend / seasonality / gay cau truc / ngoai lai ma bang
-        so kho thay; (b) Lua chon dang mo hinh phu hop (Additive vs Multiplicative -
-        bai nay ro rang la Multiplicative vi bien do tang 5.27 lan);
-        (c) Kiem dinh gia dinh mo hinh (phuong sai dong nhat, phan du trang);
-        (d) Truyen dat insight cho ben nghiep vu nhanh hon moi bang so lieu.
-   Dinh huong mo hinh hoa:
-     -> Chuoi co day du dieu kien de mo hinh hoa du bao (trend ro + seasonality 12
-        on dinh, khong phai white noise). De xuat: SARIMA(p,d,q)(P,D,Q)[12] tren
-        du lieu log/box-cox, Prophet voi seasonality mode='multiplicative',
-        hoac XGBoost voi dac trung tre (lag 1..12, rolling mean/std, month, year).
+5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 9 & 12 + ĐỊNH HƯỚNG MÔ HÌNH HÓA:
+   Câu 9 - Rolling mean được dùng để kiểm tra điều gì trong dữ liệu?
+     -> Rolling mean làm mượt các dao động ngắn hạn để làm nổi bật ĐƯỜNG XU HƯỚNG
+        DÀI HẠN (Trend) và kiểm tra xem kỳ vọng của chuỗi có ổn định theo thời gian
+        hay không (kiểm tra tính dừng về trung bình). Với AirPassengers, Rolling Mean
+        12 tháng tăng đơn điệu -> Chuỗi KHÔNG DỪNG về trung bình (non-stationary mean),
+        cần lấy sai phân (d >= 1) trước khi xây dựng mô hình ARIMA/SARIMA.
+   Câu 12 - Vì sao trực quan hóa dữ liệu là bước quan trọng trong phân tích
+     chuỗi thời gian?
+     -> (a) Phát hiện tự nhiên Trend / Seasonality / gãy cấu trúc / ngoại lai mà bảng
+        số liệu tĩnh khó nhận ra; (b) Lựa chọn dạng mô hình phù hợp (Additive vs Multiplicative -
+        bài này rõ ràng là Multiplicative vì biên độ mùa vụ tăng gấp 5.27 lần);
+        (c) Kiểm định các giả định mô hình (phương sai đồng nhất, phần dư phân phối chuẩn);
+        (d) Truyền đạt insight nhanh chóng và trực quan cho người ra quyết định.
+   Định hướng mô hình hóa:
+     -> Chuỗi hội tụ đầy đủ điều kiện để mô hình hóa dự báo (Trend rõ + Seasonality chu kỳ 12 tháng
+        bền vững, không phải nhiễu trắng). Đề xuất: SARIMA(p,d,q)(P,D,Q)[12] trên
+        dữ liệu Log-transform, Prophet với chế độ seasonality_mode='multiplicative',
+        hoặc XGBoost / LightGBM với bộ đặc trưng trễ (lag 1..12, rolling mean/std, tháng, năm).
 =================================================================================

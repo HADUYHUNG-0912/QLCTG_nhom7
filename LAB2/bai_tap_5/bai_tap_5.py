@@ -42,16 +42,23 @@ from typing import Tuple, Dict, Any, List
 
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Thiết lập bảng mã UTF-8 cho console Windows nhằm ngăn ngừa UnicodeEncodeError
 if sys.platform == "win32":
     try:
+        os.system("chcp 65001 >nul 2>&1")
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stderr.reconfigure(encoding="utf-8")
     except Exception:
         pass
+
+# Cấu hình font chữ hỗ trợ tiếng Việt đầy đủ và đẹp trên Windows / Linux / macOS
+mpl.rcParams["font.family"] = "sans-serif"
+mpl.rcParams["font.sans-serif"] = ["Segoe UI", "Arial", "Tahoma", "DejaVu Sans"]
+mpl.rcParams["axes.unicode_minus"] = False
 
 
 def step1_load_data(data_path: Path) -> pd.Series:
@@ -217,8 +224,10 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
     plt.tight_layout()
     if figures_dir is not None:
         figures_dir.mkdir(parents=True, exist_ok=True)
-        fig1.savefig(figures_dir / "bai5_1_rolling_statistics.png", dpi=150)
-        print(f" -> Đã lưu biểu đồ 1 (Rolling Statistics): {figures_dir / 'bai5_1_rolling_statistics.png'}")
+        out1 = figures_dir / "bai5_1_rolling_statistics.png"
+        with open(out1, "wb") as f:
+            fig1.savefig(f, format="png", dpi=150, bbox_inches="tight")
+        print(f" -> Đã lưu biểu đồ 1 (Rolling Statistics): {out1}")
     if show_plot:
         plt.show()
     else:
@@ -246,8 +255,10 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
 
     plt.tight_layout()
     if figures_dir is not None:
-        fig_seasonal.savefig(figures_dir / "bai5_2_seasonal_plot.png", dpi=150)
-        print(f" -> Đã lưu biểu đồ 2 (Seasonal Plot): {figures_dir / 'bai5_2_seasonal_plot.png'}")
+        out2 = figures_dir / "bai5_2_seasonal_plot.png"
+        with open(out2, "wb") as f:
+            fig_seasonal.savefig(f, format="png", dpi=150, bbox_inches="tight")
+        print(f" -> Đã lưu biểu đồ 2 (Seasonal Plot): {out2}")
     if show_plot:
         plt.show()
     else:
@@ -274,8 +285,10 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
 
     plt.tight_layout()
     if figures_dir is not None:
-        fig2.savefig(figures_dir / "bai5_3_seasonality_heatmap.png", dpi=150)
-        print(f" -> Đã lưu biểu đồ 3 (Seasonality Heatmap): {figures_dir / 'bai5_3_seasonality_heatmap.png'}")
+        out3 = figures_dir / "bai5_3_seasonality_heatmap.png"
+        with open(out3, "wb") as f:
+            fig2.savefig(f, format="png", dpi=150, bbox_inches="tight")
+        print(f" -> Đã lưu biểu đồ 3 (Seasonality Heatmap): {out3}")
     if show_plot:
         plt.show()
     else:
@@ -286,16 +299,16 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
 
 
 def _month_name(m: int) -> str:
-    """Trả về tên tháng rút gọn tiếng Việt (không sinh phụ thuộc locale)."""
-    names = {1: "Thang 1", 2: "Thang 2", 3: "Thang 3", 4: "Thang 4", 5: "Thang 5", 6: "Thang 6",
-             7: "Thang 7", 8: "Thang 8", 9: "Thang 9", 10: "Thang 10", 11: "Thang 11", 12: "Thang 12"}
-    return names.get(int(m), f"Thang {int(m)}")
+    """Trả về tên tháng tiếng Việt."""
+    names = {1: "Tháng 1", 2: "Tháng 2", 3: "Tháng 3", 4: "Tháng 4", 5: "Tháng 5", 6: "Tháng 6",
+             7: "Tháng 7", 8: "Tháng 8", 9: "Tháng 9", 10: "Tháng 10", 11: "Tháng 11", 12: "Tháng 12"}
+    return names.get(int(m), f"Tháng {int(m)}")
 
 
 def step4_conclude_and_report(analysis_results: Dict[str, Any], output_path: Path) -> str:
     """
     Bước 4: Tổng hợp nhận định chuyên sâu, xuất báo cáo nghiệm thu Bài tập 5
-            và trả lời đầy đủ 3 câu nghiệm thu + câu lý thuyết 9 & 12.
+            và trả lời đầy đủ 5 câu nghiệm thu đề bài + câu lý thuyết 9 & 12.
 
     Cấu trúc báo cáo 5 phần:
         1. Phân tích xu hướng & dải biến thiên (±2σ)
@@ -320,84 +333,84 @@ def step4_conclude_and_report(analysis_results: Dict[str, Any], output_path: Pat
     yoy_line = "; ".join(f"{int(ts.year)}: {val:+.1f}%" for ts, val in yoy.dropna().items())
 
     report_text = f"""=================================================================================
-BAO CAO PHAN TICH KET QUA BAI TAP 5 (TRUC QUAN HOA CHUYEN SAU CHUOI THOI GIAN)
-Thanh vien thuc hien: Bui Tran Ngoc Khai (CV06) - Mon QLCTG (UTH), Nhom 7
-Du lieu: AirPassengers.csv | 144 quan sat thang | 1949-01 -> 1960-12
+BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 5 (TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN)
+Thành viên thực hiện: Bùi Trần Ngọc Khải (CV06) - Môn QLCTG (UTH), Nhóm 7
+Dữ liệu: AirPassengers.csv | 144 quan sát tháng | 1949-01 -> 1960-12
 =================================================================================
-1. PHAN TICH XU HUONG VA DAI BIEN THIEN (ROLLING STATISTICS, window=12):
-   - Duong trung binh truot 12 thang (Rolling Mean) lam min hoan toan cac dao dong
-     song ngan, cho thay ro rang xu huong tang truong doc manh qua tung nam.
-   - Tong luong hanh khach hang nam: {int(annual_sum.iloc[0])} (1949) -> {int(annual_sum.iloc[-1])} (1960),
-     tuong duong gap {gfac:.2f} lan (+{gpct:.1f}%). Tang truong YoY: {yoy_line}.
-   - Dai bien do dao dong ±2 Rolling Std mo rong ro ret theo thoi gian:
-     + Do lech chuan noi nam 1949: {std_init:.2f}
-     + Do lech chuan noi nam 1960: {std_end:.2f} (Gap {ratio:.2f} lan so voi 1949).
-     + Bien do mua vu noi nam (max-min): {int(amp.iloc[0])} (1949) -> {int(amp.iloc[-1])} (1960),
-       gap {amp_growth:.2f} lan - tang ty le thuan voi muc do lon cua chuoi.
-   - Ty le diem nam trong dai ±2 Std: {coverage:.1f}% (~95%, phu hop ky vong thong ke).
-   - Ket luan phuong sai: Chuoi vi pham gia dinh phuong sai dong nhat
-     (Heteroskedasticity). Mo hinh dang nhan (Multiplicative) hoac phep bien doi
-     Box-Cox / Log-transform la toi can thiet khi xay dung mo hinh du bao.
+1. PHÂN TÍCH XU HƯỚNG VÀ DẢI BIẾN THIÊN (ROLLING STATISTICS, window=12):
+   - Đường trung bình trượt 12 tháng (Rolling Mean) làm mịn hoàn toàn các dao động
+     mùa vụ nội năm ngắn hạn, thể hiện rõ xu hướng tăng trưởng dốc và liên tục qua từng năm.
+   - Tổng lượng hành khách hàng năm: {int(annual_sum.iloc[0])} (1949) -> {int(annual_sum.iloc[-1])} (1960),
+     tương đương tăng gấp {gfac:.2f} lần (+{gpct:.1f}%). Tăng trưởng YoY: {yoy_line}.
+   - Dải biên độ dao động ±2 Rolling Std mở rộng rõ rệt theo thời gian:
+     + Độ lệch chuẩn nội năm 1949: {std_init:.2f}
+     + Độ lệch chuẩn nội năm 1960: {std_end:.2f} (Gấp {ratio:.2f} lần so với năm 1949).
+     + Biên độ mùa vụ nội năm (Max - Min): {int(amp.iloc[0])} (1949) -> {int(amp.iloc[-1])} (1960),
+       gấp {amp_growth:.2f} lần - biên độ tăng tỷ lệ thuận với độ lớn của chuỗi thời gian.
+   - Tỷ lệ số điểm nằm trọn trong dải ±2 Std: {coverage:.1f}% (~95%, phù hợp quy tắc thực nghiệm thống kê).
+   - Kết luận phương sai: Chuỗi vi phạm giả định phương sai đồng nhất
+     (Heteroskedasticity). Mô hình dạng nhân (Multiplicative) hoặc phép biến đổi
+     Box-Cox / Log-transform là tối cần thiết khi xây dựng mô hình dự báo.
 
-2. QUY LUAT MUA VU THEO THANG (MONTHLY SEASONAL PLOT):
-   - Bieu do Seasonal Plot cho thay cac duong cong qua tung nam co hinh dang
-     (pha dao dong) dong dang gan nhu tuyet doi, chung minh tinh mua vu mang
-     quy luat tu nhien rat cao va on dinh.
-   - Dinh diem hanh khach (Peak): Thang {peak_m} (TB {monthly_avg.loc[peak_m]:.1f} nghin nguoi;
-     ky luc {int(analysis_results['series'].max())} tai {analysis_results['series'].idxmax():%Y-%m}).
-   - Day thap nhat (Trough): Thang {trough_m} (TB {monthly_avg.loc[trough_m]:.1f} nghin nguoi;
-     thap nhat lich su {int(analysis_results['series'].min())} tai {analysis_results['series'].idxmin():%Y-%m}).
-   - Moi nam duong cong mua vu tinh tien deu len phia tren ma khong lam dao lon
-     cau truc song -> xu huong dai han + mua vu 12 thang song song ton tai.
+2. QUY LUẬT MÙA VỤ THEO THÁNG (MONTHLY SEASONAL PLOT):
+   - Biểu đồ Seasonal Plot cho thấy các đường cong qua từng năm có hình dạng
+     (pha dao động) đồng dạng gần như tuyệt đối, chứng minh tính mùa vụ mang
+     quy luật tự nhiên rất cao và ổn định.
+   - Đỉnh điểm hành khách (Peak): Tháng {peak_m} (TB {monthly_avg.loc[peak_m]:.1f} nghìn người;
+     kỷ lục {int(analysis_results['series'].max())} nghìn người tại {analysis_results['series'].idxmax():%Y-%m}).
+   - Đáy thấp nhất (Trough): Tháng {trough_m} (TB {monthly_avg.loc[trough_m]:.1f} nghìn người;
+     thấp nhất lịch sử {int(analysis_results['series'].min())} nghìn người tại {analysis_results['series'].idxmin():%Y-%m}).
+   - Mỗi năm đường cong mùa vụ tịnh tiến đều lên phía trên mà không làm đảo lộn
+     cấu trúc sóng -> Xu hướng dài hạn và mùa vụ chu kỳ 12 tháng cùng song song tồn tại.
 
-3. DANH GIA MAT DO QUA HEATMAP (YEAR x MONTH):
-   - Ban do nhiet the hien ro su chuyen mau tu tong nhat (nam 1949, ~100-150)
-     sang tong dam (nam 1960, vuot nguong 500-622).
-   - "Dai mau nong" tap trung lien tuc vao cot Thang 7 va Thang 8 qua moi nam
-     (TB T7={monthly_avg.loc[7]:.1f}, TB T8={monthly_avg.loc[8]:.1f}).
-   - Cot Thang 11 luon la "o lanh" xuyen suot 12 nam (TB {monthly_avg.loc[11]:.1f}).
-   - Su ket hop truc quan giua Heatmap va Rolling Statistics cung cap buc tranh
-     toan dien ve ca 2 chieu: thoi diem trong nam (seasonality) va xu huong lien nam (trend).
+3. ĐÁNH GIÁ MẬT ĐỘ QUA BẢN ĐỒ NHIỆT (SEASONALITY HEATMAP: NĂM x THÁNG):
+   - Bản đồ nhiệt thể hiện rõ sự chuyển dịch tông màu từ nhạt (giai đoạn 1949: ~100-150 nghìn khách)
+     sang tông đậm (giai đoạn 1960: vượt ngưỡng 500-622 nghìn khách).
+   - "Dải màu nóng" (mật độ cao nhất) tập trung liên tục vào cột Tháng 7 và Tháng 8 qua mọi năm
+     (TB T7 = {monthly_avg.loc[7]:.1f}, TB T8 = {monthly_avg.loc[8]:.1f} nghìn người).
+   - Cột Tháng 11 luôn là "vùng lạnh nhất" xuyên suốt 12 năm quan sát (TB {monthly_avg.loc[11]:.1f} nghìn người).
+   - Sự kết hợp trực quan giữa Heatmap và Rolling Statistics cung cấp góc nhìn
+     toàn diện theo cả 2 chiều: thời điểm trong năm (seasonality) và xu hướng liên năm (trend).
 
-4. TRA LOI CAU HOI NGHIEM THU BAI 5 (5 CAU CHUAN DE BAI):
-   Cau 1 - Line chart toan bo chuoi cho thay gi?
-     -> Chuoi tang truong lien tuc tu 1949 den 1960 (tong nam gap {gfac:.2f} lan),
-        dao dong hinh quat mo rong dan, co 12 dinh song mua vu lap lai deu dan.
-   Cau 2 - Rolling Mean (window=12) va Rolling Std co vai tro gi?
-     -> Rolling Mean lam min chu ky 12 thang, lo ro trend dai han; Rolling Std
-        va dai ±2 Std kiem tra tinh thuan nhat phuong sai. Dai mo rong dan
-        (Std gap {ratio:.2f} lan) chung minh heteroskedasticity.
-   Cau 3 - Seasonal Plot theo thang rut ra dieu gi?
-     -> 12 duong cong dong dang, tinh tien deu len tren; dinh T{peak_m}, day T{trough_m}
-        on dinh qua moi nam -> mua vu chu ky 12 manh va on dinh.
-   Cau 4 - Heatmap Seasonality (Month x Year) phat hien gi?
-     -> Ma tran {len(analysis_results['years'])}x12 lam noi bat "vung nong" T7-T8 va "vung lanh" T11,
-        dong thoi cho thay gradient tang dan theo truc nam - bang chung truc quan
-        cho ca trend va seasonality.
-   Cau 5 - Ket luan: xu huong chung, mua vu noi bat, bat thuong?
-     -> Xu huong: tang manh, khong co diem gay cau truc lon. Mua vu: chu ky 12 thang
-        cuc ky ro, dinh he (T7) - day cuoi thu (T11). Bat thuong: khong co outlier
-        cuc doan nao vuot dai ±2 Std mot cach he thong ({coverage:.1f}% nam trong dai).
+4. TRẢ LỜI CÂU HỎI NGHIỆM THU BÀI 5 (5 CÂU CHUẨN ĐỀ BÀI):
+   Câu 1 - Line chart toàn bộ chuỗi cho thấy gì?
+     -> Chuỗi tăng trưởng liên tục từ 1949 đến 1960 (tổng năm tăng gấp {gfac:.2f} lần),
+        dao động hình cánh quạt mở rộng dần, có 12 đỉnh sóng mùa vụ lặp lại đều đặn mỗi năm.
+   Câu 2 - Rolling Mean (window=12) và Rolling Std có vai trò gì?
+     -> Rolling Mean làm mịn chu kỳ 12 tháng để làm nổi bật Trend dài hạn; Rolling Std
+        và dải ±2 Std kiểm tra tính thuần nhất phương sai. Dải mở rộng dần
+        (Std tăng gấp {ratio:.2f} lần) chứng minh hiện tượng phương sai thay đổi (Heteroskedasticity).
+   Câu 3 - Seasonal Plot theo tháng rút ra điều gì?
+     -> 12 đường cong đồng dạng, tịnh tiến đều đặn lên trên qua từng năm; đỉnh Tháng {peak_m}
+        và đáy Tháng {trough_m} ổn định qua mọi năm -> Mùa vụ chu kỳ 12 tháng rất mạnh và bền vững.
+   Câu 4 - Heatmap Seasonality (Month x Year) phát hiện gì?
+     -> Ma trận {len(analysis_results['years'])}x12 làm nổi bật "vùng nóng" Tháng 7 - Tháng 8 và "vùng lạnh" Tháng 11,
+        đồng thời thể hiện gradient tăng dần theo trục năm – bằng chứng trực quan
+        cho cả Trend và Seasonality.
+   Câu 5 - Kết luận: xu hướng chung, mùa vụ nổi bật, bất thường?
+     -> Xu hướng: Tăng trưởng mạnh mẽ, không có điểm gãy cấu trúc lớn. Mùa vụ: Chu kỳ 12 tháng
+        cực kỳ rõ nét (đỉnh du lịch hè T7 - đáy cuối thu T11). Bất thường: Không xuất hiện ngoại lai
+        cực đoan nào vi phạm dải ±2 Std một cách hệ thống ({coverage:.1f}% nằm trong dải).
 
-5. TRA LOI CAU HOI LY THUYET 9 & 12 + DINH HUONG MO HINH HOA:
-   Cau 9 - Rolling mean duoc dung de kiem tra dieu gi trong du lieu?
-     -> Rolling mean lam muot cac dao dong ngan han de lam noi bat DUONG XU HUONG
-        DAI HAN (Trend) va kiem tra xem ky vong cua chuoi co on dinh theo thoi gian
-        hay khong (kiem tra tinh dung ve trung binh). Voi AirPassengers, Rolling Mean
-        12 thang tang don dieu -> chuoi KHONG DUNG (non-stationary ve mean), can lay
-        sai phan (d>=1) truoc khi mo hinh hoa ARIMA.
-   Cau 12 - Vi sao truc quan hoa du lieu la buoc quan trong trong phan tich
-     chuoi thoi gian?
-     -> (a) Phat hien tu nhien trend / seasonality / gay cau truc / ngoai lai ma bang
-        so kho thay; (b) Lua chon dang mo hinh phu hop (Additive vs Multiplicative -
-        bai nay ro rang la Multiplicative vi bien do tang {amp_growth:.2f} lan);
-        (c) Kiem dinh gia dinh mo hinh (phuong sai dong nhat, phan du trang);
-        (d) Truyen dat insight cho ben nghiep vu nhanh hon moi bang so lieu.
-   Dinh huong mo hinh hoa:
-     -> Chuoi co day du dieu kien de mo hinh hoa du bao (trend ro + seasonality 12
-        on dinh, khong phai white noise). De xuat: SARIMA(p,d,q)(P,D,Q)[12] tren
-        du lieu log/box-cox, Prophet voi seasonality mode='multiplicative',
-        hoac XGBoost voi dac trung tre (lag 1..12, rolling mean/std, month, year).
+5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 9 & 12 + ĐỊNH HƯỚNG MÔ HÌNH HÓA:
+   Câu 9 - Rolling mean được dùng để kiểm tra điều gì trong dữ liệu?
+     -> Rolling mean làm mượt các dao động ngắn hạn để làm nổi bật ĐƯỜNG XU HƯỚNG
+        DÀI HẠN (Trend) và kiểm tra xem kỳ vọng của chuỗi có ổn định theo thời gian
+        hay không (kiểm tra tính dừng về trung bình). Với AirPassengers, Rolling Mean
+        12 tháng tăng đơn điệu -> Chuỗi KHÔNG DỪNG về trung bình (non-stationary mean),
+        cần lấy sai phân (d >= 1) trước khi xây dựng mô hình ARIMA/SARIMA.
+   Câu 12 - Vì sao trực quan hóa dữ liệu là bước quan trọng trong phân tích
+     chuỗi thời gian?
+     -> (a) Phát hiện tự nhiên Trend / Seasonality / gãy cấu trúc / ngoại lai mà bảng
+        số liệu tĩnh khó nhận ra; (b) Lựa chọn dạng mô hình phù hợp (Additive vs Multiplicative -
+        bài này rõ ràng là Multiplicative vì biên độ mùa vụ tăng gấp {amp_growth:.2f} lần);
+        (c) Kiểm định các giả định mô hình (phương sai đồng nhất, phần dư phân phối chuẩn);
+        (d) Truyền đạt insight nhanh chóng và trực quan cho người ra quyết định.
+   Định hướng mô hình hóa:
+     -> Chuỗi hội tụ đầy đủ điều kiện để mô hình hóa dự báo (Trend rõ + Seasonality chu kỳ 12 tháng
+        bền vững, không phải nhiễu trắng). Đề xuất: SARIMA(p,d,q)(P,D,Q)[12] trên
+        dữ liệu Log-transform, Prophet với chế độ seasonality_mode='multiplicative',
+        hoặc XGBoost / LightGBM với bộ đặc trưng trễ (lag 1..12, rolling mean/std, tháng, năm).
 =================================================================================
 """
     # Ghi báo cáo ra file text
