@@ -2,19 +2,41 @@
 =================================================================================
 BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯỢNG DỮ LIỆU)
 =================================================================================
-1. SO SÁNH PHƯƠNG PHÁP XỬ LÝ DỮ LIỆU THIẾU (MISSING IMPUTATION):
-   - Phương pháp Forward-fill (ffill) cho sai số MAE = 23.31.
-     Nhược điểm của ffill là tạo ra các đoạn nằm ngang bậc thang, không bắt kịp xu hướng tăng trưởng của chuỗi.
-   - Phương pháp Time-based Interpolation cho sai số MAE = 16.43 (giảm đáng kể sai số).
-     Nội suy thời gian khôi phục độ dốc tự nhiên của chuỗi mượt mà và chính xác hơn nhiều.
+1. KIỂM TOÁN DỮ LIỆU KHUYẾT TẬT:
+   - Chuỗi gốc được giữ nguyên; mọi lỗi chỉ được tạo trên bản sao series.copy().
+   - Seed = 101; số NaN = 13/144
+     (9.03%); 3 spike nhân 3.5 tại vị trí [25, 75, 110].
 
-2. HIỆU QUẢ CỦA BỘ LỌC NGOẠI LAI (HAMPEL FILTER):
-   - Đã phát hiện và đưa về mức bình thường thành công 21 điểm ngoại lai đột biến.
-   - Hampel Filter sử dụng Trung vị trượt (Rolling Median) và MAD (Median Absolute Deviation),
-     do đó có tính kháng ngoại lai cực cao, không bị giá trị đột biến làm lệch ngưỡng phát hiện như Z-score hay Mean truyền thống.
+2. BẢNG SO SÁNH XỬ LÝ MISSING (CHỈ TÍNH TRÊN CÁC ĐIỂM NaN):
+   +--------------------------+----------+----------+
+   | Phương pháp              | MAE      | RMSE     |
+   +--------------------------+----------+----------+
+   | Forward-fill             |    23.31 |    28.59 |
+   | Time-based Interpolation |    16.43 |    18.83 |
+   +--------------------------+----------+----------+
+   - Time-based Interpolation tốt hơn theo cả MAE và RMSE. Phương pháp này bám theo độ dốc
+     giữa hai mốc thời gian, trong khi ffill tạo các đoạn nằm ngang và trễ so với xu hướng tăng.
 
-3. ĐÁNH GIÁ CHẤT LƯỢNG PHỤC HỒI TOÀN DIỆN:
-   - Sai số toàn chuỗi sau khi làm sạch: RMSE = 20.24, MAE = 7.35.
-   - Đồ thị đối chứng chứng minh chuỗi sau phục hồi bám sát gần như hoàn hảo với chuỗi gốc,
-     đảm bảo dữ liệu sẵn sàng cho các mô hình dự báo thống kê và học máy.
+3. HIỆU QUẢ CỦA HAMPEL FILTER:
+   - Cửa sổ 13 tháng bao quát một chu kỳ mùa vụ; ngưỡng = 3 x 1.4826 x MAD.
+   - Vị trí phát hiện: [25, 75, 110].
+   - Đúng 3/3 spike; phát hiện nhầm 0;
+     bỏ sót 0.
+   - Hampel dùng trung vị trượt và MAD nên ít bị chính spike kéo lệch ngưỡng hơn Z-score,
+     vốn dựa vào mean và standard deviation nhạy với giá trị cực đoan.
+
+4. BẢNG SAI SỐ TỔNG THỂ TRƯỚC VÀ SAU LÀM SẠCH NGOẠI LAI:
+   +--------------------------------------+----------+----------+
+   | Trạng thái                           | MAE      | RMSE     |
+   +--------------------------------------+----------+----------+
+   | Sau nội suy, trước Hampel             |    15.04 |    99.18 |
+   | Sau nội suy và Hampel                 |     1.64 |     5.90 |
+   +--------------------------------------+----------+----------+
+
+5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 7 VÀ 8:
+   - Câu 7: Ba lỗi phổ biến là missing values (mất quan sát), outliers (giá trị bất thường)
+     và non-stationarity (mean/variance thay đổi do xu hướng hoặc mùa vụ).
+   - Câu 8: Có thể dùng ffill, bfill, nội suy tuyến tính/spline theo thời gian, giá trị cùng kỳ
+     mùa vụ, hoặc mô hình bù khuyết như KNN, Kalman Filter và Prophet. Cần chọn phương pháp
+     theo cơ chế sinh dữ liệu và chỉ đánh giá trên các điểm bị khuyết để tránh kết luận sai.
 =================================================================================
