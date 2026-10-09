@@ -1,27 +1,80 @@
 =================================================================================
 BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 5 (TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN)
+Thành viên thực hiện: Bùi Trần Ngọc Khải (CV06) - Môn QLCTG (UTH), Nhóm 7
+Dữ liệu: AirPassengers.csv | 144 quan sát tháng | 1949-01 -> 1960-12
 =================================================================================
-1. PHÂN TÍCH XU HƯỚNG VÀ DẢI BIẾN THIÊN (ROLLING STATISTICS):
-   - Đường trung bình trượt 12 tháng (Rolling Mean) làm mịn hoàn toàn các dao động sóng ngắn,
-     cho thấy rõ ràng xu hướng tăng trưởng tuyến tính dốc mạnh qua từng năm.
+1. PHÂN TÍCH XU HƯỚNG VÀ DẢI BIẾN THIÊN (ROLLING STATISTICS, window=12):
+   - Đường trung bình trượt 12 tháng (Rolling Mean) làm mịn hoàn toàn các dao động
+     mùa vụ nội năm ngắn hạn, thể hiện rõ xu hướng tăng trưởng dốc và liên tục qua từng năm.
+   - Tổng lượng hành khách hàng năm: 1520 (1949) -> 5714 (1960),
+     tương đương tăng gấp 3.76 lần (+275.9%). Tăng trưởng YoY: 1950: +10.3%; 1951: +21.8%; 1952: +15.8%; 1953: +14.2%; 1954: +6.2%; 1955: +18.9%; 1956: +15.6%; 1957: +12.2%; 1958: +3.4%; 1959: +12.4%; 1960: +11.2%.
    - Dải biên độ dao động ±2 Rolling Std mở rộng rõ rệt theo thời gian:
      + Độ lệch chuẩn nội năm 1949: 13.72
-     + Độ lệch chuẩn nội năm 1960: 77.74 (Gấp 5.67 lần so với 1949).
-   - Kết luận phương sai: Chuỗi vi phạm giả định phương sai đồng nhất (Heteroskedasticity).
-     Biên độ dao động tăng tỷ lệ thuận với mức độ lớn của chuỗi, minh chứng dạng mô hình nhân (Multiplicative)
-     hoặc phép biến đổi Box-Cox / Log-transform là tối cần thiết khi xây dựng mô hình dự báo.
+     + Độ lệch chuẩn nội năm 1960: 77.74 (Gấp 5.67 lần so với năm 1949).
+     + Biên độ mùa vụ nội năm (Max - Min): 44 (1949) -> 232 (1960),
+       gấp 5.27 lần - biên độ tăng tỷ lệ thuận với độ lớn của chuỗi thời gian.
+   - Tỷ lệ số điểm nằm trọn trong dải ±2 Std: 95.5% (~95%, phù hợp quy tắc thực nghiệm thống kê).
+   - Kết luận phương sai: Chuỗi vi phạm giả định phương sai đồng nhất
+     (Heteroskedasticity). Mô hình dạng nhân (Multiplicative) hoặc phép biến đổi
+     Box-Cox / Log-transform là tối cần thiết khi xây dựng mô hình dự báo.
 
-2. QUY LUẬT MÙA VỤ THEO THÁNG (MONTHLY SEASONALITY):
-   - Biểu đồ Seasonal Plot cho thấy các đường cong qua từng năm có hình dáng (pha dao động)
-     đồng dạng gần như tuyệt đối, chứng minh tính mùa vụ mang tính quy luật tự nhiên rất cao.
-   - Đỉnh điểm hành khách (Peak): Tháng 7 (Tháng 7 - mùa nghỉ hè quốc tế) luôn đạt lưu lượng cao nhất.
-   - Đáy thấp nhất (Trough): Tháng 11 (Tháng 11 - giai đoạn chuyển giao mùa thấp điểm du lịch).
-   - Mỗi năm đường cong mùa vụ tịnh tiến đều lên phía trên mà không làm đảo lộn cấu trúc sóng.
+2. QUY LUẬT MÙA VỤ THEO THÁNG (MONTHLY SEASONAL PLOT):
+   - Biểu đồ Seasonal Plot cho thấy các đường cong qua từng năm có hình dạng
+     (pha dao động) đồng dạng gần như tuyệt đối, chứng minh tính mùa vụ mang
+     quy luật tự nhiên rất cao và ổn định.
+   - Đỉnh điểm hành khách (Peak): Tháng 7 (TB 351.3 nghìn người;
+     kỷ lục 622 nghìn người tại 1960-07).
+   - Đáy thấp nhất (Trough): Tháng 11 (TB 232.8 nghìn người;
+     thấp nhất lịch sử 104 nghìn người tại 1949-11).
+   - Mỗi năm đường cong mùa vụ tịnh tiến đều lên phía trên mà không làm đảo lộn
+     cấu trúc sóng -> Xu hướng dài hạn và mùa vụ chu kỳ 12 tháng cùng song song tồn tại.
 
-3. ĐÁNH GIÁ MẬT ĐỘ QUA HEATMAP (YEAR X MONTH):
-   - Bản đồ nhiệt thể hiện rõ sự chuyển màu từ tông vàng nhạt (năm 1949, lưu lượng ~100-150)
-     sang tông xanh lục đậm (năm 1960, lưu lượng vượt ngưỡng 500-600).
-   - "Dải màu nóng" (nồng độ hành khách cao nhất) tập trung liên tục vào cột Tháng 7 và Tháng 8 qua mọi năm.
-   - Sự kết hợp trực quan giữa Heatmap và Rolling Statistics cung cấp bức tranh toàn diện
-     về cả 2 chiều không gian (thời điểm trong năm) và thời gian (xu hướng liên năm).
+3. ĐÁNH GIÁ MẬT ĐỘ QUA BẢN ĐỒ NHIỆT (SEASONALITY HEATMAP: NĂM x THÁNG):
+   - Bản đồ nhiệt thể hiện rõ sự chuyển dịch tông màu từ nhạt (giai đoạn 1949: ~100-150 nghìn khách)
+     sang tông đậm (giai đoạn 1960: vượt ngưỡng 500-622 nghìn khách).
+   - "Dải màu nóng" (mật độ cao nhất) tập trung liên tục vào cột Tháng 7 và Tháng 8 qua mọi năm
+     (TB T7 = 351.3, TB T8 = 351.1 nghìn người).
+   - Cột Tháng 11 luôn là "vùng lạnh nhất" xuyên suốt 12 năm quan sát (TB 232.8 nghìn người).
+   - Sự kết hợp trực quan giữa Heatmap và Rolling Statistics cung cấp góc nhìn
+     toàn diện theo cả 2 chiều: thời điểm trong năm (seasonality) và xu hướng liên năm (trend).
+
+4. TRẢ LỜI CÂU HỎI NGHIỆM THU BÀI 5 (5 CÂU CHUẨN ĐỀ BÀI):
+   Câu 1 - Line chart toàn bộ chuỗi cho thấy gì?
+     -> Chuỗi tăng trưởng liên tục từ 1949 đến 1960 (tổng năm tăng gấp 3.76 lần),
+        dao động hình cánh quạt mở rộng dần, có 12 đỉnh sóng mùa vụ lặp lại đều đặn mỗi năm.
+   Câu 2 - Rolling Mean (window=12) và Rolling Std có vai trò gì?
+     -> Rolling Mean làm mịn chu kỳ 12 tháng để làm nổi bật Trend dài hạn; Rolling Std
+        và dải ±2 Std kiểm tra tính thuần nhất phương sai. Dải mở rộng dần
+        (Std tăng gấp 5.67 lần) chứng minh hiện tượng phương sai thay đổi (Heteroskedasticity).
+   Câu 3 - Seasonal Plot theo tháng rút ra điều gì?
+     -> 12 đường cong đồng dạng, tịnh tiến đều đặn lên trên qua từng năm; đỉnh Tháng 7
+        và đáy Tháng 11 ổn định qua mọi năm -> Mùa vụ chu kỳ 12 tháng rất mạnh và bền vững.
+   Câu 4 - Heatmap Seasonality (Month x Year) phát hiện gì?
+     -> Ma trận 12x12 làm nổi bật "vùng nóng" Tháng 7 - Tháng 8 và "vùng lạnh" Tháng 11,
+        đồng thời thể hiện gradient tăng dần theo trục năm – bằng chứng trực quan
+        cho cả Trend và Seasonality.
+   Câu 5 - Kết luận: xu hướng chung, mùa vụ nổi bật, bất thường?
+     -> Xu hướng: Tăng trưởng mạnh mẽ, không có điểm gãy cấu trúc lớn. Mùa vụ: Chu kỳ 12 tháng
+        cực kỳ rõ nét (đỉnh du lịch hè T7 - đáy cuối thu T11). Bất thường: Không xuất hiện ngoại lai
+        cực đoan nào vi phạm dải ±2 Std một cách hệ thống (95.5% nằm trong dải).
+
+5. TRẢ LỜI CÂU HỎI LÝ THUYẾT 9 & 12 + ĐỊNH HƯỚNG MÔ HÌNH HÓA:
+   Câu 9 - Rolling mean được dùng để kiểm tra điều gì trong dữ liệu?
+     -> Rolling mean làm mượt các dao động ngắn hạn để làm nổi bật ĐƯỜNG XU HƯỚNG
+        DÀI HẠN (Trend) và kiểm tra xem kỳ vọng của chuỗi có ổn định theo thời gian
+        hay không (kiểm tra tính dừng về trung bình). Với AirPassengers, Rolling Mean
+        12 tháng tăng đơn điệu -> Chuỗi KHÔNG DỪNG về trung bình (non-stationary mean),
+        cần lấy sai phân (d >= 1) trước khi xây dựng mô hình ARIMA/SARIMA.
+   Câu 12 - Vì sao trực quan hóa dữ liệu là bước quan trọng trong phân tích
+     chuỗi thời gian?
+     -> (a) Phát hiện tự nhiên Trend / Seasonality / gãy cấu trúc / ngoại lai mà bảng
+        số liệu tĩnh khó nhận ra; (b) Lựa chọn dạng mô hình phù hợp (Additive vs Multiplicative -
+        bài này rõ ràng là Multiplicative vì biên độ mùa vụ tăng gấp 5.27 lần);
+        (c) Kiểm định các giả định mô hình (phương sai đồng nhất, phần dư phân phối chuẩn);
+        (d) Truyền đạt insight nhanh chóng và trực quan cho người ra quyết định.
+   Định hướng mô hình hóa:
+     -> Chuỗi hội tụ đầy đủ điều kiện để mô hình hóa dự báo (Trend rõ + Seasonality chu kỳ 12 tháng
+        bền vững, không phải nhiễu trắng). Đề xuất: SARIMA(p,d,q)(P,D,Q)[12] trên
+        dữ liệu Log-transform, Prophet với chế độ seasonality_mode='multiplicative',
+        hoặc XGBoost / LightGBM với bộ đặc trưng trễ (lag 1..12, rolling mean/std, tháng, năm).
 =================================================================================

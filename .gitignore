@@ -29,6 +29,10 @@ clean_chapter2_temp.md
 # Office lock files
 ~$*
 
+# Ban ve truc quan hoa de nop kem bao cao (chi dinh nghia - KHONG loai *.png tong quat
+# vi CV06 can luu 3 bieu do trong LAB2/bai_tap_5/figures/)
+# LAB2/bai_tap_5/figures/*.png   # bo comment dong nay neu khong muon push anh
+
 # Progress management sheets (Local only - Khong push len Git theo yeu cau)
 *.xlsx
 *.xls
