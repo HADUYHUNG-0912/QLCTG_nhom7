@@ -13,7 +13,7 @@ Dataset đầu vào: LAB2/data/raw/AirPassengers.csv
 =================================================================================
 Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude...):
 1. TUÂN THỦ KIẾN TRÚC ĐỒNG NHẤT:
-   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`, 
+   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`,
      `step3_visualize`, `step4_conclude_and_report`.
    - Tất cả các hàm phải có type hint (gợi ý kiểu dữ liệu) rõ ràng.
 2. NGUYÊN TẮC XỬ LÝ DỮ LIỆU:
@@ -31,9 +31,8 @@ Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude.
 """
 
 import sys
-import os
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
 # Cấu hình encoding UTF-8 để không bị lỗi console trên Windows
 if sys.platform == "win32":
@@ -81,6 +80,13 @@ def step1_load_data(data_path: Path) -> pd.Series:
     df.sort_index(inplace=True)
 
     series = df[CONFIG["target_col"]].astype(float)
+    expected_index = pd.date_range(series.index.min(), series.index.max(), freq="MS")
+    if not series.index.equals(expected_index):
+        raise ValueError("Dữ liệu phải có các tháng liên tiếp, không trùng và bắt đầu ngày 1.")
+    series = series.asfreq("MS")
+    if not np.isfinite(series.to_numpy()).all():
+        raise ValueError("Dữ liệu chứa giá trị thiếu hoặc không hữu hạn.")
+    print(f" -> Tần suất dữ liệu: {series.index.freqstr}")
     print(f" -> Đã tải {len(series)} quan sát ({series.index.min().strftime('%Y-%m')} đến {series.index.max().strftime('%Y-%m')}).")
     print(f" -> Kiểm tra giá trị khuyết thiếu (NaN): {series.isna().sum()} điểm.")
     return series
@@ -94,15 +100,24 @@ def step2_execute_analysis(series: pd.Series, nlags: int = 40) -> Dict[str, Any]
     Tính toán chi tiết các giá trị ACF và PACF lên tới 40 lags.
     """
     print(f"[BƯỚC 2] Tính toán hệ số ACF và PACF với số lag = {nlags}...")
+    if not 12 <= nlags < len(series) // 2:
+        raise ValueError("Số lag phải >= 12 và nhỏ hơn một nửa số quan sát.")
     acf_values, acf_confint = acf(series, nlags=nlags, alpha=CONFIG["alpha"])
     pacf_values, pacf_confint = pacf(series, nlags=nlags, alpha=CONFIG["alpha"], method="ywm")
 
     # Xác định các lag vượt ngưỡng tin cậy 95%
     n = len(series)
     threshold = 1.96 / np.sqrt(n)
-    significant_acf_lags = [lag for lag, val in enumerate(acf_values) if lag > 0 and abs(val) > threshold]
+    significant_acf_lags = [lag for lag in range(1, len(acf_values))
+                            if acf_confint[lag, 0] > 0 or acf_confint[lag, 1] < 0]
+    significant_pacf_lags = [lag for lag in range(1, len(pacf_values))
+                             if pacf_confint[lag, 0] > 0 or pacf_confint[lag, 1] < 0]
 
     results = {
+        "nlags": nlags,
+        "acf_confint": acf_confint,
+        "pacf_confint": pacf_confint,
+        "significant_pacf_lags": significant_pacf_lags,
         "acf_values": acf_values,
         "pacf_values": pacf_values,
         "threshold_95": threshold,
@@ -114,8 +129,10 @@ def step2_execute_analysis(series: pd.Series, nlags: int = 40) -> Dict[str, Any]
     print(f" -> Hệ số tự tương quan tại Lag 1:  {results['acf_lag_1']:.4f}")
     if results["acf_lag_12"] is not None:
         print(f" -> Hệ số tự tương quan tại Lag 12: {results['acf_lag_12']:.4f}")
-    print(f" -> Ngưỡng tin cậy 95% (+/- 1.96 / sqrt(N)): +/- {threshold:.4f}")
+    print(f" -> Ngưỡng xấp xỉ cho PACF 95% (+/- 1.96 / sqrt(N)): +/- {threshold:.4f}")
     print(f" -> Số lượng lag vượt ngưỡng tin cậy: {len(significant_acf_lags)} / {nlags} lags.")
+    print(f" -> Các lag ACF có ý nghĩa (CI Bartlett 95%): {significant_acf_lags}")
+    print(f" -> Các lag PACF có ý nghĩa (CI 95%): {significant_pacf_lags}")
     return results
 
 
@@ -132,13 +149,13 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
     fig, axes = plt.subplots(1, 2, figsize=(16, 5))
 
     # Đồ thị ACF
-    plot_acf(series, lags=CONFIG["lags"], ax=axes[0], title="Autocorrelation Function (ACF) - AirPassengers", color="royalblue")
+    plot_acf(series, lags=analysis_results["nlags"], alpha=CONFIG["alpha"], ax=axes[0], title="Autocorrelation Function (ACF) - AirPassengers", color="royalblue")
     axes[0].set_xlabel("Độ trễ (Lags)")
     axes[0].set_ylabel("Hệ số ACF")
     axes[0].grid(True, linestyle="--", alpha=0.5)
 
     # Đồ thị PACF
-    plot_pacf(series, lags=CONFIG["lags"], ax=axes[1], title="Partial Autocorrelation Function (PACF) - AirPassengers", color="crimson", method="ywm")
+    plot_pacf(series, lags=analysis_results["nlags"], alpha=CONFIG["alpha"], ax=axes[1], title="Partial Autocorrelation Function (PACF) - AirPassengers", color="crimson", method="ywm")
     axes[1].set_xlabel("Độ trễ (Lags)")
     axes[1].set_ylabel("Hệ số PACF")
     axes[1].grid(True, linestyle="--", alpha=0.5)
@@ -172,19 +189,30 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 1 (ACF & PACF)
 
 2. DẤU HIỆU XU HƯỚNG (TREND) VÀ MÙA VỤ (SEASONALITY):
    - Xu hướng (Trend): Thể hiện rõ nét qua việc các hệ số ACF dương lớn suy giảm từ từ qua thời gian.
-     Chuỗi này là chuỗi không dừng (Non-stationary), cần lấy sai phân bậc 1 (d = 1) để khử xu hướng.
-   - Mùa vụ (Seasonality): Biểu đồ ACF xuất hiện các đỉnh nhô cao vượt dải tin cậy lặp lại theo chu kỳ 
-     đều đặn tại các bội số của 12 (Lag 12, Lag 24, Lag 36). Điều này khẳng định chuỗi có chu kỳ mùa vụ 12 tháng.
+     Đây là dấu hiệu chuỗi không dừng; có thể thử sai phân bậc 1 (d = 1),
+     sau đó kiểm định tính dừng để xác nhận.
+   - Mùa vụ (Seasonality): Biểu đồ ACF xuất hiện các đỉnh cục bộ lặp lại theo chu kỳ
+     tại các bội số của 12, gợi ý chu kỳ mùa vụ 12 tháng.
+   - ACF tại Lag 12/24/36: {analysis_results['acf_values'][12]:.4f} / {analysis_results['acf_values'][24] if analysis_results['nlags'] >= 24 else float('nan'):.4f} / {analysis_results['acf_values'][36] if analysis_results['nlags'] >= 36 else float('nan'):.4f}.
 
 3. CÁC LAG CÓ Ý NGHĨA QUAN TRỌNG NHẤT:
    - Lag 1: Đo lường tương quan trễ ngắn hạn mạnh nhất.
    - Lag 12 ({analysis_results['acf_lag_12']:.4f}): Lag phản ánh đỉnh chu kỳ mùa vụ hàng năm.
-   - Biểu đồ PACF cắt cụt (cut-off) sau Lag 1 và có xung đáng chú ý tại Lag 12/13, gợi ý việc xây dựng
-     mô hình SARIMA với thành phần tự hồi quy p = 1 và mùa vụ P = 1.
+   - Các lag ACF có ý nghĩa theo khoảng tin cậy Bartlett 95%: {analysis_results['significant_acf_lags']}.
+   - Các lag PACF có ý nghĩa theo khoảng tin cậy 95%: {analysis_results['significant_pacf_lags']}.
+   - PACF tại Lag 1/2/12/13: {analysis_results['pacf_values'][1]:.4f} / {analysis_results['pacf_values'][2]:.4f} / {analysis_results['pacf_values'][12]:.4f} / {analysis_results['pacf_values'][13] if analysis_results['nlags'] >= 13 else float('nan'):.4f}.
+     PACF không cắt cụt rõ ngay sau Lag 1; không thể chốt bậc AR chỉ từ chuỗi gốc.
+   - Dải ACF dùng công thức Bartlett, độ rộng tăng theo lag; dải PACF xấp xỉ
+     +/- {analysis_results['threshold_95']:.4f}. Các kiểm tra theo từng lag chưa hiệu chỉnh đa kiểm định.
+
+4. GỢI Ý MÔ HÌNH BAN ĐẦU:
+   - Có thể thử ARIMA(1,1,1) và SARIMA(1,1,1)(1,1,1)[12].
+   - Đây chỉ là cấu hình khởi đầu; cần xem lại ACF/PACF sau sai phân, so sánh
+     AIC/BIC, đánh giá dự báo và kiểm định phần dư trước khi chọn mô hình.
 =================================================================================
 """
     print(report_text)
-    
+
     # Ghi báo cáo ra file txt
     report_file = BASE_DIR / "ket_qua_bai_1.txt"
     with open(report_file, "w", encoding="utf-8") as f:
@@ -196,7 +224,7 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 1 (ACF & PACF)
 # -------------------------------------------------------------------------------
 # HÀM THỰC THI CHÍNH
 # -------------------------------------------------------------------------------
-def main():
+def main() -> None:
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH ACF/PACF")
     print("=" * 80)
