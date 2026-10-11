@@ -1,23 +1,262 @@
 
-=================================================================================
-BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 3 (PHÂN RÃ CHUỖI THỜI GIAN)
-=================================================================================
-1. XU HƯỚNG (TREND):
-   - Đường xu hướng tăng trưởng liên tục và mạnh mẽ qua toàn bộ giai đoạn 1949 - 1960.
-   - Tốc độ tăng trưởng đạt khoảng +274.7%, phản ánh sự bùng nổ của ngành hàng không sau Thế chiến 2.
+==============================================================================
+BAI TAP 3 - PHAN RA CHUOI THOI GIAN (DECOMPOSITION)
+==============================================================================
+Nguon du lieu : AirPassengers.csv
+Chuoi du lieu : Theo THANG (1949-01 den 1960-12)
+Phuong phap   : STL (chinh) + classical decomposition (doi chieu)
+Chu ky mua vu : 12 thang
 
-2. MÙA VỤ (SEASONALITY):
-   - Tính mùa vụ diễn ra cực kỳ mạnh và ổn định với chu kỳ 12 tháng.
-   - Đỉnh điểm (Peak) luôn rơi vào Tháng 7 (Mùa cao điểm du lịch hè).
-   - Đáy chạm mức thấp nhất vào Tháng 11 hàng năm.
+==============================================================================
+1. THONG KE MO TA DU LIEU
+==============================================================================
+So quan sat     : 144 (tu 1949-01 den 1960-12)
+Trung binh     : 280.30   Trung vị : 265.50
+Min / Max      : 104 (1949-11) / 622 (1960-07)
+Do lech chuan   : 119.97   CV       : 0.4280
+Ket qua nghiea  : mean = 280.3, std = 120.0, min = 104, max = 622
+Khong co gia tri thieu : True
+------------------------------------------------------------------------------
+Trung binh theo nam:
+  1949:  126.7
+  1950:  139.7
+  1951:  170.2
+  1952:  197.0
+  1953:  225.0
+  1954:  238.9
+  1955:  284.0
+  1956:  328.2
+  1957:  368.4
+  1958:  381.0
+  1959:  428.3
+  1960:  476.2
+Trung binh va do lech chuan theo thang (trong 12 nam):
+  Thang  1: mean =  241.8   std =  101.0
+  Thang  2: mean =  235.0   std =   89.6
+  Thang  3: mean =  270.2   std =  100.6
+  Thang  4: mean =  267.1   std =  107.4
+  Thang  5: mean =  271.8   std =  114.7
+  Thang  6: mean =  311.7   std =  134.2
+  Thang  7: mean =  351.3   std =  156.8
+  Thang  8: mean =  351.1   std =  155.8
+  Thang  9: mean =  302.4   std =  124.0
+  Thang 10: mean =  266.6   std =  110.7
+  Thang 11: mean =  232.8   std =   95.2
+  Thang 12: mean =  261.8   std =  103.1
 
-3. SO SÁNH ADDITIVE VS MULTIPLICATIVE:
-   - Dạng Nhân (Multiplicative: Y = T * S * R) phù hợp vượt trội so với dạng Cộng (Additive).
-   - Lý do: Biên độ dao động giữa mùa cao điểm và thấp điểm mở rộng theo thời gian tỷ lệ thuận với xu hướng
-     (Năm 1949 biên độ chỉ chênh ~40 khách, đến 1960 biên độ chênh lệch tăng lên hơn 150 khách).
+==============================================================================
+2. KET QUA PHAN RA (STL, robust=True, chu ky = 12 thang)
+==============================================================================
+Thoi diem   Observed     Trend   Seasonal   Residual
+------------------------------------------------------------------------------
+1949-01        112      122.55     -11.15       0.60
+1949-07        148      126.98      21.69      -0.68
+1950-01        115      132.11     -11.79      -5.32
+1950-07        170      141.53      26.53       1.95
+1951-01        145      154.88     -12.69       2.81
+1951-07        199      169.09      31.76      -1.85
+1952-01        171      183.21     -13.49       1.28
+1952-07        230      197.92      37.37      -5.29
+1953-01        196      210.63     -16.26       1.62
+1953-07        264      220.59      47.12      -3.71
+1954-01        204      229.84     -19.18      -6.66
+1954-07        302      242.78      59.93      -0.71
+1955-01        242      262.20     -23.04       2.84
+1955-07        364      285.94      73.22       4.84
+1956-01        284      309.53     -27.02       1.48
+1956-07        413      329.16      85.77      -1.93
+1957-01        315      347.36     -31.95      -0.41
+1957-07        465      365.55      96.88       2.57
+1958-01        340      378.13     -35.45      -2.68
+1958-07        491      386.66     110.44      -6.10
+1959-01        360      401.95     -38.50      -3.45
+1959-07        548      426.60     124.37      -2.97
+1960-01        417      454.60     -41.22       3.62
+1960-07        622      480.03     138.55       3.42
+1960-12        432      500.71     -68.68      -0.03
+------------------------------------------------------------------------------
+Do lon cac thanh phan:
+  Observed  : mean = 280.30   std = 119.97
+  Trend     : min  = 122.55   max  = 500.71   mean = 279.90
+  Seasonal  : min  = -102.59   max  = 148.26   std  = 44.44
+  Residual  : min  = -26.47   max  = 28.22   std  = 6.92
+  Ty le std Residual / std Observed = 0.0577
+------------------------------------------------------------------------------
+Su manh thanh phan (Cleveland 1990, gia tri 0-1):
+  STL tren thang    : F_trend = 0.9962   F_seasonal = 0.9753
+  STL tren thang log: F_trend = 0.9961   F_seasonal = 0.9593
 
-4. ĐÁNH GIÁ THÀNH PHẦN PHẦN DƯ (RESIDUAL):
-   - Thành phần Residual dao động ổn định quanh giá trị 1.0 (đối với dạng nhân).
-   - Residual không còn chứa các bước sóng chu kỳ rõ rệt, tiệm cận với tính chất của White Noise,
-     chứng minh mô hình phân rã đã trích xuất thành công gần như toàn bộ thông tin có cấu trúc.
-=================================================================================
+==============================================================================
+3. MO TA THANH PHAN
+==============================================================================
+3.1. XU HUONG (Trend)
+------------------------------------------------------------------------------
+  Xhuong: TANG manh va tuong duong tuyet doi.
+  Gia tri Trend dau chuoi (1949-01) : 122.55
+  Gia tri Trend cuoi chuoi (1960-12): 500.71
+  Tang gap            : 378.16 luat khach
+  He so tang theo nam  : 12.56% /nam
+  Trend tang dan deu khong co bien dong chu ky nam (nhac lan khach nang khong bi pha).
+
+3.2. MUA VU (Seasonal)
+------------------------------------------------------------------------------
+  He so mua vu trung binh theo thang (do lech so voi Trend):
+    Thang  1:   -23.48
+    Thang  2:   -31.46
+    Thang  3:    -6.43
+    Thang  4:    -5.64
+    Thang  5:    -5.01
+    Thang  6:   +32.68
+    Thang  7:   +71.14 <-- DINH
+    Thang  8:   +70.53
+    Thang  9:   +15.10
+    Thang 10:   -22.34
+    Thang 11:   -59.70 <-- DINH
+    Thang 12:   -33.87
+  Bien do mua vu (max - min) = 130.84 luat khach
+  Ty le bien do / gia tri Trend trung binh = 46.75% -> MUA VU RAT MANH
+
+  Bien do mua vu co tang dan theo thoi gian (chu ky nhan):
+    Giai doan           TB T7-T8  TB T11-T2  Bien do
+    1949-1952        188.2        141.9       46.3
+    1953-1956        332.5        232.8       99.7
+    1957-1960        532.9        353.8      179.1
+    Bien do tang tu 46 len 179 (3.9 lan) trong khi Trend chi gap 4.1 lan.
+    => Bien do mua vu KHONG cang bang voi xu huong => phai dung mo hinh NHAN,
+       hoac phan ra tren thang LOG de co bien do mua vu ổn định.
+  Tren thang log: bien do mua vu chi con 0.4954 log-don vi (~51%).
+
+  So sanh classical additive vs multiplicative (chat luong phan du):
+    Cong   : std(Residual) = 21.2306   F_trend = 0.9652   F_seas = 0.7651
+    Nhan   : std(Residual) = 0.0354   F_trend = 1.0000   F_seas = 0.9290
+    => Nhan tot hon 600.32 lan, xac nhan mua vu nhan.
+
+==============================================================================
+4. RESIDUAL CO GIONG WHITE NOISE KHONG?
+==============================================================================
+------------------------------------------------------------------------------
+Kiem dinh cac gia dy cua white noise: mean = 0, phuong sai hang, tuong quan = 0, phan phoi chuan.
+
+  --- STL (thang) ---
+    n               = 144
+    Mean            = 0.2741 (std loi cua mean = 0.5764)
+    Std             = 6.9164
+    Min / Max       = -26.47 / 28.22
+    Skewness        = 0.2635   Kurtosis = 5.4911
+    Kiem dinh Ljung-Box (H0: residual la white noise):
+      lag =  1: Q =    9.063   p = 0.002608   BAC BO
+      lag =  6: Q =   14.490   p = 0.024619   BAC BO
+      lag = 12: Q =   36.818   p = 0.000239   BAC BO
+      lag = 24: Q =   47.347   p = 0.003038   BAC BO
+    ACF             : 1:+0.248, 2:+0.163, 3:+0.090, 12:-0.059, 24:+0.081
+    Shapiro-Wilk    : p = 0.0000   KHONG duong bang chuan
+    Jarque-Bera     : p = 0.0000   KHONG duong bang chuan
+
+  --- STL (thang log) ---
+    n               = 144
+    Mean            = 0.0003 (std loi cua mean = 0.0022)
+    Std             = 0.0265
+    Min / Max       = -0.11 / 0.12
+    Skewness        = 0.4014   Kurtosis = 6.2469
+    Kiem dinh Ljung-Box (H0: residual la white noise):
+      lag =  1: Q =   20.645   p = 0.000006   BAC BO
+      lag =  6: Q =   28.075   p = 0.000091   BAC BO
+      lag = 12: Q =   41.709   p = 0.000037   BAC BO
+      lag = 24: Q =   50.045   p = 0.001398   BAC BO
+    ACF             : 1:+0.375, 2:+0.213, 3:+0.010, 12:-0.134, 24:+0.064
+    Shapiro-Wilk    : p = 0.0000   KHONG duong bang chuan
+    Jarque-Bera     : p = 0.0000   KHONG duong bang chuan
+
+  --- Classical Nhan ---
+    n               = 144
+    Mean            = 1.0004 (std loi cua mean = 0.0029)
+    Std             = 0.0354
+    Min / Max       = 0.89 / 1.11
+    Skewness        = 0.1253   Kurtosis = 0.7640
+    Kiem dinh Ljung-Box (H0: residual la white noise):
+      lag =  1: Q =   30.510   p = 0.000000   BAC BO
+      lag =  6: Q =   79.174   p = 0.000000   BAC BO
+      lag = 12: Q =  112.179   p = 0.000000   BAC BO
+      lag = 24: Q =  189.698   p = 0.000000   BAC BO
+    ACF             : 1:+0.456, 2:+0.155, 3:-0.159, 12:+0.313, 24:+0.321
+    Shapiro-Wilk    : p = 0.0698   duong bang chuan
+    Jarque-Bera     : p = 0.1438   duong bang chuan
+
+  Kiem dinh phuong sai khac nghiet (dich lech chuan cua 2 nua):
+    Levene (1949-54 vs 1955-60): stat = 1.7288, p = 0.190688   khong bac bo
+    std nua dau = 6.173, std nua sau = 7.627 (tang 1.24 lan)
+
+==============================================================================
+5. KET LUAN VA NHAN XET
+==============================================================================
+------------------------------------------------------------------------------
+Cau 1 - Chon chuoi du lieu theo thang hay theo quy:
+  Chon CHUOI THEO THANG. Ly do:
+    - Du lieu co 144 quan sat (12 nam x 12 thang), du de xac dinh chu ky mua vu 12 thang
+      va uoc luong Trend + Seasonal + Residual deu o do phan giai cao nhat.
+    - Chu ky mua vu 12 thang khong chia het cho 4 nen phan ra theo quy (chu ky 4)
+      se lam mat phan thong tin mua vu (chi con 4 diem mot vong).
+    - Neu tach theo quy, bien do mua vu van tang dan theo nam, khong giai quyet het
+      van de khac phuc cua phan ra.
+
+Cau 2 - STL hay classical decomposition:
+  Dung STL (Seasonal-Trend decomposition using LOESS) lam phuong phap chinh,
+  ket hop classical decomposition de doi chieu.
+  Ly do chon STL:
+    - STL giu nguyen phan Seasonal o bien goc dui dang cong, khong ep bien do mua vu
+      khong doi (classical decomposition ep nhieu mua vu khac nhau).
+    - Xu huong duoc uoc luong boi LOESS: khong ep da bac da thu truong nhan voi tu
+      lai khu du lich, phu hop hon moving average co dinh.
+    - Bien so 'robust=True' chong lai nhieu du lieu bat thuong, thich hop voi du lieu
+      thuc te co dinh bien dong lon.
+  Classical decomposition: phuong phap cong bi lech do bien do mua vu tang dan;
+  phuong phap nhan cho ket qua tot hon va la luon chon cho du lieu nay.
+
+Cau 3 - Bon thanh phan:
+  Da ve 4 thanh phan va luu vao thu muc 'bai_3_figures':
+    stl_phan_rava.png      - Observed / Trend / Seasonal / Residual (thang duoc tu)
+    stl_phan_rava_log.png  - 4 thanh phan tren thang log
+    classical_phan_rava.png - Residual cua cong so voi nhan
+
+Cau 4 - Mo ta:
+  a) Xu huong TANG hay GIAM?
+     => TANG manh va on dinh. Trend tang tu 122.6 (1949-01) len 500.7 (1960-12),
+        gap 378 luat khach, tuong duong ~12.56%/nam. Khong co dau hieu suy giam.
+     Luu y: xu huong khong phai la duong thang thuan ma nhoi dan o phia cuoi
+     (dot bien nganh khach hang hang khong co du chieu tang). Do la ly do dung STL
+     voi ban kinh cua nua doi thay vi moving average co dinh.
+
+  b) Mua vu MANH hay YEU?
+     => MANH. F_seasonal = 0.9753 (STL) va 0.9593 (thang log), gan sat 1.
+     Dac diem: dinh o T7-T8 (mua he), thap nhat o T11 (mua dong), T1-T2 cung thap.
+     Bien do tuyet doi TANG theo nam (46 -> 100 -> 179 luat khach giuaa cac giai doan),
+     nen day la mua vu TYC DO (nhieu) chu khong phai mua vu cong. Phai log-transform
+     hoac mo hinh nhan de mo ta dung.
+
+  c) Residual co giong white noise khong?
+     => KHONG hoan toan. Bang chung:
+       - Gia tri mean gan 0 (0.2741) va std nho (6.92), nen phan du da 'sach' phan lon bien dong.
+       - NHUNG Ljung-Box bac bo H0 o moi do tre (lag 1: p = 0.0026): con tuong quan.
+       - ACF(1) = 0.2483 > 0, cac lag 1-3 deu duong: phan du co xu huong ngay sau
+       tinh trang 'nhieu o cap' (over-smoothing) dac trung cua STL.
+       - Shapiro-Wilk p = 0.0000 va Jarque-Bera p = 0.0000: phan du KHONG phan phoi chuan
+         (nhieu lon nhat nam o 2 dau chuoi - noi Trend chua on dinh).
+       - Phuong sai khac nghiet: std phan du tang tu 6.17 len 7.63 giua 2 nua chuoi.
+     => Vi vay Residual CHUA phai white noise. Khi uoc luong mo hinh du bao nen dung
+        phan du nay lam input vao ARIMA/SARIMA hoac mo hinh bien doi trang thai,
+        va nen dung ban phan ra tren thang log de phan du on dinh hon.
+
+  Ket luon chung:
+    Chuoi co XU HUONG TANG manh + MUA VU MANH bien dong, phan ra bang STL tren
+    thang log cho ket qua tot nhat. Residual con tuong quan va hetero, nen mo hinh
+    phai tiep tuc mo hinh hoa phan du.
+
+==============================================================================
+6. FILE DA TAO
+==============================================================================
+------------------------------------------------------------------------------
+  bai_tap_3.py           - script phan tich nay
+  ket_qua_bai_3.txt      - ket qua xuat ban nay
+  bai_3_figures/stl_phan_rava.png
+  bai_3_figures/stl_phan_rava_log.png
+  bai_3_figures/classical_phan_rava.png
