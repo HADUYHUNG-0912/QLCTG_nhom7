@@ -77,19 +77,27 @@ QLCTG_nhom7/
     │       └── AirPassengers.csv         # Dữ liệu chuẩn quốc tế (144 quan sát, 1949-1960)
     ├── bai_tap_1/                        # BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH ACF & PACF
     │   ├── bai_tap_1.py                  # Mã nguồn phân tích ACF & PACF (40 lags, chuẩn 4 bước)
+    │   ├── figures/                      # Biểu đồ ACF & PACF (bai1_acf_pacf.png)
     │   └── ket_qua_bai_1.txt             # Báo cáo kết quả nghiệm thu Bài 1
     ├── bai_tap_2/                        # BÀI TẬP 2: KIỂM ĐỊNH CHUỖI NHIỄU TRẮNG
     │   ├── bai_tap_2.py                  # Mô phỏng 1000 điểm White Noise & Ljung-Box test
+    │   ├── figures/                      # Biểu đồ so sánh White Noise vs AirPassengers
     │   └── ket_qua_bai_2.txt             # Nhận xét so sánh 5 dòng chuẩn đề bài
     ├── bai_tap_3/                        # BÀI TẬP 3: PHÂN RÃ CHUỖI THỜI GIAN
     │   ├── bai_tap_3.py                  # Phân rã Classical (Additive/Multiplicative) & STL
+    │   ├── figures/                      # Biểu đồ phân rã Additive, Multiplicative, STL
     │   └── ket_qua_bai_3.txt             # Phân tích xu hướng, mùa vụ và phần dư
     ├── bai_tap_4/                        # BÀI TẬP 4: KIỂM TRA & XỬ LÝ CHẤT LƯỢNG DỮ LIỆU
     │   ├── bai_tap_4.py                  # Giả lập 10% NaN & Hampel Filter lọc outlier
+    │   ├── figures/                      # Biểu đồ trước/sau làm sạch dữ liệu
     │   └── ket_qua_bai_4.txt             # Đánh giá sai số phục hồi MAE/RMSE
-    └── bai_tap_5/                        # BÀI TẬP 5: TRỰC QUAN HÓA CHUYÊN SÂU
-        ├── bai_tap_5.py                  # Rolling Statistics (±2σ) & Seasonality Heatmap
-        └── ket_qua_bai_5.txt             # Phân tích quy luật mùa vụ & phương sai
+    ├── bai_tap_5/                        # BÀI TẬP 5: TRỰC QUAN HÓA CHUYÊN SÂU
+    │   ├── bai_tap_5.py                  # Rolling Statistics (±2σ) & Seasonality Heatmap
+    │   ├── figures/                      # 3 Biểu đồ trực quan hóa chuyên sâu
+    │   └── ket_qua_bai_5.txt             # Phân tích quy luật mùa vụ & phương sai
+    └── bai_tap_6/                        # BÀI TẬP 6: BÁO CÁO KỸ THUẬT TỔNG HỢP (7 MỤC)
+        ├── BAO_CAO_LAB2_NHOM7.md         # Báo cáo kỹ thuật tổng hợp chuẩn Markdown
+        └── BAO_CAO_LAB2.docx             # Báo cáo kỹ thuật in ấn Word (.docx)
 ```
 
 > **Nguyên tắc Quản lý Tinh gọn của Nhóm 7:**  

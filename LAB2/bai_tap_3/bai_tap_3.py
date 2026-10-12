@@ -8,29 +8,11 @@ Thư mục: LAB2/bai_tap_3/
 Tệp thực thi: bai_tap_3.py
 Dataset đầu vào: LAB2/data/raw/AirPassengers.csv
 
-=================================================================================
-🤖 CHỈ THỊ DÀNH CHO AI AGENT (AI AGENT PROMPT & GUARDRAILS SPECIFICATION)
-=================================================================================
-Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude...):
-1. TUÂN THỦ KIẾN TRÚC ĐỒNG NHẤT:
-   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`, 
-     `step3_visualize`, `step4_conclude_and_report`.
-   - Giữ nguyên các type hint và cấu trúc trả về `Dict[str, Any]`.
-2. NGUYÊN TẮC KỸ THUẬT:
-   - Dữ liệu AirPassengers có biên độ mùa vụ tăng dần theo thời gian (cần so sánh
-     giữa `model='additive'` và `model='multiplicative'` trong Classical Decomposition).
-   - Chạy thêm phương pháp phân rã hiện đại STL (`statsmodels.tsa.seasonal.STL`) với `robust=True`.
-   - Chu kỳ phân rã: `period=12` (chu kỳ năm cho dữ liệu tháng).
-3. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - KHÔNG tự ý lưu tệp hình ảnh (.png/.jpg) ra ổ đĩa để tránh làm nặng repository.
-   - Hàm `step3_visualize` khởi tạo đồ thị để phân tích, giải phóng bộ nhớ hoặc hiển thị nếu cần.
-   - Báo cáo phân tích lưu tại `LAB2/bai_tap_3/ket_qua_bai_3.txt`.
-4. CÂU HỎI NGHIỆM THU:
-   - Câu 1: Xu hướng (Trend) là tăng hay giảm? Tăng tuyến tính hay phi tuyến?
-   - Câu 2: Tính mùa vụ (Seasonality) mạnh hay yếu? Đỉnh điểm vào tháng mấy?
-   - Câu 3: Vì sao dạng Multiplicative phù hợp hơn dạng Additive cho AirPassengers?
-   - Câu 4: Thành phần Residual có hành vi giống White Noise không?
-=================================================================================
+MỤC TIÊU BÀI TẬP:
+- Thực hiện phân rã chuỗi thời gian theo phương pháp Cổ điển (Classical Additive & Multiplicative) và STL.
+- Tách và đánh giá 4 thành phần: Observed, Trend, Seasonal, Residual.
+- So sánh hiệu quả giữa mô hình Cộng và mô hình Nhân đối với chuỗi AirPassengers.
+- Kiểm tra tính chất ngẫu nhiên của thành phần phần dư (Residual).
 """
 
 import sys
@@ -129,28 +111,43 @@ def step2_execute_analysis(series: pd.Series) -> Dict[str, Any]:
 # -------------------------------------------------------------------------------
 def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False) -> None:
     """
-    Khởi tạo biểu đồ 4 thành phần: Observed, Trend, Seasonal, Residual cho cả Classical và STL.
-    Lưu ý: Không tự ý xuất file ảnh ra ổ đĩa theo quy định tinh gọn của dự án.
+    Khởi tạo và lưu biểu đồ 4 thành phần: Observed, Trend, Seasonal, Residual cho cả Classical Additive, Multiplicative và STL.
     """
     print(f"[BƯỚC 3] Đang khởi tạo đồ thị phân rã chuỗi thời gian...")
+    figures_dir = BASE_DIR / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
 
-    # Đồ thị Classical Multiplicative
+    # 1. Đồ thị Classical Additive
+    fig_add = analysis_results["decomp_add"].plot()
+    fig_add.set_size_inches(14, 8)
+    fig_add.suptitle("Classical Additive Decomposition (Y = T + S + R)", fontsize=14, y=1.02)
+    out_add = figures_dir / "bai3_1_additive_decomposition.png"
+    fig_add.savefig(out_add, dpi=300, bbox_inches="tight")
+    print(f" -> Đã lưu biểu đồ Additive Decomposition tại: {out_add}")
+
+    # 2. Đồ thị Classical Multiplicative
     fig_mul = analysis_results["decomp_mul"].plot()
     fig_mul.set_size_inches(14, 8)
     fig_mul.suptitle("Classical Multiplicative Decomposition (Y = T * S * R)", fontsize=14, y=1.02)
-    if not show_plot:
-        plt.close(fig_mul)
+    out_mul = figures_dir / "bai3_2_multiplicative_decomposition.png"
+    fig_mul.savefig(out_mul, dpi=300, bbox_inches="tight")
+    print(f" -> Đã lưu biểu đồ Multiplicative Decomposition tại: {out_mul}")
 
-    # Đồ thị STL
+    # 3. Đồ thị STL
     fig_stl = analysis_results["res_stl"].plot()
     fig_stl.set_size_inches(14, 8)
     fig_stl.suptitle("STL Decomposition (Loess Smoothing, Robust to Outliers)", fontsize=14, y=1.02)
+    out_stl = figures_dir / "bai3_3_stl_decomposition.png"
+    fig_stl.savefig(out_stl, dpi=300, bbox_inches="tight")
+    print(f" -> Đã lưu biểu đồ STL Decomposition tại: {out_stl}")
+
     if show_plot:
         plt.show()
     else:
+        plt.close(fig_add)
+        plt.close(fig_mul)
         plt.close(fig_stl)
 
-    print(" -> Đã hoàn thành trực quan hóa phân rã (không xuất tệp ảnh ra đĩa).")
     return None
 
 
@@ -198,16 +195,17 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 3 (PHÂN RÃ CHUỖI THỜI GIAN)
 # -------------------------------------------------------------------------------
 # HÀM THỰC THI CHÍNH
 # -------------------------------------------------------------------------------
-def main():
+def main(show_plot: bool = True):
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 3: PHÂN RÃ CHUỖI THỜI GIAN (DECOMPOSITION)")
     print("=" * 80)
     series = step1_load_data(DATA_PATH)
     analysis_results = step2_execute_analysis(series)
-    step3_visualize(series, analysis_results)
+    step3_visualize(series, analysis_results, show_plot=show_plot)
     step4_conclude_and_report(analysis_results)
     print("\n[HOÀN THÀNH BÀI TẬP 3 THÀNH CÔNG]")
 
 
 if __name__ == "__main__":
-    main()
+    show = "--no-show" not in sys.argv
+    main(show_plot=show)

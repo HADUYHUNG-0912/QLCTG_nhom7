@@ -8,26 +8,10 @@ Thư mục: LAB2/bai_tap_1/
 Tệp thực thi: bai_tap_1.py
 Dataset đầu vào: LAB2/data/raw/AirPassengers.csv
 
-=================================================================================
-🤖 CHỈ THỊ DÀNH CHO AI AGENT (AI AGENT PROMPT & GUARDRAILS SPECIFICATION)
-=================================================================================
-Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude...):
-1. TUÂN THỦ KIẾN TRÚC ĐỒNG NHẤT:
-   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`, 
-     `step3_visualize`, `step4_conclude_and_report`.
-   - Tất cả các hàm phải có type hint (gợi ý kiểu dữ liệu) rõ ràng.
-2. NGUYÊN TẮC XỬ LÝ DỮ LIỆU:
-   - Dữ liệu phải được thiết lập DatetimeIndex với tần suất tháng ('MS').
-   - Tuyệt đối không thay đổi chuỗi gốc khi tính toán.
-3. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - KHÔNG tự ý lưu tệp hình ảnh (.png/.jpg) ra đĩa để tránh làm nặng repository.
-   - Hàm `step3_visualize` tạo biểu đồ, có thể gọi `plt.show()` nếu cần xem trực quan hoặc giải phóng bộ nhớ.
-   - Console log và file text phải in rõ: Trị số ACF tại lag 1, lag 12 và kết luận về Trend / Seasonality.
-4. CÂU HỎI NGHIỆM THU CẦN TRẢ LỜI:
-   - Câu 1: Chuỗi có tự tương quan mạnh không? (ACF giảm chậm hay nhanh?)
-   - Câu 2: Có xu hướng (Trend) và mùa vụ (Seasonality) thể hiện qua ACF/PACF không?
-   - Câu 3: Những lag nào có ý nghĩa thống kê quan trọng nhất?
-=================================================================================
+MỤC TIÊU BÀI TẬP:
+- Tính toán hệ số tự tương quan (ACF) và tự tương quan riêng phần (PACF) đến 40 lags.
+- Đánh giá tính chất tự tương quan, xu hướng (Trend) và tính mùa vụ (Seasonality).
+- Xác định các độ trễ (lags) có ý nghĩa thống kê quan trọng nhất.
 """
 
 import sys
@@ -125,7 +109,7 @@ def step2_execute_analysis(series: pd.Series, nlags: int = 40) -> Dict[str, Any]
 def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False) -> None:
     """
     Khởi tạo 2 biểu đồ trực quan ACF và PACF cạnh nhau để kiểm tra hình dạng tương quan.
-    Lưu ý: Không tự ý xuất file ảnh ra ổ đĩa theo yêu cầu của dự án.
+    Lưu đồ thị ra thư mục figures/ để phục vụ làm báo cáo tổng hợp.
     """
     print(f"[BƯỚC 3] Đang khởi tạo biểu đồ ACF và PACF...")
 
@@ -144,12 +128,19 @@ def step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_pl
     axes[1].grid(True, linestyle="--", alpha=0.5)
 
     plt.tight_layout()
+
+    # Xuất ảnh ra thư mục figures/
+    figures_dir = BASE_DIR / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    out_file = figures_dir / "bai1_acf_pacf.png"
+    fig.savefig(out_file, dpi=300, bbox_inches="tight")
+    print(f" -> Đã lưu biểu đồ ACF/PACF tại: {out_file}")
+
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
 
-    print(" -> Đã hoàn thành trực quan hóa ACF/PACF (không xuất tệp ảnh ra đĩa).")
     return None
 
 
@@ -196,16 +187,17 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 1 (ACF & PACF)
 # -------------------------------------------------------------------------------
 # HÀM THỰC THI CHÍNH
 # -------------------------------------------------------------------------------
-def main():
+def main(show_plot: bool = True):
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH ACF/PACF")
     print("=" * 80)
     series = step1_load_data(DATA_PATH)
     analysis_results = step2_execute_analysis(series, nlags=CONFIG["lags"])
-    step3_visualize(series, analysis_results)
+    step3_visualize(series, analysis_results, show_plot=show_plot)
     step4_conclude_and_report(analysis_results)
     print("\n[HOÀN THÀNH BÀI TẬP 1 THÀNH CÔNG]")
 
 
 if __name__ == "__main__":
-    main()
+    show = "--no-show" not in sys.argv
+    main(show_plot=show)

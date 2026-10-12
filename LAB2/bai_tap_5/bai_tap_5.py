@@ -5,33 +5,12 @@ NHOM 7 - MON: QUAN LY & KHAI PHA CHUOI THOI GIAN (QLCTG) - UTH
 Thanh vien phu trach: Bui Tran Ngoc Khai (CV06) - Nhanh: ngoc-khai-bt5
 ================================================================================
 
-AI_AGENT_INSTRUCTIONS:
-----------------------
-Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Claude, ChatGPT...) hỗ trợ thành viên nhóm hoàn thiện hoặc mở rộng file này,
-hãy TUÂN THỦ NGHIÊM NGẶT các quy tắc kiến trúc sau:
-1. NGUYÊN TẮC BẢO TOÀN KIẾN TRÚC ĐỒNG BỘ:
-   - File bắt buộc phải chia thành 4 hàm tuần tự:
-     + step1_load_data(data_path: Path) -> pd.Series
-     + step2_execute_analysis(series: pd.Series, window: int = 12) -> Dict[str, Any]
-+ step3_visualize(series: pd.Series, analysis_results: Dict[str, Any], show_plot: bool = False, figures_dir: Path = None) -> None
-      + step4_conclude_and_report(analysis_results: Dict[str, Any], output_path: Path) -> str
-    - Hàm main() điều phối toàn bộ luồng thực thi, in log rõ ràng và lưu file kết quả.
-2. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - Theo lựa chọn của thành viên CV06, bài này ĐƯỢC PHÉP lưu 3 biểu đồ PNG vào
-     `LAB2/bai_tap_5/figures/` để nộp kèm báo cáo kỹ thuật:
-     bai5_1_rolling_statistics.png, bai5_2_seasonal_plot.png, bai5_3_seasonality_heatmap.png (150 dpi).
-     Chạy với cờ `--no-figures` để tắt lưu ảnh nếu cần giữ repo tinh gọn.
-   - Phân tích đầy đủ 3 góc nhìn trực quan:
-     (a) Rolling Statistics (Mean & Band ±2 Std): Đánh giá xu hướng và tính biến thiên phương sai (heteroskedasticity).
-     (b) Monthly Seasonal Plot (Từng năm qua 12 tháng): Quan sát pha sóng và sự dịch chuyển tăng trưởng liên năm.
-     (c) Seasonality Heatmap (Year x Month): Thể hiện mật độ hành khách qua bảng màu heatmap trực quan.
-   - Hàm `step3_visualize` tạo biểu đồ và giải phóng bộ nhớ (hoặc hiển thị nếu show_plot=True).
-3. TÍNH TƯƠNG THÍCH MÔI TRƯỜNG WINDOWS:
-   - Luôn sử dụng encoding='utf-8' cho mọi thao tác đọc/ghi file và luồng I/O console.
-4. CAC CAU HOI NGHIEM THU & LY THUYET BAT BUOC TRA LOI:
-   - Cau 1: 12-Month Rolling Mean giup kiem tra dieu gi ve du lieu? (cau ly thuyet 9)
-   - Cau 2: Tai sao truc quan hoa la buoc quan trong trong phan tich chuoi thoi gian? (cau ly thuyet 12)
-   - Cau 3: Cac thang nao dat diem mua vu cao nhat va thap nhat? Minh chung dinh luong?
+MỤC TIÊU BÀI TẬP:
+- Phân tích trực quan hóa chuỗi thời gian qua 3 góc nhìn chuyên sâu:
+  (1) Thống kê trượt (Rolling Statistics: Rolling Mean và Rolling Std band ±2).
+  (2) Biểu đồ mùa vụ theo tháng qua các năm (Monthly Seasonal Plot).
+  (3) Bản đồ nhiệt chu kỳ mùa vụ (Seasonality Heatmap: Year x Month).
+- Đánh giá xu hướng tăng trưởng, sự biến thiên phương sai và các thời điểm mùa cao điểm/thấp điểm.
 ================================================================================
 """
 
@@ -435,6 +414,7 @@ def main():
     print("=" * 80)
 
     save_figures = "--no-figures" not in sys.argv[1:]
+    show_plot = "--no-show" not in sys.argv[1:]
 
     current_dir = Path(__file__).resolve().parent
     data_path = current_dir.parent / "data" / "raw" / "AirPassengers.csv"
@@ -448,7 +428,7 @@ def main():
     analysis_results = step2_execute_analysis(series, window=12)
 
     # Bước 3
-    step3_visualize(series, analysis_results, figures_dir=figures_dir)
+    step3_visualize(series, analysis_results, show_plot=show_plot, figures_dir=figures_dir)
 
     # Bước 4
     print("\n[BƯỚC 4] TỔNG HỢP KẾT QUẢ VÀ TRẢ LỜI CÂU HỎI NGHIỆM THU + LÝ THUYẾT 9, 12:\n")

@@ -8,29 +8,11 @@ Thư mục: LAB2/bai_tap_4/
 Tệp thực thi: bai_tap_4.py
 Dataset đầu vào: LAB2/data/raw/AirPassengers.csv
 
-=================================================================================
-🤖 CHỈ THỊ DÀNH CHO AI AGENT (AI AGENT PROMPT & GUARDRAILS SPECIFICATION)
-=================================================================================
-Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude...):
-1. TUÂN THỦ KIẾN TRÚC ĐỒNG NHẤT:
-   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`, 
-     `step3_visualize`, `step4_conclude_and_report`.
-   - Giữ nguyên cấu trúc trả về `Dict[str, Any]` và các type hints.
-2. NGUYÊN TẮC KỸ THUẬT:
-   - BẮT BUỘC tạo bản sao `series.copy()`, tuyệt đối không ghi đè làm hỏng chuỗi dữ liệu gốc!
-   - Tỷ lệ thiếu giả lập: 10% ngẫu nhiên với seed=101 (`np.random.seed(101)`).
-   - Thêm đúng 3 điểm ngoại lai (Outliers) có giá trị phóng đại gấp 3.5 lần.
-   - So sánh 2 phương pháp xử lý missing: Forward-fill (`ffill()`) vs Time Interpolation (`interpolate(method='time')`).
-   - Xử lý Outlier bằng thuật toán Hampel Filter (Rolling Median +/- 3 * MAD).
-3. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - KHÔNG tự ý lưu tệp hình ảnh (.png/.jpg) ra ổ đĩa để tránh làm nặng repository.
-   - Hàm `step3_visualize` tạo biểu đồ so sánh Trước - Sau khi làm sạch, giải phóng bộ nhớ hoặc hiển thị nếu cần.
-   - Báo cáo đánh giá sai số MAE/RMSE giữa chuỗi phục hồi và chuỗi gốc tại `LAB2/bai_tap_4/ket_qua_bai_4.txt`.
-4. CÂU HỎI NGHIỆM THU:
-   - Câu 1: Forward-fill hay Time Interpolation cho kết quả phục hồi tốt hơn trên chuỗi có xu hướng tăng?
-   - Câu 2: Hampel Filter có ưu điểm gì so với Z-score khi phát hiện ngoại lai cục bộ?
-   - Câu 3: Sai số tái tạo (MAE, RMSE) sau khi làm sạch là bao nhiêu?
-=================================================================================
+MỤC TIÊU BÀI TẬP:
+- Giả lập dữ liệu khuyết thiếu (Missing values 10%) và giá trị ngoại lai (3 Outliers).
+- So sánh các phương pháp xử lý dữ liệu thiếu: Forward-fill vs Time Interpolation.
+- Phát hiện và xử lý ngoại lai bằng thuật toán Hampel Filter (Rolling Median + MAD).
+- Đánh giá sai số phục hồi dữ liệu qua các chỉ số MAE và RMSE.
 """
 
 import sys
@@ -380,17 +362,18 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 4 (KIỂM TRA & XỬ LÝ CHẤT LƯ
 # -------------------------------------------------------------------------------
 # HÀM THỰC THI CHÍNH
 # -------------------------------------------------------------------------------
-def main():
+def main(show_plot: bool = True):
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 4: KIỂM TRA & XỬ LÝ CHẤT LƯỢNG DỮ LIỆU (DATA CLEANING)")
     print("=" * 80)
     clean_series, corrupted_series = step1_load_data(DATA_PATH)
     analysis_results = step2_execute_analysis(clean_series, corrupted_series)
-    # show_plot=True để bật cửa sổ trực quan cho người dùng / Giảng viên kiểm tra
-    step3_visualize(clean_series, corrupted_series, analysis_results, show_plot=False)
+    step3_visualize(clean_series, corrupted_series, analysis_results, show_plot=show_plot)
     step4_conclude_and_report(analysis_results)
     print("\n[HOÀN THÀNH BÀI TẬP 4 THÀNH CÔNG]")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    show = "--no-show" not in sys.argv
+    main(show_plot=show)

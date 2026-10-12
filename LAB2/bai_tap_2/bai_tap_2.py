@@ -8,27 +8,11 @@ Thư mục: LAB2/bai_tap_2/
 Tệp thực thi: bai_tap_2.py
 Dataset so sánh: LAB2/data/raw/AirPassengers.csv
 
-=================================================================================
-🤖 CHỈ THỊ DÀNH CHO AI AGENT (AI AGENT PROMPT & GUARDRAILS SPECIFICATION)
-=================================================================================
-Nếu bạn là một AI Agent (Cursor, GitHub Copilot, Gemini, ChatGPT, Claude...):
-1. TUÂN THỦ KIẾN TRÚC ĐỒNG NHẤT:
-   - Không được đổi tên 4 hàm chuẩn: `step1_load_data`, `step2_execute_analysis`, 
-     `step3_visualize`, `step4_conclude_and_report`.
-   - Giữ nguyên cấu trúc trả về dạng `Dict[str, Any]` và các type hints.
-2. NGUYÊN TẮC KỸ THUẬT:
-   - Sinh chuỗi Gaussian White Noise với `loc=0.0`, `scale=1.0`, kích thước 1000 điểm.
-   - Bắt buộc cố định `np.random.seed(42)` để kết quả thực nghiệm có tính tái lập (reproducible).
-   - Thực hiện kiểm định Ljung-Box (`acorr_ljungbox`) tại các độ trễ kiểm tra: lags=[10, 20].
-3. NGUYÊN TẮC TRỰC QUAN HÓA & LƯU TRỮ:
-   - KHÔNG tự ý lưu tệp hình ảnh (.png/.jpg) ra ổ đĩa để tránh làm nặng repository.
-   - Hàm `step3_visualize` tạo biểu đồ đối chứng trực quan, giải phóng bộ nhớ hoặc hiển thị tương tác nếu cần.
-   - Xuất file văn bản `LAB2/bai_tap_2/ket_qua_bai_2.txt` chứa đoạn nhận xét 5 dòng chuẩn.
-4. CÂU HỎI NGHIỆM THU:
-   - Câu 1: Bao nhiêu lag của chuỗi White Noise vượt ra ngoài dải tin cậy 95%?
-   - Câu 2: Trị số p-value của kiểm định Ljung-Box trên 2 chuỗi là bao nhiêu?
-   - Câu 3: Chuỗi White Noise có thể dùng để dự báo tương lai được không? Tại sao?
-=================================================================================
+MỤC TIÊU BÀI TẬP:
+- Sinh chuỗi Gaussian White Noise với loc=0.0, scale=1.0 (1000 điểm, seed=42).
+- Vẽ biểu đồ ACF và kiểm định xem các lag có nằm trong dải tin cậy 95% không.
+- Thực hiện kiểm định Ljung-Box Test tại lags=[10, 20] để đối chứng White Noise vs AirPassengers.
+- Nhận xét và đánh giá khả năng dự báo của chuỗi thời gian.
 """
 
 import sys
@@ -158,12 +142,19 @@ def step3_visualize(wn_series: pd.Series, real_series: pd.Series, analysis_resul
     axes[1, 1].grid(True, linestyle="--", alpha=0.5)
 
     plt.tight_layout()
+
+    # Xuất ảnh ra thư mục figures/
+    figures_dir = BASE_DIR / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    out_file = figures_dir / "bai2_white_noise_comparison.png"
+    fig.savefig(out_file, dpi=300, bbox_inches="tight")
+    print(f" -> Đã lưu biểu đồ đối chứng White Noise tại: {out_file}")
+
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
 
-    print(" -> Đã hoàn thành trực quan hóa đối chứng (không xuất tệp ảnh ra đĩa).")
     return None
 
 
@@ -204,16 +195,17 @@ BÁO CÁO PHÂN TÍCH KẾT QUẢ BÀI TẬP 2 (KIỂM TRA WHITE NOISE)
 # -------------------------------------------------------------------------------
 # HÀM THỰC THI CHÍNH
 # -------------------------------------------------------------------------------
-def main():
+def main(show_plot: bool = True):
     print("=" * 80)
     print("KHỞI CHẠY BÀI TẬP 2: KIỂM ĐỊNH CHUỖI NHIỄU TRẮNG (WHITE NOISE)")
     print("=" * 80)
     wn_series, real_series = step1_load_data(DATA_PATH)
     analysis_results = step2_execute_analysis(wn_series, real_series)
-    step3_visualize(wn_series, real_series, analysis_results)
+    step3_visualize(wn_series, real_series, analysis_results, show_plot=show_plot)
     step4_conclude_and_report(analysis_results)
     print("\n[HOÀN THÀNH BÀI TẬP 2 THÀNH CÔNG]")
 
 
 if __name__ == "__main__":
-    main()
+    show = "--no-show" not in sys.argv
+    main(show_plot=show)
