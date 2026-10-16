@@ -1,5 +1,0 @@
-﻿Model,MAE,RMSE,MAPE,R2,Note
-1. Baseline XGBoost,167.78,223.69,1.16,0.9916,"24 Lags, lr=0.01"
-2. XGBoost + Rolling (24h/168h),170.05,226.5,1.18,0.9914,Lags + Rolling stats
-3. XGBoost Tuned (TimeSeriesSplit),142.4,193.87,0.98,0.9937,Expanding Window CV
-4. Benchmark Random Forest,152.06,207.54,1.04,0.9928,"100 Trees, max_depth=12"
