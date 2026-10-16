@@ -1,4 +1,0 @@
-﻿Model,Formula,Trend_Growth_Percent,Seasonal_Peak_Month,Seasonal_Trough_Month,Residual_Variance,Best_Fit_Assessment
-Additive (Cộng),Y = T + S + R,+274.7%,Tháng 7 (+53.5 khách),Tháng 11 (-56.2 khách),Thay đổi theo thời gian (Heteroskedastic),Không tối ưu do biên độ phình rộng
-Multiplicative (Nhân),Y = T * S * R,+274.7%,Tháng 7 (x1.27),Tháng 11 (x0.82),Ổn định quanh 1.0 (Homoskedastic),TỐI ƯU VƯỢT TRỘI
-STL (Loess),Y = T + S + R (Loess),+274.7%,Tháng 7 (+51.2 khách),Tháng 11 (-54.8 khách),Ổn định cao,Rất tốt cho phân tích nâng cao

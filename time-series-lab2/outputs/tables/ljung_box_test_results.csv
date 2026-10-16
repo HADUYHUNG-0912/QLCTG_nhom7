@@ -1,5 +1,0 @@
-﻿Series,Lag_h,Q_Statistic,p_value,Significance_Level,Conclusion
-Gaussian White Noise,10,7.71,0.6571,0.05,Chấp nhận H0 (Nhiễu trắng)
-Gaussian White Noise,20,15.16,0.7675,0.05,Chấp nhận H0 (Nhiễu trắng)
-AirPassengers,10,857.07,1.10e-177,0.05,Bác bỏ H0 (Chứa quy luật)
-AirPassengers,20,1434.15,5.30e-292,0.05,Bác bỏ H0 (Chứa quy luật)
