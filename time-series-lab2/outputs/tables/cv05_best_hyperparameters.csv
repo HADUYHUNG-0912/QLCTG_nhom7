@@ -1,0 +1,2 @@
+subsample,n_estimators,max_depth,learning_rate
+0.8,250,6,0.08

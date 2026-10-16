@@ -1,0 +1,8 @@
+﻿Tiêu chí Đánh giá,XGBoost (Tuned),Random Forest
+Thời gian Huấn luyện (Train Time - s),2.29 s,23.82 s
+Tốc độ Suy luận (Inference Speed - ms),32.78 ms,88.77 ms
+MAE (Mean Absolute Error - MW),142.40 MW,152.06 MW
+RMSE (Root Mean Squared Error - MW),193.87 MW,207.54 MW
+MAPE (Mean Absolute Percentage Error - %),0.98 %,1.04 %
+Hệ số Xác định (R2 Score),0.9937,0.9928
+Mô hình Thắng cuộc (Winner),Độ chính xác & Tốc độ,-

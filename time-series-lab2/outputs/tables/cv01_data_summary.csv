@@ -1,0 +1,13 @@
+﻿Thông số,Giá trị
+Tổng số quan sát khả dụng,"121,245"
+Số đặc trưng Lag (Features),24 (lag_1 đến lag_24)
+Tỷ lệ phân chia Train/Test,80% / 20%
+Số lượng mẫu Train,"96,996"
+Thời gian bắt đầu Train,2004-10-02 01:00:00
+Thời gian kết thúc Train,2015-10-27 12:00:00
+Số lượng mẫu Test,"24,249"
+Thời gian bắt đầu Test,2015-10-27 13:00:00
+Thời gian kết thúc Test,2018-08-03 00:00:00
+Giá trị Target Min (MW),"9,581.00"
+Giá trị Target Max (MW),"25,695.00"
+Giá trị Target Mean (MW),"15,499.90"

@@ -1,88 +1,90 @@
-# TIME SERIES LAB 2 - DỰ ĐOÁN CHUỖI THỜI GIAN BẰNG MACHINE LEARNING MODELS
+# TIME SERIES LAB 3 - DỰ ĐOÁN CHUỖI THỜI GIAN BẰNG MACHINE LEARNING MODELS
 ## BÀI THỰC HÀNH: DỰ BÁO TIÊU THỤ NĂNG LƯỢNG HÀNG GIỜ BẰNG XGBOOST REGRESSOR
 
+> **Học phần:** Quản lý & Khai phá Chuỗi Thời gian (QLCTG)  
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
 > **Giảng viên hướng dẫn:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
-> **Nhóm thực hiện:** Nhóm 7  
-> **GitHub Repository:** [https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git](https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git)  
-> **Đề bài chi tiết:** [DE_BAI_LAB.md](DE_BAI_LAB.md) hoặc [docs/lab_description.md](docs/lab_description.md)
+> **Nhóm thực hiện:** Nhóm 7 (`QLCTG_nhom7`) - 6 thành viên  
+> **Kho lưu trữ GitHub:** [HADUYHUNG-0912/QLCTG_nhom7](https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git)  
+> **Kế hoạch phân công chi tiết:** [docs/KE_HOACH_PHAN_CONG_NHOM7.md](docs/KE_HOACH_PHAN_CONG_NHOM7.md)  
+> **Đề bài chi tiết:** [DE_BAI_LAB.md](DE_BAI_LAB.md)
 
 ---
 
-## 1. MỤC TIÊU VÀ ĐỀ BÀI THỰC HÀNH
+### 1. MA TRẬN PHÂN CÔNG CÔNG VIỆC 6 THÀNH VIÊN
 
-- **Mục tiêu chính:**
-  1. Chuyển bài toán chuỗi thời gian đơn biến thành bài toán học máy có giám sát (Supervised Learning).
-  2. Huấn luyện mô hình XGBoost Regressor (`xgboost.XGBRegressor`).
-  3. Đánh giá chất lượng dự báo và phân tích Feature Importance (ảnh hưởng của các độ trễ).
-
-- **Dataset thực nghiệm:** [Hourly Energy Consumption (PJM) - AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)  
-  *Dữ liệu tiêu thụ năng lượng hàng giờ trong hơn 10 năm từ American Electric Power (AEP) thuộc PJM, tính bằng Megawatt (MW).*
+| Mã CV | Hạng mục công việc | Mô tả & Trách nhiệm kỹ thuật | File mã nguồn phụ trách | Người phụ trách & Nhánh |
+| :---: | :--- | :--- | :--- | :---: |
+| **CV01** | **Tiền xử lý dữ liệu & Sinh Lag Features (Bước 1, 2, 3)** | Xử lý `AEP_hourly.csv`, tạo 24 Lags, phân chia Train/Test 80/20 theo thời gian (No Shuffle), lưu `data/processed/`. | [`src/cv01_data_and_lags.py`](src/cv01_data_and_lags.py) | **Hà Duy Hưng (Lead)**<br>`main` |
+| **CV02** | **Huấn luyện mô hình cơ sở XGBoost (Bước 4, 5)** | Khởi tạo `XGBRegressor`, áp dụng early stopping 50 rounds, vẽ learning loss curve, lưu checkpoint `outputs/models/`. | [`src/cv02_xgboost_train.py`](src/cv02_xgboost_train.py) | **Ngọc Trâm**<br>`feat/cv02-xgb-train` |
+| **CV03** | **Đánh giá chỉ số & Feature Importance (Bước 6, 7)** | Tính toán MAE, RMSE, MAPE, $R^2$; vẽ Actual vs Predicted và biểu đồ độ quan trọng đặc trưng (Top Lags). | [`src/cv03_evaluation_importance.py`](src/cv03_evaluation_importance.py) | **Thanh Phương**<br>`feat/cv03-evaluation` |
+| **CV04** | **Nâng cao 1 & 2: Rolling Features & Multi-Step** | Tạo Rolling Mean/Std (24h, 168h) bằng `.shift(1)`; dự báo đệ quy đa bước 24h và phân tích sai số tích lũy. | [`src/cv04_rolling_and_multistep.py`](src/cv04_rolling_and_multistep.py) | **Hoàng Hiệp**<br>`feat/cv04-rolling-multistep` |
+| **CV05** | **Nâng cao 3 & 4: Tuning TimeSeriesSplit & Random Forest** | Tinh chỉnh siêu tham số bằng `TimeSeriesSplit` (CV 3 folds); huấn luyện benchmark đối chứng với `RandomForestRegressor`. | [`src/cv05_tuning_random_forest.py`](src/cv05_tuning_random_forest.py) | **Hoàng**<br>`feat/cv05-tuning-benchmark` |
+| **CV06** | **Lý luận chuyên sâu & Báo cáo kỹ thuật tổng hợp** | Trả lời 3 câu hỏi lý luận chuyên sâu; tổng hợp Dashboard đối chứng 4 mô hình; xuất Báo cáo kỹ thuật Markdown. | [`src/cv06_report_synthesis.py`](src/cv06_report_synthesis.py) | **Bùi Trần Ngọc Khải**<br>`feat/cv06-report-theory` |
 
 ---
 
-## 2. CẤU TRÚC THƯ MỤC DỰ ÁN (`time-series-lab2/`)
+### 2. CẤU TRÚC THƯ MỤC DỰ ÁN
 
 ```text
 time-series-lab2/
-├── DE_BAI_LAB.md           # Đề bài thực hành chi tiết (chuyển từ file PDF/ảnh của giảng viên)
-├── README.md               # Giới thiệu, hướng dẫn cài đặt và thứ tự chạy
-├── requirements.txt        # Danh sách thư viện phụ thuộc (xgboost, scikit-learn, pandas, numpy,...)
+├── DE_BAI_LAB.md                      # Đề bài thực hành chính thức của Lab
+├── README.md                          # Tài liệu giới thiệu và hướng dẫn thực thi
+├── requirements.txt                   # Danh sách gói thư viện Python
 │
 ├── data/
-│   ├── raw/                # Dữ liệu gốc: AEP_hourly.csv
-│   └── processed/          # Dữ liệu sau khi tạo lag features, train/test sets
+│   ├── raw/                           # Dữ liệu gốc: AEP_hourly.csv (121,273 dòng)
+│   └── processed/                     # Dữ liệu train.csv, test.csv sau khi tạo lag
 │
 ├── docs/
-│   ├── lab_description.md  # Toàn văn đề bài gốc và yêu cầu kỹ thuật chi tiết
-│   ├── lab3_description.md # Bản sao theo tên bài thực hành 3
-│   ├── data_introduction.md# Giới thiệu chi tiết dataset Hourly Energy Consumption (PJM)
-│   ├── data_processing.md  # Kỹ thuật tạo Lag Features, Rolling Features, Time-based Split
-│   ├── theory.md           # Cơ sở lý thuyết XGBoost, TimeSeriesSplit, Multi-step Forecast
-│   └── bt_report.md        # Báo cáo kết quả dự báo và trả lời 3 câu hỏi lý luận
-│
-├── notebooks/
-│   ├── 01_data_preparation_and_lags.ipynb # Bước 1-3: Chuẩn bị dữ liệu & tạo Lag Features
-│   ├── 02_xgboost_training_eval.ipynb     # Bước 4-7: Huấn luyện XGBoost, Đánh giá & Feature Importance
-│   └── 03_advanced_experiments.ipynb      # Nâng cao: Rolling Stats, Multi-step, TimeSeriesSplit, Random Forest
+│   ├── KE_HOACH_PHAN_CONG_NHOM7.md   # Bảng phân công chi tiết 6 thành viên Nhóm 7
+│   ├── BAO_CAO_LAB3_NHOM7.md          # Báo cáo kỹ thuật tổng kết toàn diện nộp Giảng viên
+│   ├── lab_description.md             # Đề bài sao lưu
+│   └── lab3_description.md            # Đề bài sao lưu
 │
 ├── outputs/
-│   ├── figures/            # Biểu đồ trích xuất: Actual vs Predicted, Feature Importance, Rolling Stats
-│   └── tables/             # Bảng so sánh sai số định lượng (MAE, RMSE, MAPE, R2)
+│   ├── figures/                       # Trọn bộ đồ thị PNG xuất bản (DPI 150)
+│   ├── models/                        # Checkpoint mô hình XGBoost (xgboost_baseline.json)
+│   └── tables/                        # Bảng số liệu thống kê và đối chứng định lượng (.csv)
 │
-└── src/                    # Mã nguồn script Python (.py) thực thi tự động qua CLI
-    ├── prepare_lags.py
-    ├── train_xgboost.py
-    └── advanced_tuning.py
+└── src/                               # 6 module mã nguồn chuẩn hóa của 6 thành viên
+    ├── cv01_data_and_lags.py          # CV01: Hà Duy Hưng (Lead)
+    ├── cv02_xgboost_train.py          # CV02: Ngọc Trâm
+    ├── cv03_evaluation_importance.py  # CV03: Thanh Phương
+    ├── cv04_rolling_and_multistep.py  # CV04: Hoàng Hiệp
+    ├── cv05_tuning_random_forest.py   # CV05: Hoàng
+    └── cv06_report_synthesis.py       # CV06: Bùi Trần Ngọc Khải
 ```
 
 ---
 
-## 3. NỘI DUNG THỰC HÀNH CỐT LÕI (7 BƯỚC)
+### 3. HƯỚNG DẪN CÀI ĐẶT & THỰC THI TOÀN HỆ THỐNG
 
-1. **Bước 1. Chuẩn bị dữ liệu:** Nạp `AEP_hourly.csv`, parse `DatetimeIndex`, sort thời gian, kiểm tra missing.
-2. **Bước 2. Tạo lag features:** Dùng `.shift(1)` đến `.shift(p)` chuyển đổi sang Supervised Learning.
-3. **Bước 3. Chia $X - y$:** Tách ma trận đặc trưng $X = [y_{t-1}, \dots, y_{t-p}]$ và biến mục tiêu $y = y_t$.
-4. **Bước 4. Chia train / test theo thời gian:** Tách theo chuỗi thời gian tuần tự (không shuffle để tránh rò rỉ dữ liệu).
-5. **Bước 5. Huấn luyện mô hình XGBoost:** Khởi tạo `XGBRegressor` và fit trên tập huấn luyện.
-6. **Bước 6. Dự đoán và đánh giá:** Đo MAE, RMSE, MAPE, $R^2$ và vẽ biểu đồ Actual vs Predicted.
-7. **Bước 7. Phân tích feature importance:** Xác định các lag có ảnh hưởng mạnh nhất đến tải điện (Lag 1h, Lag 24h, Lag 168h).
+1. **Cài đặt thư viện phụ thuộc:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
----
+2. **Chạy tuần tự từng nhiệm vụ (mỗi thành viên kiểm thử độc lập):**
+   ```bash
+   # Bước 1 (CV01 - Hà Duy Hưng): Tiền xử lý dữ liệu & sinh Lag 1-24
+   python src/cv01_data_and_lags.py
 
-## 4. BÀI TẬP NÂNG CAO (4 BÀI TOÁN MỞ RỘNG)
+   # Bước 2 (CV02 - Ngọc Trâm): Huấn luyện XGBoost cơ sở & Early Stopping
+   python src/cv02_xgboost_train.py
 
-1. **Thêm rolling mean / rolling std:** Bổ sung trung bình trượt 24h, 168h và độ lệch chuẩn trượt để nắm bắt xu thế.
-2. **Dự báo multi-step:** Triển khai dự báo nhiều giờ tiếp theo bằng chiến lược Recursive hoặc Direct.
-3. **Tune hyperparameter bằng `TimeSeriesSplit`:** Tối ưu hóa siêu tham số bằng Cross-Validation chuyên biệt cho chuỗi thời gian.
-4. **So sánh với Random Forest:** Đánh giá đối chứng hiệu năng giữa XGBoost và Random Forest.
+   # Bước 3 (CV03 - Thanh Phương): Đánh giá MAE/RMSE/MAPE & Feature Importance
+   python src/cv03_evaluation_importance.py
 
----
+   # Bước 4 (CV04 - Hoàng Hiệp): Rolling Features & Dự báo Đa bước 24h
+   python src/cv04_rolling_and_multistep.py
 
-## 5. HỆ THỐNG 3 CÂU HỎI LÝ LUẬN
+   # Bước 5 (CV05 - Hoàng): Tinh chỉnh TimeSeriesSplit & So sánh Random Forest
+   python src/cv05_tuning_random_forest.py
 
-1. **So sánh XGBoost với Linear Regression trong dự báo chuỗi thời gian?**
-2. **Điều gì xảy ra khi tăng số lượng độ trễ $p$?** (Trade-off thông tin vs Overfitting và mất dữ liệu đầu chuỗi).
-3. **Khi nào XGBoost phù hợp hơn mô hình truyền thống ARIMA?**
+   # Bước 6 (CV06 - Bùi Trần Ngọc Khải): Tổng hợp Dashboard & Cập nhật Báo cáo
+   python src/cv06_report_synthesis.py
+   ```
 
-Chi tiết hướng dẫn giải và phân tích học thuật được trình bày tại [DE_BAI_LAB.md](DE_BAI_LAB.md).
+3. **Chỉ thị sử dụng AI Agent (Cursor, Antigravity, Copilot):**
+   Mỗi tệp `.py` trong `src/` đều tích hợp sẵn khối cấu hình `AI_AGENT_INSTRUCTIONS` ở phần đầu. Thành viên chỉ cần mở file bằng công cụ AI và yêu cầu thực hiện / tinh chỉnh, AI Agent sẽ đọc các chỉ thị và tuân thủ các ràng buộc (không shuffle, shift 1 trước khi tính rolling, xuất đúng định dạng file).
