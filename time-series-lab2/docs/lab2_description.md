@@ -1,130 +1,169 @@
-# ĐỀ BÀI VÀ HƯỚNG DẪN THỰC HÀNH LAB 2
-## KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU CHUỖI THỜI GIAN
-**(Time Series Exploratory Data Analysis & Data Quality Engineering)**
+# BÀI TẬP THỰC HÀNH: DỰ ĐOÁN CHUỖI THỜI GIAN SỬ DỤNG MACHINE LEARNING MODELS
+## (TIME SERIES FORECASTING USING MACHINE LEARNING MODELS)
 
-- **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)
-- **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)
-- **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)
-- **Nhóm thực hiện:** Nhóm 7
-- **Bộ dữ liệu thực nghiệm:** `AirPassengers.csv` (144 quan sát tháng, từ 01/1949 đến 12/1960)
+> **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)  
+> **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
+> **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
+> **Bộ dữ liệu thực nghiệm:** [Hourly Energy Consumption (PJM) - AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)
 
 ---
 
-## MỤC TIÊU TỔNG QUAN CỦA BÀI THỰC HÀNH
+## 🎯 MỤC TIÊU (OBJECTIVES)
 
-Sau khi hoàn thành 6 bài tập trong đợt thực hành này, sinh viên phải nắm vững:
-1. Bản chất toán học của hàm tự tương quan (ACF) và tự tương quan riêng phần (PACF), ý nghĩa của các độ trễ (lags) và cách suy luận tính dừng, xu hướng, mùa vụ.
-2. Khái niệm và phương pháp kiểm định thống kê chuỗi Nhiễu trắng (White Noise), phân biệt chuỗi có thể dự báo và chuỗi ngẫu nhiên thuần túy.
-3. Kỹ thuật phân rã chuỗi thời gian (Time Series Decomposition) theo mô hình Cộng (Additive), Nhân (Multiplicative) và STL (Loess Smoothing).
-4. Các vấn đề chất lượng dữ liệu Time Series: Kỹ thuật xử lý missing values (bằng Time Interpolation) và phát hiện, làm sạch ngoại lai (Outliers) bằng thuật toán Hampel Filter.
-5. Kỹ thuật trực quan hóa chuyên sâu: Thống kê trượt (Rolling Statistics), đồ thị mùa vụ theo tháng (Seasonal Plot) và bản đồ nhiệt chu kỳ (Seasonality Heatmap).
-6. Kỹ năng tổng hợp báo cáo kỹ thuật nghiệm thu và xây dựng pipeline xử lý dữ liệu chuẩn công nghiệp.
+- **Chuyển bài toán chuỗi thời gian $\rightarrow$ học có giám sát** (Transforming Time Series into Supervised Learning via Feature Engineering).
+- **Huấn luyện mô hình XGBoost Regressor** (`xgboost.XGBRegressor`) chuyên sâu cho bài toán hồi quy chuỗi thời gian.
+- **Đánh giá chất lượng dự báo** qua các chỉ số định lượng chuẩn mực (MAE, RMSE, MAPE, $R^2$) và trực quan hóa Actual vs Predicted.
 
 ---
 
-## NỘI DUNG CHI TIẾT 6 BÀI TẬP THỰC HÀNH
+## 📝 BÀI TẬP THỰC HÀNH CỐT LÕI (CORE WORKFLOW)
 
-### BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH BIỂU ĐỒ ACF & PACF
-- **Mã nguồn:** `notebooks/bt1_acf_pacf.ipynb` hoặc `src/bt1_acf_pacf.py`
-- **Tệp xuất ra:** `outputs/figures/bai1_acf_pacf.png`
-- **Nội dung yêu cầu:**
-  1. Tải bộ dữ liệu `AirPassengers.csv`, chuyển cột `Month` thành kiểu `DatetimeIndex` với tần suất tháng (`MS`).
-  2. Tính toán hệ số tự tương quan (ACF) và tự tương quan riêng phần (PACF) đến tối thiểu 40 lags.
-  3. Vẽ biểu đồ ACF và PACF trên cùng một giao diện hình ảnh (2 subplots xếp chồng dọc), hiển thị rõ dải tin cậy 95% Bartlett:
-     $$\text{CI}_{95\%} = \pm \frac{1.96}{\sqrt{n}}$$
-  4. Trả lời và phân tích 3 câu hỏi nghiệm thu:
-     - Tự tương quan của chuỗi có mạnh không? Có suy giảm chậm (tail-off) không?
-     - Có dấu hiệu của xu hướng (Trend) và tính mùa vụ (Seasonality) hay không?
-     - Những lag nào có ý nghĩa thống kê quan trọng nhất? (Gợi ý: Lag 1 phản ánh xu hướng, Lag 12 phản ánh đỉnh mùa vụ chu kỳ 1 năm).
+Cho một chuỗi thời gian đơn biến $y_t$, hãy dự đoán giá trị tại thời điểm tiếp theo dựa trên các giá trị trong quá khứ ($y_t$ hoặc $y_{t+1}$ từ $y_{t-1}, y_{t-2}, \dots, y_{t-p}$).  
+Thực hiện tuần tự theo 7 bước dưới đây:
 
----
+### Bước 1. Chuẩn bị dữ liệu (Data Ingestion & Preprocessing)
+- Tải tệp dữ liệu `AEP_hourly.csv` từ bộ dữ liệu PJM Hourly Energy Consumption.
+- Chuyển đổi cột mốc thời gian (`Datetime`) thành kiểu `pd.DatetimeIndex`.
+- Sắp xếp tăng dần theo trục thời gian (`df.sort_index(inplace=True)`).
+- Kiểm tra tính liên tục, kiểm tra giá trị khuyết thiếu (`isna().sum()`) và trùng lặp chỉ mục (`index.has_duplicates`).
 
-### BÀI TẬP 2: KIỂM ĐỊNH CHUỖI NHIỄU TRẮNG (WHITE NOISE TESTING)
-- **Mã nguồn:** `notebooks/bt2_white_noise.ipynb` hoặc `src/bt2_white_noise.py`
-- **Tệp xuất ra:** `outputs/figures/bai2_white_noise_comparison.png`, `outputs/tables/ljung_box_test_results.csv`
-- **Nội dung yêu cầu:**
-  1. Sinh chuỗi Gaussian White Noise ngẫu nhiên với kích thước mẫu $N = 1000$, kỳ vọng $\mu = 0$, độ lệch chuẩn $\sigma = 1$ (cố định `seed=42`).
-  2. Vẽ biểu đồ đối chứng dạng sóng (Waveform) và biểu đồ ACF (30 lags) của White Noise đặt cạnh chuỗi dữ liệu thực tế `AirPassengers`.
-  3. Thực hiện kiểm định thống kê Ljung-Box Test tại các độ trễ $h = 10$ và $h = 20$:
-     $$Q(h) = n(n+2)\sum_{k=1}^h \frac{\hat{\rho}_k^2}{n-k}$$
-  4. Trình bày đoạn văn nhận xét so sánh (tối thiểu 5 dòng):
-     - Biểu đồ ACF của White Noise có nằm trong dải tin cậy 95% không?
-     - Trị số p-value của kiểm định Ljung-Box trên White Noise so với AirPassengers như thế nào?
-     - Ý nghĩa thực tế: Chuỗi nào có thể dự báo được, chuỗi nào không thể dự báo được và vì sao?
+### Bước 2. Tạo lag features (Supervised Learning Transformation)
+- Biến đổi bài toán chuỗi thời gian thành bài toán học máy có giám sát bằng kỹ thuật trượt độ trễ:
+  $$X_t = [y_{t-1}, y_{t-2}, \dots, y_{t-p}]$$
+- Sử dụng hàm `.shift(1)`, `.shift(2)`, $\dots$, `.shift(p)` trong Pandas để tạo các cột độ trễ tương ứng.
+- Xử lý các giá trị NaN phát sinh ở đầu chuỗi sau khi tạo lag features (`dropna()`).
 
----
+### Bước 3. Chia ma trận đặc trưng và biến mục tiêu ($X - y$)
+- **Ma trận đặc trưng ($X$):** Gồm các cột lag features $y_{t-1}, \dots, y_{t-p}$ (và các đặc trưng bổ sung nếu có).
+- **Vector mục tiêu ($y$):** Giá trị thực tế cần dự đoán tại thời điểm hiện tại $y_t$ (hoặc bước tiếp theo $y_{t+1}$).
 
-### BÀI TẬP 3: PHÂN RÃ CHUỖI THỜI GIAN (TIME-SERIES DECOMPOSITION)
-- **Mã nguồn:** `notebooks/bt3_decomposition.ipynb` hoặc `src/bt3_decomposition.py`
-- **Tệp xuất ra:** `outputs/figures/bai3_1_additive_decomposition.png`, `bai3_2_multiplicative_decomposition.png`, `bai3_3_stl_decomposition.png`, `outputs/tables/decomposition_summary.csv`
-- **Nội dung yêu cầu:**
-  1. Thực hiện phân rã chuỗi theo phương pháp cổ điển (Classical Decomposition):
-     - Dạng Cộng: $Y_t = T_t + S_t + R_t$
-     - Dạng Nhân: $Y_t = T_t \times S_t \times R_t$
-  2. Thực hiện phân rã nâng cao bằng phương pháp STL (Seasonal and Trend decomposition using Loess) với tính năng `robust=True`.
-  3. Trích xuất và trực quan hóa 4 thành phần: Dữ liệu quan sát (`Observed`), Xu hướng (`Trend`), Mùa vụ (`Seasonal`), Phần dư (`Residual`).
-  4. Phân tích học thuật:
-     - Xu hướng dài hạn tăng hay giảm? Tốc độ tăng trưởng qua các năm là bao nhiêu phần trăm?
-     - Tính mùa vụ diễn ra như thế nào? Tháng nào là đỉnh cao điểm (Peak), tháng nào là đáy (Trough)?
-     - So sánh giữa dạng Cộng và dạng Nhân: Dạng nào phù hợp với dữ liệu `AirPassengers` hơn? Vì sao?
-     - Đánh giá thành phần phần dư (Residual): Có mang tính chất của White Noise không?
+### Bước 4. Chia tập Train / Test theo thời gian (Time-Based Train/Test Split)
+- **Quy tắc bắt buộc:** Chia theo thứ tự thời gian tuần tự (ví dụ: $80\%$ quan sát đầu dùng làm tập Huấn luyện - Train, $20\%$ quan sát sau dùng làm tập Kiểm thử - Test).
+- **Cấm kỵ:** Tuyệt đối **KHÔNG dùng hàm ngẫu nhiên `train_test_split(shuffle=True)`** để tránh hiện tượng rò rỉ dữ liệu tương lai vào quá khứ (Data Leakage / Lookahead Bias).
 
----
+### Bước 5. Huấn luyện mô hình XGBoost (Model Training)
+- Khởi tạo mô hình `XGBRegressor` từ thư viện `xgboost`.
+- Thiết lập các siêu tham số cơ bản ban đầu:
+  ```python
+  from xgboost import XGBRegressor
 
-### BÀI TẬP 4: KIỂM TRA VÀ XỬ LÝ CHẤT LƯỢNG DỮ LIỆU (DATA QUALITY CLEANING)
-- **Mã nguồn:** `notebooks/bt4_data_quality.ipynb` hoặc `src/bt4_data_quality.py`
-- **Tệp xuất ra:** `outputs/figures/bai4_data_cleaning_before_after.png`, `outputs/tables/data_cleaning_summary.csv`, `data/processed/AirPassengers_cleaned.csv`
-- **Nội dung yêu cầu:**
-  1. Kiểm tra tính toàn vẹn của chuỗi dữ liệu gốc (số lượng missing, kiểm tra trùng lặp chỉ mục).
-  2. Tạo bản sao khuyết tật mô phỏng:
-     - Tạo ngẫu nhiên 10% giá trị bị thiếu (Missing NaN).
-     - Tiêm 3 giá trị ngoại lai đột biến (Outlier spikes nhân 3.5 lần giá trị gốc) tại các vị trí chỉ số `[25, 75, 110]`.
-  3. So sánh 2 phương pháp bù khuyết dữ liệu thiếu:
-     - Phương pháp Forward-fill (`ffill`).
-     - Phương pháp Nội suy theo thời gian (`interpolate(method='time')`).
-     - Đo sai số MAE và RMSE trên các điểm bị khuyết.
-  4. So sánh 3 phương pháp phát hiện ngoại lai:
-     - Rolling Z-Score (dựa trên Rolling Mean & Std).
-     - Rolling IQR (dựa trên phân vị $Q_1, Q_3$).
-     - Hampel Filter (dựa trên Rolling Median và Median Absolute Deviation - MAD).
-  5. Xây dựng pipeline hoàn chỉnh: Nội suy thời gian $\rightarrow$ Lọc Hampel Filter $\rightarrow$ Khôi phục chuỗi dữ liệu sạch. So sánh sai số toàn diện Trước và Sau khi làm sạch.
+  model = XGBRegressor(
+      n_estimators=1000,
+      learning_rate=0.01,
+      max_depth=5,
+      early_stopping_rounds=50,
+      objective='reg:squarederror',
+      random_state=42
+  )
+  model.fit(
+      X_train, y_train,
+      eval_set=[(X_train, y_train), (X_test, y_test)],
+      verbose=100
+  )
+  ```
+
+### Bước 6. Dự đoán và đánh giá chất lượng (Forecasting & Evaluation)
+- Dự báo trên tập kiểm thử: $\hat{y}_{\text{test}} = \operatorname{model.predict}(X_{\text{test}})$.
+- Tính toán các chỉ số sai số đánh giá:
+  - **MAE (Mean Absolute Error):**
+    $$\text{MAE} = \frac{1}{n} \sum_{t=1}^{n} |y_t - \hat{y}_t|$$
+  - **RMSE (Root Mean Squared Error):**
+    $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{t=1}^{n} (y_t - \hat{y}_t)^2}$$
+  - **MAPE (Mean Absolute Percentage Error):**
+    $$\text{MAPE} = \frac{1}{n} \sum_{t=1}^{n} \left| \frac{y_t - \hat{y}_t}{y_t} \right| \times 100\%$$
+  - **Hệ số xác định ($R^2$ Score):** Đánh giá tỷ lệ phương sai mà mô hình giải thích được.
+- Vẽ biểu đồ đối chứng trực quan giữa chuỗi thực tế ($y_{\text{test}}$) và chuỗi dự báo ($\hat{y}_{\text{test}}$) trên cùng một đồ thị theo thời gian.
+
+### Bước 7. Phân tích Feature Importance (Độ quan trọng của đặc trưng)
+- Trích xuất độ quan trọng của các độ trễ: `model.feature_importances_`.
+- Vẽ biểu đồ cột trực quan hóa thứ hạng quan trọng của các lag (`plot_importance`).
+- Phân tích và giải thích: **Lag nào có ảnh hưởng mạnh nhất đến giá trị dự báo?** (Ví dụ: Lag 1h trước, Lag 24h trước - chu kỳ 1 ngày, hoặc Lag 168h trước - chu kỳ 1 tuần).
 
 ---
 
-### BÀI TẬP 5: TRỰC QUAN HÓA CHUYÊN SÂU CHUỖI THỜI GIAN (ADVANCED EDA)
-- **Mã nguồn:** `notebooks/bt5_visualization.ipynb` hoặc `src/bt5_visualization.py`
-- **Tệp xuất ra:** `outputs/figures/bai5_1_rolling_statistics.png`, `bai5_2_seasonal_plot.png`, `bai5_3_seasonality_heatmap.png`, `outputs/tables/monthly_seasonal_summary.csv`
-- **Nội dung yêu cầu:**
-  1. Trực quan hóa Thống kê trượt (Rolling Statistics):
-     - Vẽ đường trung bình trượt 12 tháng (`Rolling Mean`, $w=12$).
-     - Vẽ dải biến thiên $\pm 2$ độ lệch chuẩn trượt (`Rolling Std`).
-     - Đánh giá hiện tượng biến thiên phương sai (Heteroskedasticity).
-  2. Trực quan hóa Mùa vụ theo tháng qua các năm (Monthly Seasonal Plot):
-     - Vẽ 12 đường cong đại diện cho 12 năm quan sát trên cùng một hệ trục tọa độ 12 tháng.
-     - Quan sát tính đồng dạng của các bước sóng và xác định tháng đỉnh hè, tháng đáy cuối năm.
-  3. Xây dựng Bản đồ nhiệt Mùa vụ (Seasonality Heatmap):
-     - Tái cấu trúc ma trận Pivot (Năm $\times$ Tháng, kích thước $12 \times 12$).
-     - Tô màu theo thang đo mật độ hành khách (`YlGnBu`), nhận diện "vùng nhiệt cao" và "vùng nhiệt thấp".
-  4. Trả lời 5 câu hỏi nghiệm thu chuẩn mực của đề bài.
+## 🚀 BÀI TẬP NÂNG CAO (ADVANCED TASKS)
+
+Sau khi hoàn thành 7 bước cơ bản, triển khai tiếp 4 nội dung nâng cao sau:
+
+### 1. Thêm Rolling Mean & Rolling Std (Rolling Window Features)
+- Tạo thêm các đặc trưng thống kê trượt để cung cấp mức nền xu hướng và mức độ biến động cục bộ:
+  - `rolling_mean_24`: Trung bình trượt 24 giờ.
+  - `rolling_std_24`: Độ lệch chuẩn trượt 24 giờ.
+  - `rolling_mean_168`: Trung bình trượt 1 tuần (168 giờ).
+- *Lưu ý kỹ thuật:* Luôn tính rolling trên các giá trị đã trễ (dùng `.shift(1).rolling(w)`) để tránh rò rỉ dữ liệu tại thời điểm dự báo $t$.
+
+### 2. Dự báo Đa bước (Multi-Step Ahead Forecasting)
+- Mở rộng bài toán từ dự báo 1 bước ($t+1$) sang dự báo nhiều bước trong tương lai ($t+1, t+2, \dots, t+24$):
+  - **Chiến lược Đệ quy (Recursive Strategy):** Lấy giá trị dự báo $\hat{y}_{t+1}$ làm đầu vào để dự báo tiếp $\hat{y}_{t+2}$.
+  - **Chiến lược Trực tiếp (Direct Strategy):** Huấn luyện $H$ mô hình độc lập, mỗi mô hình chuyên dự báo cho một bước trễ tương ứng $t+h$.
+  - **Chiến lược Đa đầu ra (Multi-Output Regressor):** Sử dụng mô hình hỗ trợ xuất vector nhiều giá trị tương lai cùng lúc.
+
+### 3. Tinh chỉnh Siêu tham số bằng `TimeSeriesSplit` (Hyperparameter Tuning)
+- Sử dụng phương pháp Cross-Validation đặc thù cho chuỗi thời gian: `TimeSeriesSplit` từ `sklearn.model_selection` (mở rộng cửa sổ huấn luyện Rolling / Expanding Window, không xáo trộn).
+- Kết hợp với `GridSearchCV` hoặc `RandomizedSearchCV` để tìm bộ siêu tham số tối ưu:
+  - `max_depth` (3, 5, 7, 9)
+  - `learning_rate` (0.01, 0.05, 0.1)
+  - `n_estimators` (300, 500, 1000)
+  - `subsample` và `colsample_bytree` (0.7, 0.8, 1.0)
+
+### 4. So sánh Thực nghiệm với Random Forest (Benchmark Comparison)
+- Huấn luyện song song mô hình `RandomForestRegressor` trên cùng tập đặc trưng $X$ và nhãn $y$.
+- Lập bảng so sánh đối chứng giữa **XGBoost** và **Random Forest**:
+  - Thời gian huấn luyện (Training Time).
+  - Tốc độ suy luận (Inference Speed).
+  - Độ chính xác sai số (MAE, RMSE, MAPE).
+  - Khả năng tổng quát hóa trên tập kiểm thử (Overfitting Assessment).
 
 ---
 
-### BÀI TẬP 6: BÁO CÁO KỸ THUẬT TỔNG KẾT (COMPREHENSIVE LAB REPORT)
-- **Tệp báo cáo:** `docs/bt6_report.md`
-- **Tệp Word nộp bài:** `docs/project_management/BAO_CAO_LAB2.docx`
-- **Nội dung yêu cầu:**
-  1. Tổng hợp toàn diện kết quả thực nghiệm từ Bài tập 1 đến Bài tập 5.
-  2. Bổ sung bảng biểu số liệu, công thức toán học minh chứng cho mọi kết luận.
-  3. Nhúng đầy đủ các hình ảnh biểu đồ chất lượng cao xuất ra từ thư mục `outputs/figures/`.
-  4. Đưa ra đánh giá chuyên sâu về tiềm năng áp dụng các mô hình dự báo tương lai (SARIMA, Holt-Winters, Prophet, XGBoost with Lag Features).
+## ❓ CÂU HỎI LÝ LUẬN CẦN TRẢ LỜI (THEORETICAL QUESTIONS)
+
+Trình bày câu trả lời chi tiết và lập luận khoa học cho 3 câu hỏi dưới đây:
+
+### Câu 1: So sánh XGBoost với Linear Regression trong bài toán dự báo chuỗi thời gian?
+- *Gợi ý trả lời:*
+  - Khả năng nắm bắt mối quan hệ phi tuyến tính phức tạp và tương tác bậc cao giữa các đặc trưng (XGBoost vượt trội nhờ cấu trúc cây quyết định phân nhánh).
+  - Độ nhạy với hiện tượng đa cộng tuyến (Multicollinearity) giữa các lag kề cận ($y_{t-1}, y_{t-2}$ tương quan rất cao, Linear Regression dễ bị phình to phương sai hệ số, trong khi XGBoost chọn đặc trưng tốt nhất tại mỗi nút chia).
+  - Khả năng ngoại suy xu hướng dài hạn (Linear Regression ngoại suy tuyến tính tốt ra ngoài miền giá trị, còn Decision Tree/XGBoost bị giới hạn trong khoảng $[y_{\min}, y_{\max}]$ của tập huấn luyện nếu không khử trend trước).
+
+### Câu 2: Điều gì xảy ra khi tăng số lượng độ trễ (lags $p$)?
+- *Gợi ý trả lời:*
+  - **Lợi ích:** Mô hình tiếp nhận thêm thông tin quá khứ ở các chu kỳ xa hơn (ví dụ lag 24h, 168h), giúp nhận diện đầy đủ các nhịp tuần hoàn ngày và tuần.
+  - **Rủi ro:** 
+    - Hiện tượng quá khớp (Overfitting): Thêm quá nhiều lag không cần thiết tạo ra nhiễu thông tin.
+    - Lời nguyền số chiều (Curse of Dimensionality) và tăng thời gian tính toán.
+    - Mất mát dữ liệu đầu chuỗi: Cần bỏ $p$ dòng đầu tiên do chứa NaN khi tạo `.shift(p)`.
+
+### Câu 3: Khi nào mô hình XGBoost phù hợp hơn mô hình truyền thống ARIMA/SARIMA?
+- *Gợi ý trả lời:*
+  - **Nên dùng XGBoost khi:**
+    - Chuỗi thời gian có mối quan hệ phi tuyến tính mạnh, cấu trúc mùa vụ phức tạp nhiều chu kỳ đan xen (Intra-day, Weekly, Annual Seasonality).
+    - Có nhiều biến ngoại sinh (Exogenous variables): Nhiệt độ, độ ẩm, ngày lễ, giá điện, biến lịch (Hour, DayOfWeek, Month).
+    - Tập dữ liệu có kích thước lớn (hàng chục/hàng trăm nghìn quan sát như dữ liệu đo từng giờ của PJM).
+  - **Nên dùng ARIMA khi:**
+    - Chuỗi thời gian đơn biến tuyến tính, kích thước mẫu nhỏ hoặc vừa.
+    - Cần mô hình có cơ sở thống kê suy diễn chặt chẽ, dễ diễn giải khoảng tin cậy giải tích, hoặc khi cần ngoại suy xu hướng tuyến tính thuần túy.
 
 ---
 
-## TIÊU CHÍ ĐÁNH GIÁ NGHIỆM THU (RUBRICS)
+## 📊 THÔNG TIN BỘ DỮ LIỆU (DATASET SPECIFICATION)
 
-| Hạng mục | Trọng số | Tiêu chí đạt điểm tối đa |
-| :--- | :---: | :--- |
-| **Cấu trúc thư mục chuẩn hóa** | 15% | Đầy đủ thư mục `data/`, `docs/`, `notebooks/`, `outputs/`, `src/` theo đúng thiết kế khoa học. |
-| **Chất lượng mã nguồn** | 30% | Mã nguồn viết module hóa, có chú thích giải thích rõ ràng, chạy thông suốt không lỗi, tương thích cả CLI và Jupyter Notebooks. |
-| **Phân tích học thuật & Trực quan** | 30% | Biểu đồ sắc nét, phông chữ hiển thị chuẩn tiếng Việt, đồ thị đầy đủ nhãn trục, chú giải và tiêu đề. Phân tích sâu sắc, lập luận logic. |
-| **Báo cáo tổng hợp** | 25% | Báo cáo Markdown & Word đầy đủ các phần, công thức toán học rõ ràng, bảng kết quả định lượng chuẩn xác và liên kết chéo thông minh. |
+- **Tên bộ dữ liệu:** **Hourly Energy Consumption** (PJM Interconnection LLC)
+- **Mô tả:** Bộ dữ liệu ghi nhận mức tiêu thụ điện năng hàng giờ trong hơn 10 năm liên tục từ PJM Interconnection (tổ chức truyền tải điện khu vực phục vụ nhiều bang tại Hoa Kỳ), đơn vị đo lường tính bằng **Megawatt (MW)**.
+- **Tệp dữ liệu thực nghiệm chỉ định:** `AEP_hourly.csv` (American Electric Power).
+- **Đường dẫn tải trực tiếp:** [https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)
+- **Vị trí lưu trữ trong dự án:**
+  ```text
+  time-series-lab2/data/raw/AEP_hourly.csv
+  ```
+
+---
+
+## 📋 CẤU TRÚC BÀI NỘP VÀ TIÊU CHÍ NGHIỆM THU
+
+1. **Thư mục dự án:** [`time-series-lab2/`](../)
+2. **Notebook thực thi:** `notebooks/bt_xgboost_energy.ipynb` (hoặc các notebook chia nhỏ theo từng bước).
+3. **Mã nguồn script CLI:** `src/xgboost_forecasting.py`.
+4. **Hình ảnh trực quan:** Lưu trong `outputs/figures/` (Actual vs Predicted, Feature Importance, Multi-step Forecast, Rolling Stats).
+5. **Bảng kết quả:** Lưu trong `outputs/tables/` (Bảng so sánh MAE, RMSE, MAPE giữa XGBoost, Random Forest, Linear Regression).
+6. **Báo cáo phân tích:** Trả lời đầy đủ 3 câu hỏi lý luận và tổng kết bài học kinh nghiệm.
