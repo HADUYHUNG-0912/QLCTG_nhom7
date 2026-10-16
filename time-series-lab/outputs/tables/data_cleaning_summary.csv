@@ -1,0 +1,8 @@
+﻿Task_Component,Method,MAE,RMSE,Accuracy_or_Evaluation
+Missing Values Imputation,Forward-fill (ffill),23.31,28.59,"Chậm pha, trễ so với xu hướng tăng"
+Missing Values Imputation,Time-based Interpolation,16.43,18.83,Tốt nhất cho dữ liệu thiếu (bám độ dốc)
+Outlier Detection,Rolling Z-Score (Mean/Std),,,Phát hiện đúng 3/3 spikes
+Outlier Detection,Rolling IQR (Q1-Q3),,,Báo nhầm đỉnh hè tự nhiên (4/3)
+Outlier Detection,Hampel Filter (Median/MAD),,,"Tối ưu tuyệt đối 3/3, 0 báo nhầm"
+End-to-End Pipeline Recovery,"Sau nội suy, trước Hampel",15.04,99.18,Lỗi lớn do spike 3.5x kéo lệch
+End-to-End Pipeline Recovery,Sau nội suy và Hampel Filter,1.64,5.9,"RMSE giảm ~17 lần, phục hồi chuẩn xác"
