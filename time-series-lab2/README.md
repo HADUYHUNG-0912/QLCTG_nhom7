@@ -1,90 +1,142 @@
-# TIME SERIES LAB 3 - DỰ ĐOÁN CHUỖI THỜI GIAN BẰNG MACHINE LEARNING MODELS
-## BÀI THỰC HÀNH: DỰ BÁO TIÊU THỤ NĂNG LƯỢNG HÀNG GIỜ BẰNG XGBOOST REGRESSOR
+# TIME SERIES LAB 2 - QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG)
+## BÀI THỰC HÀNH SỐ 3: DỰ ĐOÁN CHUỖI THỜI GIAN SỬ DỤNG MACHINE LEARNING MODELS (XGBOOST REGRESSOR)
 
-> **Học phần:** Quản lý & Khai phá Chuỗi Thời gian (QLCTG)  
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
 > **Giảng viên hướng dẫn:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
-> **Nhóm thực hiện:** Nhóm 7 (`QLCTG_nhom7`) - 6 thành viên  
-> **Kho lưu trữ GitHub:** [HADUYHUNG-0912/QLCTG_nhom7](https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git)  
-> **Kế hoạch phân công chi tiết:** [docs/KE_HOACH_PHAN_CONG_NHOM7.md](docs/KE_HOACH_PHAN_CONG_NHOM7.md)  
-> **Đề bài chi tiết:** [DE_BAI_LAB.md](DE_BAI_LAB.md)
+> **Nhóm thực hiện:** Nhóm 7 (6 thành viên)  
+> **Bộ dữ liệu thực nghiệm:** [Hourly Energy Consumption (PJM) - AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)  
+> **GitHub Repository:** [https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git](https://github.com/HADUYHUNG-0912/QLCTG_nhom7.git)
 
 ---
 
-### 1. MA TRẬN PHÂN CÔNG CÔNG VIỆC 6 THÀNH VIÊN
+## 1. PHÂN CÔNG KHỐI LƯỢNG CÔNG VIỆC CHO 6 THÀNH VIÊN (WORKLOAD MATRIX)
 
-| Mã CV | Hạng mục công việc | Mô tả & Trách nhiệm kỹ thuật | File mã nguồn phụ trách | Người phụ trách & Nhánh |
-| :---: | :--- | :--- | :--- | :---: |
-| **CV01** | **Tiền xử lý dữ liệu & Sinh Lag Features (Bước 1, 2, 3)** | Xử lý `AEP_hourly.csv`, tạo 24 Lags, phân chia Train/Test 80/20 theo thời gian (No Shuffle), lưu `data/processed/`. | [`src/cv01_data_and_lags.py`](src/cv01_data_and_lags.py) | **Hà Duy Hưng (Lead)**<br>`main` |
-| **CV02** | **Huấn luyện mô hình cơ sở XGBoost (Bước 4, 5)** | Khởi tạo `XGBRegressor`, áp dụng early stopping 50 rounds, vẽ learning loss curve, lưu checkpoint `outputs/models/`. | [`src/cv02_xgboost_train.py`](src/cv02_xgboost_train.py) | **Ngọc Trâm**<br>`feat/cv02-xgb-train` |
-| **CV03** | **Đánh giá chỉ số & Feature Importance (Bước 6, 7)** | Tính toán MAE, RMSE, MAPE, $R^2$; vẽ Actual vs Predicted và biểu đồ độ quan trọng đặc trưng (Top Lags). | [`src/cv03_evaluation_importance.py`](src/cv03_evaluation_importance.py) | **Thanh Phương**<br>`feat/cv03-evaluation` |
-| **CV04** | **Nâng cao 1 & 2: Rolling Features & Multi-Step** | Tạo Rolling Mean/Std (24h, 168h) bằng `.shift(1)`; dự báo đệ quy đa bước 24h và phân tích sai số tích lũy. | [`src/cv04_rolling_and_multistep.py`](src/cv04_rolling_and_multistep.py) | **Hoàng Hiệp**<br>`feat/cv04-rolling-multistep` |
-| **CV05** | **Nâng cao 3 & 4: Tuning TimeSeriesSplit & Random Forest** | Tinh chỉnh siêu tham số bằng `TimeSeriesSplit` (CV 3 folds); huấn luyện benchmark đối chứng với `RandomForestRegressor`. | [`src/cv05_tuning_random_forest.py`](src/cv05_tuning_random_forest.py) | **Hoàng**<br>`feat/cv05-tuning-benchmark` |
-| **CV06** | **Lý luận chuyên sâu & Báo cáo kỹ thuật tổng hợp** | Trả lời 3 câu hỏi lý luận chuyên sâu; tổng hợp Dashboard đối chứng 4 mô hình; xuất Báo cáo kỹ thuật Markdown. | [`src/cv06_report_synthesis.py`](src/cv06_report_synthesis.py) | **Bùi Trần Ngọc Khải**<br>`feat/cv06-report-theory` |
+Dự án được module hóa thành 6 script độc lập tương ứng với 6 thành viên (CV01 đến CV06), đảm bảo luồng dữ liệu thông suốt và tương thích tuyệt đối khi các thành viên sử dụng AI coding agents.
+
+| Mã CV | Thành viên phụ trách | Nhánh Git gợi ý | Tệp thực thi | Đầu vào (Input Contract) | Đầu ra (Output Contract) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CV01** | **Thành viên 1** (Lead) | `feature/cv01-data-prep` | [`src/cv01_data_prep_and_lags.py`](src/cv01_data_prep_and_lags.py) | `data/raw/AEP_hourly.csv` | `data/processed/AEP_features.csv`<br>`outputs/figures/eda_aep_hourly.png`<br>`outputs/tables/data_summary.csv` |
+| **CV02** | **Thành viên 2** | `feature/cv02-xgboost-training` | [`src/cv02_xgboost_train.py`](src/cv02_xgboost_train.py) | `data/processed/AEP_features.csv` | `outputs/models/xgboost_baseline.json`<br>`outputs/tables/train_test_split_info.csv`<br>`outputs/figures/training_loss_curve.png` |
+| **CV03** | **Thành viên 3** | `feature/cv03-forecast-eval-importance` | [`src/cv03_forecast_eval_importance.py`](src/cv03_forecast_eval_importance.py) | `data/processed/AEP_features.csv`<br>`outputs/models/xgboost_baseline.json` | `outputs/tables/baseline_metrics.csv`<br>`outputs/figures/actual_vs_predicted_xgboost.png`<br>`outputs/figures/feature_importance_xgboost.png` |
+| **CV04** | **Thành viên 4** | `feature/cv04-rolling-and-multistep` | [`src/cv04_rolling_and_multistep.py`](src/cv04_rolling_and_multistep.py) | `data/processed/AEP_features.csv` | `data/processed/AEP_features_rolling.csv`<br>`outputs/figures/rolling_features_plot.png`<br>`outputs/figures/multistep_forecast_24h.png`<br>`outputs/tables/multistep_metrics.csv` |
+| **CV05** | **Thành viên 5** | `feature/cv05-tuning-random-forest` | [`src/cv05_tuning_random_forest.py`](src/cv05_tuning_random_forest.py) | `data/processed/AEP_features.csv` | `outputs/models/rf_benchmark.joblib`<br>`outputs/tables/tuning_best_params.csv`<br>`outputs/tables/xgboost_vs_rf_comparison.csv`<br>`outputs/figures/model_comparison_bar.png` |
+| **CV06** | **Thành viên 6** | `feature/cv06-report-synthesis` | [`src/cv06_report_synthesis.py`](src/cv06_report_synthesis.py) | Tất cả bảng biểu trong `outputs/tables/`<br>Tất cả hình ảnh trong `outputs/figures/` | `docs/LAB3_FINAL_REPORT.md`<br>`outputs/tables/summary_all_experiments.csv` |
 
 ---
 
-### 2. CẤU TRÚC THƯ MỤC DỰ ÁN
+## 2. NGUYÊN TẮC ĐỒNG BỘ DÀNH CHO THÀNH VIÊN VÀ AI AGENTS
+
+Mọi AI coding agent (Antigravity, Cursor, GitHub Copilot, ChatGPT, Claude...) khi tham gia hỗ trợ các thành viên viết code phải tuân thủ nghiêm ngặt các quy chuẩn sau:
+
+1. **Chuẩn hóa đường dẫn tương đối (Path Management):**
+   ```python
+   from pathlib import Path
+   BASE_DIR = Path(__file__).resolve().parent
+   PROJECT_ROOT = BASE_DIR.parent
+   DATA_RAW = PROJECT_ROOT / "data" / "raw" / "AEP_hourly.csv"
+   DATA_PROCESSED = PROJECT_ROOT / "data" / "processed"
+   MODELS_DIR = PROJECT_ROOT / "outputs" / "models"
+   FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures"
+   TABLES_DIR = PROJECT_ROOT / "outputs" / "tables"
+   ```
+2. **Quy tắc Chống rò rỉ dữ liệu (Anti-Lookahead Bias / Anti-Data Leakage):**
+   - **Tuyệt đối KHÔNG dùng `shuffle=True`** khi chia tập dữ liệu huấn luyện/kiểm thử. Luôn cắt theo trình tự thời gian đơn điệu ($80\%$ train đầu, $20\%$ test sau).
+   - Khi tạo đặc trưng thống kê trượt (Rolling Mean, Rolling Std), luôn tính trên chuỗi đã trễ `.shift(1).rolling(w)`.
+   - Khi Cross-Validation, **bắt buộc dùng `TimeSeriesSplit(n_splits=5)`**, không dùng K-Fold ngẫu nhiên.
+3. **Môi trường Console Windows & Tính tái lập (Reproducibility):**
+   - Đặt `sys.stdout.reconfigure(encoding="utf-8")` ở đầu mỗi file.
+   - Luôn cố định `random_state=42` cho tất cả các mô hình học máy.
+4. **Hợp đồng Đầu vào/Đầu ra (I/O Contracts):**
+   - Mỗi thành viên xuất dữ liệu đúng định dạng đã thỏa thuận trong bảng trên để thành viên tiếp theo có thể nạp vào ngay lập tức mà không phát sinh lỗi lệch cột hay thiếu tệp.
+
+---
+
+## 3. CẤU TRÚC THƯ MỤC DỰ ÁN (PROJECT DIRECTORY TREE)
 
 ```text
 time-series-lab2/
-├── DE_BAI_LAB.md                      # Đề bài thực hành chính thức của Lab
-├── README.md                          # Tài liệu giới thiệu và hướng dẫn thực thi
-├── requirements.txt                   # Danh sách gói thư viện Python
+├── DE_BAI_LAB.md               # Bản đặc tả đề bài và hướng dẫn đầy đủ
+├── README.md                   # Tài liệu phân công và điều phối dự án
+├── requirements.txt            # Thư viện phụ thuộc (xgboost, scikit-learn, pandas,...)
 │
 ├── data/
-│   ├── raw/                           # Dữ liệu gốc: AEP_hourly.csv (121,273 dòng)
-│   └── processed/                     # Dữ liệu train.csv, test.csv sau khi tạo lag
+│   ├── raw/
+│   │   └── AEP_hourly.csv      # Dữ liệu tiêu thụ điện năng gốc (American Electric Power)
+│   └── processed/
+│       ├── AEP_features.csv    # Dữ liệu trích xuất Lag & Calendar Features (CV01)
+│       └── AEP_features_rolling.csv # Dữ liệu bổ sung Rolling Features (CV04)
 │
 ├── docs/
-│   ├── KE_HOACH_PHAN_CONG_NHOM7.md   # Bảng phân công chi tiết 6 thành viên Nhóm 7
-│   ├── BAO_CAO_LAB3_NHOM7.md          # Báo cáo kỹ thuật tổng kết toàn diện nộp Giảng viên
-│   ├── lab_description.md             # Đề bài sao lưu
-│   └── lab3_description.md            # Đề bài sao lưu
+│   ├── lab_description.md      # Mô tả tóm tắt nội dung lab
+│   ├── lab3_description.md     # Bản sao đồng bộ đề bài
+│   └── LAB3_FINAL_REPORT.md    # Báo cáo tổng hợp khoa học và trả lời 3 câu hỏi (CV06)
+│
+├── notebooks/                  # Notebooks Jupyter tương tác thực nghiệm
 │
 ├── outputs/
-│   ├── figures/                       # Trọn bộ đồ thị PNG xuất bản (DPI 150)
-│   ├── models/                        # Checkpoint mô hình XGBoost (xgboost_baseline.json)
-│   └── tables/                        # Bảng số liệu thống kê và đối chứng định lượng (.csv)
+│   ├── figures/                # Đồ thị trực quan hóa xuất ra (.png)
+│   │   ├── eda_aep_hourly.png
+│   │   ├── training_loss_curve.png
+│   │   ├── actual_vs_predicted_xgboost.png
+│   │   ├── feature_importance_xgboost.png
+│   │   ├── rolling_features_plot.png
+│   │   ├── multistep_forecast_24h.png
+│   │   └── model_comparison_bar.png
+│   ├── models/                 # Trọng số mô hình đã lưu
+│   │   ├── xgboost_baseline.json
+│   │   └── rf_benchmark.joblib
+│   └── tables/                 # Bảng số liệu và metrics xuất ra (.csv)
+│       ├── data_summary.csv
+│       ├── train_test_split_info.csv
+│       ├── baseline_metrics.csv
+│       ├── feature_importance_ranking.csv
+│       ├── multistep_metrics.csv
+│       ├── tuning_best_params.csv
+│       ├── xgboost_vs_rf_comparison.csv
+│       └── summary_all_experiments.csv
 │
-└── src/                               # 6 module mã nguồn chuẩn hóa của 6 thành viên
-    ├── cv01_data_and_lags.py          # CV01: Hà Duy Hưng (Lead)
-    ├── cv02_xgboost_train.py          # CV02: Ngọc Trâm
-    ├── cv03_evaluation_importance.py  # CV03: Thanh Phương
-    ├── cv04_rolling_and_multistep.py  # CV04: Hoàng Hiệp
-    ├── cv05_tuning_random_forest.py   # CV05: Hoàng
-    └── cv06_report_synthesis.py       # CV06: Bùi Trần Ngọc Khải
+└── src/                        # Mã nguồn 6 script thực thi của 6 thành viên
+    ├── cv01_data_prep_and_lags.py
+    ├── cv02_xgboost_train.py
+    ├── cv03_forecast_eval_importance.py
+    ├── cv04_rolling_and_multistep.py
+    ├── cv05_tuning_random_forest.py
+    └── cv06_report_synthesis.py
 ```
 
 ---
 
-### 3. HƯỚNG DẪN CÀI ĐẶT & THỰC THI TOÀN HỆ THỐNG
+## 4. HƯỚNG DẪN CÀI ĐẶT & THỨ TỰ THỰC THI (EXECUTION WORKFLOW)
 
-1. **Cài đặt thư viện phụ thuộc:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 4.1. Cài đặt môi trường
+Khởi chạy terminal tại thư mục `time-series-lab2/`:
 
-2. **Chạy tuần tự từng nhiệm vụ (mỗi thành viên kiểm thử độc lập):**
-   ```bash
-   # Bước 1 (CV01 - Hà Duy Hưng): Tiền xử lý dữ liệu & sinh Lag 1-24
-   python src/cv01_data_and_lags.py
+```bash
+cd time-series-lab2
 
-   # Bước 2 (CV02 - Ngọc Trâm): Huấn luyện XGBoost cơ sở & Early Stopping
-   python src/cv02_xgboost_train.py
+# Cài đặt các thư viện cần thiết
+pip install -r requirements.txt
+```
 
-   # Bước 3 (CV03 - Thanh Phương): Đánh giá MAE/RMSE/MAPE & Feature Importance
-   python src/cv03_evaluation_importance.py
+### 4.2. Luồng thực thi liên tục qua CLI
+Thực thi các script theo thứ tự logic từ CV01 đến CV06:
 
-   # Bước 4 (CV04 - Hoàng Hiệp): Rolling Features & Dự báo Đa bước 24h
-   python src/cv04_rolling_and_multistep.py
+```bash
+# 1. Thành viên 1: Làm sạch dữ liệu và tạo Lag Features
+python src/cv01_data_prep_and_lags.py
 
-   # Bước 5 (CV05 - Hoàng): Tinh chỉnh TimeSeriesSplit & So sánh Random Forest
-   python src/cv05_tuning_random_forest.py
+# 2. Thành viên 2: Chia Train/Test theo thời gian và huấn luyện XGBoost baseline
+python src/cv02_xgboost_train.py
 
-   # Bước 6 (CV06 - Bùi Trần Ngọc Khải): Tổng hợp Dashboard & Cập nhật Báo cáo
-   python src/cv06_report_synthesis.py
-   ```
+# 3. Thành viên 3: Dự báo tập test, tính MAE/RMSE/MAPE/R2 và phân tích Feature Importance
+python src/cv03_forecast_eval_importance.py
 
-3. **Chỉ thị sử dụng AI Agent (Cursor, Antigravity, Copilot):**
-   Mỗi tệp `.py` trong `src/` đều tích hợp sẵn khối cấu hình `AI_AGENT_INSTRUCTIONS` ở phần đầu. Thành viên chỉ cần mở file bằng công cụ AI và yêu cầu thực hiện / tinh chỉnh, AI Agent sẽ đọc các chỉ thị và tuân thủ các ràng buộc (không shuffle, shift 1 trước khi tính rolling, xuất đúng định dạng file).
+# 4. Thành viên 4: Triển khai Rolling Mean/Std và thực nghiệm Dự báo Đa bước (Multi-step 24h)
+python src/cv04_rolling_and_multistep.py
+
+# 5. Thành viên 5: Tinh chỉnh TimeSeriesSplit và huấn luyện Random Forest đối sánh
+python src/cv05_tuning_random_forest.py
+
+# 6. Thành viên 6: Kiểm toán toàn diện, tổng hợp bảng số liệu và sinh báo cáo Markdown
+python src/cv06_report_synthesis.py
+```
