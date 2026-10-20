@@ -1,0 +1,15 @@
+﻿Chỉ số,Giá trị
+Tên tệp dữ liệu gốc,AEP_hourly.csv
+Mốc thời gian bắt đầu,2004-10-01 01:00:00
+Mốc thời gian kết thúc,2018-08-03 00:00:00
+Tổng số quan sát thô,"121,273"
+Số bản ghi trùng lặp (DST),4
+Số quan sát sau làm sạch,"121,269"
+Số lượng giá trị khuyết thiếu (NaN),0
+Mức tiêu thụ trung bình (Mean MW),15499.65
+Độ lệch chuẩn (Std MW),2591.32
+Mức tiêu thụ nhỏ nhất (Min MW),9581.00
+Phân vị 25% (Q1 MW),13630.00
+Trung vị 50% (Median MW),15310.00
+Phân vị 75% (Q3 MW),17200.00
+Mức tiêu thụ lớn nhất (Max MW),25695.00
