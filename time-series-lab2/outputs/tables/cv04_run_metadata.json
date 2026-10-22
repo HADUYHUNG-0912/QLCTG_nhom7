@@ -1,0 +1,15 @@
+{
+  "train_rows": 96736,
+  "test_rows": 24221,
+  "test_start": "2015-10-28 17:00:00",
+  "hourly_rows": 121128,
+  "forward_filled_hours": 27,
+  "origins": 1006,
+  "first_forecast": "2015-10-28 17:00:00",
+  "last_forecast": "2018-08-02 16:00:00",
+  "origin_stride_hours": 24,
+  "validation": "last 10% of training; refit full training at best tree count",
+  "target_imputation": "causal forward fill; imputed targets excluded from scoring",
+  "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]",
+  "xgboost": "2.1.4"
+}
