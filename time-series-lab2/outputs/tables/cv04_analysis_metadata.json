@@ -1,0 +1,98 @@
+{
+  "train_load_q25": 13825.0,
+  "train_load_q75": 17396.0,
+  "origin_hours": [
+    16
+  ],
+  "horizon_to_target_hour": {
+    "1": [
+      17
+    ],
+    "2": [
+      18
+    ],
+    "3": [
+      19
+    ],
+    "4": [
+      20
+    ],
+    "5": [
+      21
+    ],
+    "6": [
+      22
+    ],
+    "7": [
+      23
+    ],
+    "8": [
+      0
+    ],
+    "9": [
+      1
+    ],
+    "10": [
+      2
+    ],
+    "11": [
+      3
+    ],
+    "12": [
+      4
+    ],
+    "13": [
+      5
+    ],
+    "14": [
+      6
+    ],
+    "15": [
+      7
+    ],
+    "16": [
+      8
+    ],
+    "17": [
+      9
+    ],
+    "18": [
+      10
+    ],
+    "19": [
+      11
+    ],
+    "20": [
+      12
+    ],
+    "21": [
+      13
+    ],
+    "22": [
+      14
+    ],
+    "23": [
+      15
+    ],
+    "24": [
+      16
+    ]
+  },
+  "residual_definition": "predicted - actual",
+  "daily_mae_lag1_autocorrelation": {
+    "Direct": 0.2922241688752939,
+    "Recursive": 0.3179394445572756,
+    "SeasonalNaive168": 0.6703034303148196,
+    "SeasonalNaive24": 0.23781001244014213
+  },
+  "bootstrap_seed": 42,
+  "bootstrap_repetitions": 2000,
+  "rows_per_strategy": 24144,
+  "origins": 1006,
+  "limitations": [
+    "one chronological holdout",
+    "fixed origin hour confounds horizon and target hour",
+    "no model retraining uncertainty in bootstrap",
+    "no weather or holiday variables"
+  ]
+}
