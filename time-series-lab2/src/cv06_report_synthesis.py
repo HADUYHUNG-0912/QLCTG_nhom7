@@ -83,93 +83,215 @@ EXPECTED_FIGURES = [
     "cv04_multistep_forecast.png",
     "cv05_benchmark_comparison.png"
 ]
+def step2_consolidate_comparison_table() -> pd.DataFrame:
+    """Hợp nhất các bảng kết quả thực nghiệm hiện có."""
+    print("[CV06 - BƯỚC 2] Hợp nhất bảng số liệu...")
 
+    TABLES_DIR.mkdir(parents=True, exist_ok=True)
+    final_table_path = TABLES_DIR / "final_model_comparison.csv"
+
+    input_files = [
+        "cv03_evaluation_metrics.csv",
+        "cv04_multistep_metrics.csv",
+        "cv05_benchmark_summary.csv",
+    ]
+
+    frames = []
+
+    for filename in input_files:
+        path = TABLES_DIR / filename
+
+        if not path.exists():
+            print(f"  [THIẾU] {filename}")
+            continue
+
+        try:
+            df = pd.read_csv(path)
+            if df.empty:
+                print(f"  [CẢNH BÁO] {filename} không có dữ liệu.")
+                continue
+
+            df.insert(0, "source_file", filename)
+            frames.append(df)
+            print(f"  [OK] Đã đọc {filename}: {len(df)} dòng")
+
+        except (OSError, pd.errors.ParserError, UnicodeDecodeError) as exc:
+            print(f"  [LỖI] Không đọc được {filename}: {exc}")
+
+    if frames:
+        df_final = pd.concat(frames, ignore_index=True, sort=False)
+    else:
+        df_final = pd.DataFrame(
+            columns=["source_file", "status", "message"]
+        )
+        df_final.loc[0] = [
+            "",
+            "incomplete",
+            "Chưa có bảng kết quả CV03-CV05 để tổng hợp."
+        ]
+
+    df_final.to_csv(final_table_path, index=False, encoding="utf-8-sig")
+    print(f"[OK] Đã xuất bảng tổng hợp: {final_table_path}")
+
+    return df_final
 
 # ---------------------------------------------------------------------------------
-# 2. KIỂM TOÁN TIẾN ĐỘ THỰC HIỆN CỦA CÁC THÀNH VIÊN
+# 3.5. KIỂM TOÁN CÁC ĐẦU RA CỦA NHÓM
 # ---------------------------------------------------------------------------------
 def step1_audit_team_deliverables() -> Dict[str, List[str]]:
-    """
-    [TODO - BÙI TRẦN NGỌC KHẢI / AI AGENT TRIỂN KHAI]:
-    - Quét thư mục outputs/tables/ và outputs/figures/.
-    - Kiểm tra các bảng và đồ thị mà các thành viên CV01..CV05 đã tạo ra.
-    """
-    print("[CV06 - BƯỚC 1] Đang kiểm toán tiến độ hoàn thành các đầu ra của nhóm...")
-    found_tables = [t for t in EXPECTED_TABLES if (TABLES_DIR / t).exists()]
-    missing_tables = [t for t in EXPECTED_TABLES if not (TABLES_DIR / t).exists()]
-    
+    """Kiểm tra sự tồn tại của các bảng và biểu đồ CV01-CV05."""
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    found_tables = [f for f in EXPECTED_TABLES if (TABLES_DIR / f).exists()]
+    missing_tables = [f for f in EXPECTED_TABLES if not (TABLES_DIR / f).exists()]
     found_figs = [f for f in EXPECTED_FIGURES if (FIGURES_DIR / f).exists()]
     missing_figs = [f for f in EXPECTED_FIGURES if not (FIGURES_DIR / f).exists()]
-    
-    print(f" -> Đã có {len(found_tables)}/{len(EXPECTED_TABLES)} bảng số liệu.")
-    print(f" -> Đã có {len(found_figs)}/{len(EXPECTED_FIGURES)} biểu đồ trực quan.")
-    
+
+    print(f"[CV06] Bảng có sẵn: {len(found_tables)}/{len(EXPECTED_TABLES)}")
+    print(f"[CV06] Biểu đồ có sẵn: {len(found_figs)}/{len(EXPECTED_FIGURES)}")
+
     return {
         "found_tables": found_tables,
         "missing_tables": missing_tables,
         "found_figs": found_figs,
-        "missing_figs": missing_figs
+        "missing_figs": missing_figs,
     }
 
 
 # ---------------------------------------------------------------------------------
-# 3. HỢP NHẤT TOÀN BỘ CHỈ SỐ VÀO BẢNG FINAL COMPARISON
+# 4. TẠO BÁO CÁO MARKDOWN
 # ---------------------------------------------------------------------------------
-def step2_consolidate_comparison_table() -> pd.DataFrame:
-    """
-    [TODO - BÙI TRẦN NGỌC KHẢI / AI AGENT TRIỂN KHAI]:
-    - Hợp nhất cv03_evaluation_metrics.csv và cv05_benchmark_summary.csv.
-    - Xuất bảng tổng hợp cuối cùng outputs/tables/final_model_comparison.csv.
-    """
-    print("[CV06 - BƯỚC 2] Hợp nhất bảng số liệu so sánh toàn diện...")
-    final_table_path = TABLES_DIR / "final_model_comparison.csv"
-    # TODO: Hợp nhất bảng dữ liệu
-    df_final = pd.DataFrame()
-    return df_final
+def step3_compile_final_report(
+    audit_info: Dict[str, List[str]],
+    report_path: Path,
+    df_final: pd.DataFrame,
+) -> Path:
+    """Xuất báo cáo lý thuyết và trạng thái pipeline."""
+    report_path.parent.mkdir(parents=True, exist_ok=True)
 
+    table_markdown = (
+        df_final.to_markdown(index=False)
+        if not df_final.empty
+        else "_Chưa có dữ liệu tổng hợp._"
+    )
 
-# ---------------------------------------------------------------------------------
-# 4. SOẠN THẢO BÁO CÁO KHOA HỌC VÀ TRẢ LỜI 3 CÂU HỎI LÝ LUẬN
-# ---------------------------------------------------------------------------------
-def step3_compile_final_report(audit_info: Dict[str, List[str]], report_path: Path) -> Path:
-    """
-    [TODO - BÙI TRẦN NGỌC KHẢI / AI AGENT TRIỂN KHAI]:
-    - Biên soạn báo cáo hoàn chỉnh theo cấu trúc:
-        1. Giới thiệu bài toán & Mục tiêu.
-        2. Mô tả dữ liệu & Tiền xử lý (CV01 - Hà Duy Hưng).
-        3. Huấn luyện mô hình XGBoost cơ sở (CV02 - Ngọc Trâm).
-        4. Đánh giá sai số & Feature Importance (CV03 - Thanh Phương).
-        5. Kết quả mở rộng: Rolling Features & Dự báo Đa bước (CV04 - Hoàng Hiệp).
-        6. Kết quả mở rộng: Tinh chỉnh TimeSeriesSplit & Đối sánh Random Forest (CV05 - Hoàng).
-        7. Trả lời chi tiết 3 câu hỏi lý luận (XGBoost vs LR, Số Lags, XGBoost vs ARIMA).
-        8. Kết luận và Đánh giá tiềm năng thực tế.
-    - Lưu báo cáo ra file docs/BAO_CAO_LAB3_NHOM7.md.
-    """
-    print(f"[CV06 - BƯỚC 3] Soạn thảo báo cáo kỹ thuật tại: {report_path}")
-    # TODO: Ghi báo cáo Markdown hoàn chỉnh
+    report = f"""# BÁO CÁO TỔNG KẾT LAB 3 – NHÓM 7
+
+## 1. Mục tiêu
+CV06 kiểm toán đầu ra CV01-CV05, tổng hợp các bảng kết quả và xây dựng báo cáo kỹ thuật cho bài toán dự báo chuỗi thời gian bằng Machine Learning và XGBoost.
+
+## 2. Kiểm toán pipeline
+
+### 2.1. Bảng dữ liệu
+- Đã tìm thấy: {len(audit_info['found_tables'])}/{len(EXPECTED_TABLES)}
+- Thiếu: {', '.join(audit_info['missing_tables']) if audit_info['missing_tables'] else 'Không'}
+
+### 2.2. Biểu đồ
+- Đã tìm thấy: {len(audit_info['found_figs'])}/{len(EXPECTED_FIGURES)}
+- Thiếu: {', '.join(audit_info['missing_figs']) if audit_info['missing_figs'] else 'Không'}
+
+Các tệp được đánh dấu thiếu cần được tạo từ công đoạn phụ trách tương ứng. Không suy diễn kết quả khi chưa có dữ liệu thực nghiệm.
+
+## 3. Câu hỏi lý thuyết
+
+### 3.1. XGBoost và Linear Regression
+
+Linear Regression mô hình hóa mối quan hệ tuyến tính giữa các biến đầu vào và biến mục tiêu. Khi sử dụng các giá trị trễ (lags), mô hình dễ diễn giải và thường có chi phí tính toán thấp. Tuy nhiên, mô hình không tự biểu diễn tốt các quan hệ phi tuyến nếu không bổ sung đặc trưng phù hợp.
+
+XGBoost kết hợp nhiều cây quyết định theo phương pháp boosting, có thể học các quan hệ phi tuyến và tương tác giữa các lags. Điều này có lợi khi hành vi chuỗi phức tạp. Tuy vậy, XGBoost không mặc nhiên tốt hơn Linear Regression; cần so sánh trên cùng tập kiểm tra và cùng chỉ số đánh giá.
+
+Các lags thường tương quan với nhau, gây đa cộng tuyến trong Linear Regression. Điều này có thể làm hệ số hồi quy thiếu ổn định, dù khả năng dự báo không nhất thiết luôn giảm. XGBoost ít nhạy với đa cộng tuyến theo cách của hồi quy tuyến tính, nhưng các đặc trưng dư thừa vẫn có thể làm tăng độ phức tạp.
+
+Về ngoại suy, Linear Regression có thể tiếp tục xu hướng tuyến tính theo phương trình đã học, nhưng không đảm bảo xu hướng đó đúng ngoài miền dữ liệu. XGBoost dựa trên cây thường dự báo theo các giá trị lá đã học và không giỏi ngoại suy xu hướng liên tục. Vì vậy, cần cân nhắc đặc điểm chuỗi và đánh giá ngoài mẫu.
+
+### 3.2. Tác động của việc tăng số lượng lags p
+
+Tăng số lượng lags giúp mô hình tiếp cận lịch sử dài hơn. Với dữ liệu theo giờ, lag 24 có thể cung cấp thông tin từ cùng giờ ngày trước, còn lag 168 có thể phản ánh cùng giờ của tuần trước. Những đặc trưng này hữu ích khi dữ liệu có chu kỳ ngày hoặc tuần.
+
+Tuy nhiên, nhiều lags làm tăng số đặc trưng, chi phí tính toán và nguy cơ quá khớp. Việc tạo lags cũng khiến các quan sát đầu chuỗi không đủ lịch sử để sử dụng, làm giảm số mẫu huấn luyện. Do đó, cần thử nghiệm các cấu hình lags khác nhau trên cùng cách chia dữ liệu theo thời gian và chọn cấu hình dựa trên kết quả kiểm tra.
+
+### 3.3. Khi nào XGBoost phù hợp hơn ARIMA/SARIMA?
+
+ARIMA/SARIMA phù hợp với nhiều chuỗi thời gian có cấu trúc tự hồi quy và mùa vụ có thể mô hình hóa bằng phương pháp thống kê. XGBoost đáng cân nhắc khi dữ liệu có quan hệ phi tuyến, nhiều biến ngoại sinh hoặc tương tác phức tạp giữa các đặc trưng.
+
+XGBoost có thể sử dụng các đặc trưng cho nhiều chu kỳ như trong ngày, theo tuần và theo năm, nhưng các chu kỳ này cần được mã hóa thành lags hoặc đặc trưng thời gian. Với dữ liệu lớn và nhiều biến đầu vào, XGBoost có thể khai thác các quan hệ phức tạp; đổi lại, nó cần thiết kế đặc trưng và kiểm soát rò rỉ dữ liệu.
+
+Không thể kết luận XGBoost luôn tốt hơn ARIMA/SARIMA nếu chưa có kết quả so sánh trên cùng tập kiểm tra. Lựa chọn cuối cùng phải dựa trên sai số dự báo và yêu cầu thực tế.
+
+## 4. Bảng kết quả tổng hợp
+
+{table_markdown}
+
+## 5. Kết luận
+
+CV06 cung cấp bước kiểm tra tính đầy đủ của pipeline và hợp nhất các bảng kết quả hiện có. Kết luận về mô hình tốt nhất chỉ nên đưa ra sau khi các công đoạn trước hoàn tất và dữ liệu đánh giá được kiểm chứng. Những tệp còn thiếu cần được bổ sung trước khi xác nhận toàn bộ pipeline đã sẵn sàng.
+
+## 6. Hình tổng hợp
+Biểu đồ tổng hợp sẽ được tạo nếu có dữ liệu đầu vào phù hợp và thư viện trực quan hóa được cài đặt.
+"""
+
+    report_path.write_text(report, encoding="utf-8")
+    print(f"[CV06] Đã xuất báo cáo: {report_path}")
     return report_path
 
 
 # ---------------------------------------------------------------------------------
-# HÀM THỰC THI CHÍNH (MAIN ENTRYPOINT)
+# 5. TẠO BIỂU ĐỒ TỔNG HỢP
 # ---------------------------------------------------------------------------------
-def main():
-    print("=" * 80)
-    print("KHỞI CHẠY TIẾN TRÌNH CV06: TỔNG HỢP PIPELINE & XUẤT BÁO CÁO (BÙI TRẦN NGỌC KHẢI)")
-    print("=" * 80)
-    
-    # 1. Kiểm toán tiến độ
+def step4_create_dashboard(audit_info: Dict[str, List[str]]) -> None:
+    """Tạo biểu đồ trạng thái đầu ra CV01-CV05."""
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+        labels = ["Tables", "Figures"]
+        completed = [
+            len(audit_info["found_tables"]),
+            len(audit_info["found_figs"]),
+        ]
+        total = [len(EXPECTED_TABLES), len(EXPECTED_FIGURES)]
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        x = np.arange(len(labels))
+        ax.bar(x, completed, label="Available")
+        ax.bar(x, np.array(total) - np.array(completed),
+               bottom=completed, label="Missing")
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.set_ylabel("Number of artifacts")
+        ax.set_title("CV06 Project Readiness Dashboard")
+        ax.legend()
+        fig.tight_layout()
+
+        output_path = FIGURES_DIR / "cv06_summary_dashboard.png"
+        fig.savefig(output_path, dpi=150)
+        plt.close(fig)
+        print(f"[CV06] Đã xuất biểu đồ: {output_path}")
+
+    except ImportError:
+        print("[CV06] Chưa có matplotlib; bỏ qua việc tạo dashboard.")
+
+
+# ---------------------------------------------------------------------------------
+# 6. CHƯƠNG TRÌNH CHÍNH
+# ---------------------------------------------------------------------------------
+def main() -> None:
+    print("=" * 70)
+    print("CV06 - TỔNG HỢP PIPELINE VÀ BÁO CÁO LAB 3")
+    print("=" * 70)
+
     audit_info = step1_audit_team_deliverables()
-    
-    # 2. Hợp nhất bảng so sánh
     df_final = step2_consolidate_comparison_table()
-    
-    # 3. Soạn thảo báo cáo
-    report_file = DOCS_DIR / "BAO_CAO_LAB3_NHOM7.md"
-    step3_compile_final_report(audit_info, report_file)
-    
-    print("[CV06 HOÀN TẤT: Báo cáo tổng hợp toàn bài lab đã sẵn sàng nộp]")
+
+    report_path = DOCS_DIR / "BAO_CAO_LAB3_NHOM7.md"
+    step3_compile_final_report(audit_info, report_path, df_final)
+    step4_create_dashboard(audit_info)
+
+    print("[CV06] Hoàn tất tiến trình tạo báo cáo.")
 
 
 if __name__ == "__main__":
     main()
+
