@@ -1,4 +1,4 @@
-# BÁO CÁO KỸ THUẬT LAB 2 – NHÓM 7
+# BÁO CÁO KỸ THUẬT LAB 3 – NHÓM 7
 
 **Chủ đề:** Dự báo chuỗi thời gian tiêu thụ điện bằng XGBoost Regressor
 
