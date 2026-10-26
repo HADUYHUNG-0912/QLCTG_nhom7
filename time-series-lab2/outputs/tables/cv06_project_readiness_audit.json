@@ -1,0 +1,24 @@
+{
+  "found_tables": [
+    "cv01_data_summary.csv",
+    "cv02_train_history.csv",
+    "cv03_evaluation_metrics.csv",
+    "cv03_feature_importance.csv",
+    "cv04_multistep_metrics.csv"
+  ],
+  "missing_tables": [
+    "cv05_best_hyperparameters.csv",
+    "cv05_benchmark_summary.csv"
+  ],
+  "found_figs": [
+    "cv01_raw_and_lags.png",
+    "cv02_learning_curve.png",
+    "cv03_actual_vs_predicted.png",
+    "cv03_feature_importance.png",
+    "cv04_rolling_features_impact.png",
+    "cv04_multistep_forecast.png"
+  ],
+  "missing_figs": [
+    "cv05_benchmark_comparison.png"
+  ]
+}
