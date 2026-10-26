@@ -1,0 +1,6 @@
+hyperparameter,best_value
+learning_rate,0.1
+max_depth,7
+n_estimators,500
+subsample,0.8
+_search_meta,GridSearchCV(TimeSeriesSplit n_splits=5); best_CV_MAE_MW=120.4892; search_time_s=85.6
