@@ -51,7 +51,39 @@ Trích xuất từ kết quả chạy thực nghiệm tại [`../outputs/tables/
 
 ---
 
-## 4. QUYỀN SỞ HỮU TRÍ TUỆ VÀ ĐIỀU KHOẢN SỬ DỤNG
+## 4. HÌNH ẢNH HÓA TRỰC QUAN ĐẶC TRƯNG DỮ LIỆU (DATA CHARACTERISTICS VISUALIZATION)
+
+Nhằm cung cấp góc nhìn trực quan, khoa học và đối chứng trực tiếp với bảng thống kê mô tả định lượng ở Mục 3, toàn bộ 144 quan sát được trực quan hóa qua Dashboard 4 góc nhìn chuẩn mực tại [`../outputs/figures/data_characteristics_overview.png`](../outputs/figures/data_characteristics_overview.png):
+
+![Tổng hợp trực quan hóa các đặc trưng chuỗi thời gian AirPassengers](../outputs/figures/data_characteristics_overview.png)
+
+*(Biểu đồ được tạo tự động bởi mô-đun: [`src/visualize_data_characteristics.py`](../src/visualize_data_characteristics.py))*
+
+### Diễn giải chi tiết 4 góc nhìn trực quan:
+
+1. **Panel A: Dạng sóng chuỗi thời gian & Phong bì Xu hướng - Phương sai (Waveform & Heteroskedasticity Envelope):**
+   - **Đáy kỷ lục ($y_{\min} = 104$ nghìn khách, 11/1949):** Thời điểm lưu lượng khách quốc tế thấp nhất trong lịch sử thu thập dữ liệu.
+   - **Đỉnh kỷ lục ($y_{\max} = 622$ nghìn khách, 07/1960):** Kỷ lục hành khách tăng gấp gần 6 lần sau 12 năm khai thác thương mại.
+   - **Xu hướng tăng trưởng dài hạn (Upward Trend):** Đường trung bình trượt 12 tháng (12-MA) dốc lên liên tục phản ánh sự bùng nổ của ngành hàng không dân dụng hậu Thế chiến II.
+   - **Hiện tượng phương sai thay đổi (Heteroskedasticity):** Vùng phong bì $\pm 1.96\sigma$ phình to từ $\pm 25$ nghìn (1949) lên đến hơn $\pm 130$ nghìn khách (1960), chứng minh độ biến động tỷ lệ thuận với mức trung bình và gợi ý sử dụng mô hình Nhân (Multiplicative).
+
+2. **Panel B: Phân phối xác suất & Thống kê hình dạng (Distribution, Skewness & Kurtosis):**
+   - **Độ lệch dương ($\gamma_1 = +0.5832$):** Phân phối có đuôi dài dạt về phía bên phải. Giá trị $\text{Mean} (280.30) > \text{Median} (265.50)$ là bằng chứng kinh điển của phân phối lệch phải do hiệu ứng kéo tăng trưởng của các năm cuối (1958 - 1960).
+   - **Độ nhọn bẹt ($\gamma_2 = -0.3649$):** Hệ số Kurtosis âm (Platykurtic) cho thấy đỉnh phân phối thực tế bằng phẳng hơn so với phân phối chuẩn Gauss $\mathcal{N}(\mu, \sigma^2)$, dữ liệu trải đều trên dải rộng từ 104 đến 622.
+   - **Khoảng tứ phân vị ($IQR = Q_3 - Q_1 = 360.5 - 180.0 = 180.5$ nghìn khách):** Bao phủ 50% quan sát trung tâm của chuỗi.
+
+3. **Panel C: Biến thiên phân phối qua từng năm (Yearly Evolution Boxplots):**
+   - Thể hiện sự tịnh tiến đi lên của đường trung vị từng năm (đường màu đỏ ngắt quãng) từ mức nền $\approx 125$ nghìn (năm 1949) vươn lên mốc $\approx 460$ nghìn (năm 1960).
+   - Chiều cao của các hộp phân vị ($IQR$) mở rộng rõ rệt theo thời gian: từ chiếc hộp hẹp $\sim 40$ nghìn năm 1949 phình rộng lên $\sim 200$ nghìn năm 1960, khẳng định chuỗi vi phạm tính dừng ở cả Kỳ vọng (Mean) lẫn Phương sai (Variance).
+
+4. **Panel D: Hồ sơ chu kỳ mùa vụ 12 tháng (12-Month Seasonal Profile):**
+   - **Mùa cao điểm (Summer Peak - Tháng 7 & Tháng 8):** Lượng khách đạt đỉnh vượt trội với mức bình quân $\approx 350 - 351$ nghìn lượt người, trùng khớp với kỳ nghỉ hè và cao điểm du lịch quốc tế bán cầu Bắc.
+   - **Mùa thấp điểm (Winter Trough - Tháng 11):** Lượng khách rơi vào điểm trũng sâu nhất trong năm với mức bình quân chỉ $\approx 232$ nghìn lượt người.
+   - Biên độ dao động nội năm tạo thành mô hình hình sin lặp lại nhịp nhàng với chu kỳ $s = 12$ tháng.
+
+---
+
+## 5. QUYỀN SỞ HỮU TRÍ TUỆ VÀ ĐIỀU KHOẢN SỬ DỤNG
 
 - **Bản quyền dữ liệu (License):** Bộ dữ liệu thuộc phạm vi **Miền công cộng (Public Domain / CC0: Public Domain Dedication)**.
 - **Quyền sử dụng:**
@@ -71,10 +103,11 @@ Trích xuất từ kết quả chạy thực nghiệm tại [`../outputs/tables/
 
 ---
 
-## 5. PHẠM VI ỨNG DỤNG TRONG LAB 2
+## 6. PHẠM VI ỨNG DỤNG TRONG LAB 2
 
 Dữ liệu `AirPassengers` là hình mẫu lý tưởng để thực nghiệm các kỹ thuật:
 1. **Kiểm tra tính dừng (Stationarity):** Chuỗi có xu hướng tăng rõ rệt và phương sai phình rộng dần theo thời gian (Heteroskedasticity), vi phạm tính dừng nghiêm trọng.
 2. **Phân tích ACF/PACF:** Thể hiện đồng thời tính tự tương quan dương cực mạnh suy giảm chậm và các xung nhịp mùa vụ 12 tháng.
 3. **Mô hình hóa phân rã:** Thử nghiệm đối chứng xuất sắc giữa mô hình Cộng và mô hình Nhân.
 4. **Kiểm toán chất lượng dữ liệu:** Là môi trường đối chứng chuẩn (Ground Truth) để đánh giá độ chính xác của các thuật toán bù khuyết (Interpolation) và thuật toán lọc ngoại lai (Hampel Filter).
+

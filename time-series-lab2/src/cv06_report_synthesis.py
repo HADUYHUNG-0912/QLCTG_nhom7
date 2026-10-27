@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""CV06 — Bùi Trần Ngọc Khải: Tổng hợp Pipeline, trả lời câu hỏi lý luận & xuất báo cáo tổng kết.
+"""CV06 — Thanh Phương: Tổng hợp Pipeline, trả lời câu hỏi lý luận & xuất báo cáo tổng kết.
 
 Đầu vào : outputs/tables/*.csv, outputs/figures/*.png (từ CV01 đến CV05)
 Đầu ra  : docs/BAO_CAO_LAB3_NHOM7.md
@@ -326,7 +326,7 @@ def step4_compile_final_report(
 | CV03 — Đánh giá & Feature Importance | Hoàng | ✅ Hoàn thành |
 | CV04 — Rolling Features & Dự báo 24h | Trâm | ✅ Hoàn thành |
 | CV05 — TimeSeriesSplit & Random Forest | Hiệp | ✅ Hoàn thành |
-| CV06 — Tổng hợp & Báo cáo | Bùi Trần Ngọc Khải | ✅ Hoàn thành |
+| CV06 — Tổng hợp & Báo cáo | Thanh Phương | ✅ Hoàn thành |
 
 ---
 

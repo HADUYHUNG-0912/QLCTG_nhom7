@@ -39,6 +39,7 @@ time-series-lab/
 │
 ├── outputs/
 │   ├── figures/            # Toàn bộ biểu đồ xuất ra (.png)
+│   │   ├── data_characteristics_overview.png  # Tổng hợp trực quan đặc trưng chuỗi AirPassengers
 │   │   ├── bai1_acf_pacf.png
 │   │   ├── bai2_white_noise_comparison.png
 │   │   ├── bai3_1_additive_decomposition.png
@@ -57,6 +58,7 @@ time-series-lab/
 │       └── ket_qua_bai_tap_tong_hop.md
 │
 └── src/                    # Bản script Python (.py) thực thi tự động qua CLI
+    ├── visualize_data_characteristics.py # Trực quan hóa đặc trưng dữ liệu (Mục 4 data_introduction.md)
     ├── bt1_acf_pacf.py
     ├── bt2_white_noise.py
     ├── bt3_decomposition.py

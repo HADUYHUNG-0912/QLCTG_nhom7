@@ -13,7 +13,7 @@
 | CV03 — Đánh giá & Feature Importance | Hoàng | ✅ Hoàn thành |
 | CV04 — Rolling Features & Dự báo 24h | Trâm | ✅ Hoàn thành |
 | CV05 — TimeSeriesSplit & Random Forest | Hiệp | ✅ Hoàn thành |
-| CV06 — Tổng hợp & Báo cáo | Bùi Trần Ngọc Khải | ✅ Hoàn thành |
+| CV06 — Tổng hợp & Báo cáo | Thanh Phương | ✅ Hoàn thành |
 
 ---
 
