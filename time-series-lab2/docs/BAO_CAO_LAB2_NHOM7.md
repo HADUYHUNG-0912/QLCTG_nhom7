@@ -1,4 +1,5 @@
-# BÁO CÁO LAB2 - NHÓM 7\n**Người phụ trách CV06: Trần Thị Thanh Phương**\n\n## 1. Giới thiệu\nĐề tài sử dụng mô hình XGBoost để dự báo dữ liệu chuỗi thời gian,\nđánh giá sai số và so sánh các phương pháp dự báo.\n\n## 2. Dữ liệu và tiền xử lý (CV01)\nDữ liệu được xử lý, chia tập huấn luyện và kiểm tra trước khi xây dựng mô hình.\n\n## 3. Huấn luyện mô hình XGBoost (CV02)\nMô hình XGBoost được huấn luyện dựa trên các đặc trưng thời gian và độ trễ.\n\n## 4. Đánh giá mô hình (CV03)\nCác chỉ số đánh giá gồm MAE, RMSE và MAPE.\n\n## 5. Dự báo đa bước và Rolling Features (CV04)\nPhân tích tác động của đặc trưng rolling và các chiến lược dự báo đa bước.\n\n## 6. Tối ưu mô hình và đối sánh (CV05)\nSo sánh kết quả tinh chỉnh mô hình và các phương pháp đối chứng.\n\n## 7. Tổng hợp kết quả (CV06)\nCác bảng và biểu đồ sau được lấy từ kết quả thực tế của nhóm.\n\n### cv01_data_summary.csv\n| Chỉ số                              | Giá trị             |
+# BÁO CÁO LAB2 - NHÓM 7**Người phụ trách CV06: Trần Thị Thanh Phương**## 1. Giới thiệu Đề tài sử dụng mô hình XGBoost để dự báo dữ liệu chuỗi thời gian, đánh giá sai số và so sánh các phương pháp dự báo.\n## 2. Dữ liệu và tiền xử lý (CV01) Dữ liệu được xử lý, chia tập huấn luyện và kiểm tra trước khi xây dựng mô hình. ## 3. Huấn luyện mô hình XGBoost (CV02) Mô hình XGBoost được huấn luyện dựa trên các đặc trưng thời gian và độ trễ. ## 4. Đánh giá mô hình (CV03) Các chỉ số đánh giá gồm MAE, RMSE và MAPE. ## 5. Dự báo đa bước và Rolling Features (CV04) Phân tích tác động của đặc trưng rolling và các chiến lược dự báo đa bước.## 6. Tối ưu mô hình và đối sánh (CV05) So sánh kết quả tinh chỉnh mô hình và các phương pháp đối chứng.## 7. Tổng hợp kết quả (CV06) Các bảng và biểu đồ sau được lấy từ kết quả thực tế của nhóm.### cv01_data_summary.csv
+| Chỉ số                              | Giá trị             |
 |:------------------------------------|:--------------------|
 | Tên tệp dữ liệu gốc                 | AEP_hourly.csv      |
 | Mốc thời gian bắt đầu               | 2004-10-01 01:00:00 |
@@ -34,12 +35,12 @@
 |          16 |      2199.86 |     2241.97 |
 |          17 |      2178.95 |     2220.91 |
 |          18 |      2158.28 |     2200.19 |
-|          19 |      2137.8  |     2179.65 |\n\n### cv03_evaluation_metrics.csv\n| metric   |      value | unit   |
+|          19 |      2137.8  |     2179.65 |### cv03_evaluation_metrics.csv\n| metric   |      value | unit   |
 |:---------|-----------:|:-------|
 | MAE      | 161.616    | MW     |
 | RMSE     | 211.923    | MW     |
 | MAPE     |   1.11347  | %      |
-| R2       |   0.992489 | score  |\n\n### cv03_feature_importance.csv\n|   rank | feature    |   importance | feature_type   |
+| R2       |   0.992489 | score  |### cv03_feature_importance.csv|   rank | feature    |   importance | feature_type   |
 |-------:|:-----------|-------------:|:---------------|
 |      1 | lag_1      |  0.918705    | lag            |
 |      2 | lag_3      |  0.0152096   | lag            |
@@ -53,7 +54,7 @@
 |     10 | quarter    |  0.00222709  | calendar       |
 |     11 | lag_48     |  0.00146326  | lag            |
 |     12 | year       |  0.000688889 | calendar       |
-|     13 | is_weekend |  0           | calendar       |\n\n### cv04_multistep_metrics.csv\n|   horizon |   n_origins |     MAE |     RMSE |   cumulative_MAE |   cumulative_RMSE |
+|     13 | is_weekend |  0           | calendar       |### cv04_multistep_metrics.csv|   horizon |   n_origins |     MAE |     RMSE |   cumulative_MAE |   cumulative_RMSE |
 |----------:|------------:|--------:|---------:|-----------------:|------------------:|
 |         1 |        1006 | 135.622 |  173.149 |          135.622 |           173.149 |
 |         2 |        1006 | 291.876 |  372.704 |          213.749 |           290.593 |
@@ -74,10 +75,10 @@
 |        17 |        1006 | 725.927 |  985.332 |          557.923 |           788.643 |
 |        18 |        1006 | 691.313 |  913.664 |          565.333 |           796.104 |
 |        19 |        1006 | 676.192 |  884.405 |          571.168 |           800.994 |
-|        20 |        1006 | 699.409 |  907.753 |          577.58  |           806.668 |\n\n### cv05_benchmark_summary.csv\n| Model           |   MAE (MW) |   RMSE (MW) |   MAPE (%) |   R2 Score |   Train Time (s) |   Inference (ms) |   Train MAE (MW) |   Overfit Gap MAE (MW) |
+|        20 |        1006 | 699.409 |  907.753 |          577.58  |           806.668 |### cv05_benchmark_summary.csv\n| Model           |   MAE (MW) |   RMSE (MW) |   MAPE (%) |   R2 Score |   Train Time (s) |   Inference (ms) |   Train MAE (MW) |   Overfit Gap MAE (MW) |
 |:----------------|-----------:|------------:|-----------:|-----------:|-----------------:|-----------------:|-----------------:|-----------------------:|
 | XGBoost (tuned) |    106.984 |     144.752 |   0.736231 |   0.996496 |          6.67694 |          88.2471 |          79.9184 |                27.0656 |
-| Random Forest   |    129.47  |     178.288 |   0.890403 |   0.994684 |         39.8805  |         694.645  |          45.6129 |                83.8576 |\n\n### cv05_best_hyperparameters.csv\n| hyperparameter   | best_value                                                                            |
+| Random Forest   |    129.47  |     178.288 |   0.890403 |   0.994684 |         39.8805  |         694.645  |          45.6129 |                83.8576 |\n\n### cv05_best_hyperparameters.csv| hyperparameter   | best_value                                                                            |
 |:-----------------|:--------------------------------------------------------------------------------------|
 | learning_rate    | 0.1                                                                                   |
 | max_depth        | 7                                                                                     |
