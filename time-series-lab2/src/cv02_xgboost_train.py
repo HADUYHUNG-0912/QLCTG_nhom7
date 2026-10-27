@@ -1,35 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-===================================================================================
-DỰ ÁN: QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG) - LAB 3: MACHINE LEARNING & XGBOOST
-NHIỆM VỤ CV02: HUẤN LUYỆN MÔ HÌNH CƠ SỞ XGBOOST REGRESSOR (BƯỚC 4, BƯỚC 5)
-===================================================================================
+CV02 — Khải: Huấn luyện mô hình cơ sở XGBoost Regressor.
 
-[THÔNG TIN DÀNH CHO THÀNH VIÊN & AI AGENT]:
-- Mã công việc: CV02
-- Thành viên phụ trách: Khải
-- Nhánh Git: khai_lab2_CV02
-- Tệp thực thi: src/cv02_xgboost_train.py
-- Dữ liệu đầu vào:
-  + data/processed/train.csv (tập huấn luyện do CV01 cung cấp)
-  + data/processed/test.csv  (tập kiểm thử do CV01 cung cấp)
-- Sản phẩm đầu ra:
-  + outputs/models/xgboost_baseline.json (Checkpoint mô hình XGBoost định dạng chuẩn)
-  + outputs/figures/cv02_learning_curve.png (Biểu đồ hàm mất mát RMSE theo từng vòng lặp)
-  + outputs/tables/cv02_train_history.csv (Lịch sử hội tụ loss qua các vòng lặp)
-
-[QUY TẮC KỸ THUẬT BẮT BUỘC CHO AI AGENT]:
-1. ĐỒNG BỘ ĐƯỜNG DẪN: Quản lý đường dẫn bằng `pathlib.Path` tính từ `PROJECT_ROOT`.
-2. CHUẨN MỰC SIÊU THAM SỐ:
-   - Mô hình: `xgboost.XGBRegressor`
-   - Siêu tham số cơ bản: `n_estimators=1000`, `learning_rate=0.01`, `max_depth=5`,
-     `early_stopping_rounds=50`, `objective='reg:squarederror'`, `random_state=42`.
-3. THEO DÕI HỘI TỤ (EVALUATION MONITORING):
-   - Bắt buộc truyền `eval_set=[(X_train, y_train), (X_test, y_test)]` vào phương thức `.fit()`.
-   - Đánh giá trên độ đo `eval_metric='rmse'`.
-4. LƯU TRỮ MÔ HÌNH:
-   - Lưu model checkpoint định dạng `.json` để CV03 nạp lại suy luận.
-===================================================================================
+Đầu vào : data/processed/train.csv, test.csv (từ CV01)
+Đầu ra  : outputs/models/xgboost_baseline.json
+          outputs/figures/cv02_learning_curve.png
+          outputs/tables/cv02_train_history.csv
 """
 
 import csv
@@ -54,7 +30,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------------
-# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG (ĐỒNG BỘ CHO MỌI AGENT & THÀNH VIÊN)
+# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG
 # ---------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent

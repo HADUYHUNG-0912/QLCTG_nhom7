@@ -1,36 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-===================================================================================
-DỰ ÁN: QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG) - LAB 3: MACHINE LEARNING & XGBOOST
-NHIỆM VỤ CV01: QUẢN TRỊ PIPELINE, TIỀN XỬ LÝ & SINH ĐẶC TRƯNG ĐỘ TRỄ (LAG FEATURES)
-===================================================================================
+CV01 — Hà Duy Hưng: Tiền xử lý dữ liệu & sinh đặc trưng độ trễ (Lag Features).
 
-[THÔNG TIN DÀNH CHO THÀNH VIÊN & AI AGENT]:
-- Mã công việc: CV01 (Bước 1, Bước 2, Bước 3 của bài lab)
-- Thành viên phụ trách: Hà Duy Hưng (Nhóm trưởng điều phối)
-- Nhánh Git khuyến nghị: main (hoặc feat/cv01-data-prep)
-- Tệp thực thi: src/cv01_data_and_lags.py
-- Dữ liệu đầu vào:
-  + data/raw/AEP_hourly.csv (121,273 quan sát mức tiêu thụ điện năng)
-- Sản phẩm đầu ra:
-  + data/processed/train.csv (80% quan sát đầu tiên theo thời gian)
-  + data/processed/test.csv  (20% quan sát sau cùng theo thời gian)
-  + outputs/tables/cv01_data_summary.csv (Bảng thống kê mô tả chuỗi thời gian)
-  + outputs/figures/cv01_raw_and_lags.png (Biểu đồ EDA chuỗi gốc và ma trận tương quan Lags)
-
-[QUY TẮC KỸ THUẬT BẮT BUỘC CHO AI AGENT]:
-1. ĐỒNG BỘ ĐƯỜNG DẪN: Luôn sử dụng `pathlib.Path` tính từ `PROJECT_ROOT`, tuyệt đối 
-   không sử dụng đường dẫn tuyệt đối (hard-coded path).
-2. THỨ TỰ THỜI GIAN: Chuỗi thời gian phải được sắp xếp tăng dần đơn điệu (`sort_index()`).
-3. NGĂN NGỪA DATA LEAKAGE:
-   - Khi chia tập Train/Test theo tỷ lệ 80/20, TUYỆT ĐỐI KHÔNG dùng `shuffle=True`.
-   - Cắt tuần tự: 80% thời gian đầu làm Train, 20% thời gian sau làm Test.
-4. XỬ LÝ ĐỘ TRỄ (LAGS):
-   - Tạo các lag features y_{t-1} đến y_{t-24} (hoặc các lag chu kỳ tuần y_{t-168}).
-   - Xử lý các giá trị NaN phát sinh do độ trễ bằng `dropna()` trước khi chia tập.
-5. TƯƠNG THÍCH MÔI TRƯỜNG WINDOWS:
-   - Cấu hình UTF-8 encoding cho stdout/stderr để tránh lỗi UnicodeEncodeError.
-===================================================================================
+Đầu vào : data/raw/AEP_hourly.csv
+Đầu ra  : data/processed/train.csv, test.csv, AEP_features.csv
+          outputs/tables/cv01_data_summary.csv, train_test_split_info.csv
+          outputs/figures/cv01_raw_and_lags.png, eda_aep_hourly.png
 """
 
 import sys
@@ -51,7 +26,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------------
-# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG (ĐỒNG BỘ CHO MỌI AGENT & THÀNH VIÊN)
+# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG
 # ---------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent

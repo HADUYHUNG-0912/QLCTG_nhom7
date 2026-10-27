@@ -1,36 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-===================================================================================
-DỰ ÁN: QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG) - LAB 3: MACHINE LEARNING & XGBOOST
-NHIỆM VỤ CV05: TINH CHỈNH TIMESERIESSPLIT & SO SÁNH RANDOM FOREST (BÀI TẬP NÂNG CAO 3, 4)
-===================================================================================
+CV05 — Hiệp: Tinh chỉnh siêu tham số bằng TimeSeriesSplit & so sánh với Random Forest.
 
-[THÔNG TIN DÀNH CHO THÀNH VIÊN & AI AGENT]:
-- Mã công việc: CV05
-- Thành viên phụ trách: Hoàng
-- Nhánh Git khuyến nghị: feat/cv05-tuning-benchmark
-- Tệp thực thi: src/cv05_tuning_random_forest.py
-- Dữ liệu đầu vào:
-  + data/processed/train.csv và data/processed/test.csv
-- Sản phẩm đầu ra:
-  + outputs/tables/cv05_best_hyperparameters.csv (Bộ siêu tham số tối ưu từ TimeSeriesSplit)
-  + outputs/tables/cv05_benchmark_summary.csv (Bảng so sánh chi tiết XGBoost vs Random Forest)
-  + outputs/figures/cv05_benchmark_comparison.png (Đồ thị so sánh MAE, RMSE, Thời gian huấn luyện)
-  + outputs/models/rf_benchmark.joblib (Checkpoint mô hình Random Forest đối chứng)
-
-[QUY TẮC KỸ THUẬT BẮT BUỘC CHO AI AGENT]:
-1. KIỂM ĐỊNH CHÉO CHUỖI THỜI GIAN (TIME SERIES CROSS-VALIDATION):
-   - Tuyệt đối KHÔNG sử dụng KFold ngẫu nhiên (`KFold(shuffle=True)`).
-   - BẮT BUỘC dùng `TimeSeriesSplit(n_splits=5)` từ `sklearn.model_selection` để mở rộng
-     cửa sổ huấn luyện tuần tự (Expanding Window Validation).
-2. SO SÁNH ĐỐI CHỨNG VỚI RANDOM FOREST:
-   - Huấn luyện `RandomForestRegressor` trên cùng không gian đặc trưng và nhãn.
-   - Đo lường và lập bảng so sánh đối chứng theo 4 tiêu chí:
-     + Thời gian huấn luyện (Training Duration - s).
-     + Tốc độ suy luận (Inference Speed - ms).
-     + Sai số dự báo (MAE, RMSE, MAPE %, R2 Score).
-     + Đánh giá nguy cơ quá khớp (Overfitting Assessment).
-===================================================================================
+Đầu vào : data/processed/train.csv, test.csv (từ CV01)
+Đầu ra  : outputs/tables/cv05_best_hyperparameters.csv
+          outputs/tables/cv05_benchmark_summary.csv
+          outputs/figures/cv05_benchmark_comparison.png
+          outputs/models/rf_benchmark.joblib
 """
 
 import sys
@@ -60,7 +36,7 @@ from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from xgboost import XGBRegressor
 
 # ---------------------------------------------------------------------------------
-# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG (ĐỒNG BỘ CHO MỌI AGENT & THÀNH VIÊN)
+# 1. CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG
 # ---------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
@@ -95,7 +71,7 @@ CONFIG = {
 
 
 # ---------------------------------------------------------------------------------
-# 1b. NẠP DỮ LIỆU & TÁCH X - y (đúng contract CV01: Datetime, không NaN, thứ tự thời gian)
+# 1b. NẠP DỮ LIỆU & TÁCH X - y
 # ---------------------------------------------------------------------------------
 def load_train_test(
     train_path: Path,
