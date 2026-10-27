@@ -1,0 +1,5 @@
+﻿Model,MAE (MW),RMSE (MW),MAPE (%),R2 Score,Train Time (s),Inference (ms),Ghi chú
+XGBoost Baseline (CV02/CV03),161.62,211.92,1.1135,0.9925,—,—,"Default hyperparams, 6 lags"
+XGBoost (tuned),106.98,144.75,0.7362,0.9965,6.68,88.25,TimeSeriesSplit 5-folds GridSearchCV
+Random Forest,129.47,178.29,0.8904,0.9947,39.88,694.64,TimeSeriesSplit 5-folds GridSearchCV
+XGBoost Recursive 24h (CV04),613.82,847.29,4.1603,0.8801,—,—,"Recursive multi-step 24h, rolling features"
