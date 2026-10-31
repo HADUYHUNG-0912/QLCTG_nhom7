@@ -67,9 +67,10 @@ time-series-lab2/
 │       └── AEP_features_rolling.csv # Dữ liệu bổ sung Rolling Features (CV04)
 │
 ├── docs/
-│   ├── lab_description.md      # Mô tả tóm tắt nội dung lab
-│   ├── lab3_description.md     # Bản sao đồng bộ đề bài
-│   └── LAB3_FINAL_REPORT.md    # Báo cáo tổng hợp khoa học và trả lời 3 câu hỏi (CV06)
+│   ├── data_introduction.md    # Giới thiệu nguồn gốc & 4 đặc tính trực quan của dữ liệu AEP
+│   ├── BAO_CAO_LAB3_NHOM7.md   # Báo cáo kỹ thuật tổng hợp & trả lời 3 câu hỏi lý luận (CV06)
+│   ├── KE_HOACH_PHAN_CONG_NHOM7.md # Bảng phân công chi tiết 6 thành viên
+│   └── DE_BAI_LAB.md           # Bản đặc tả đề bài và hướng dẫn đầy đủ
 │
 ├── notebooks/                  # Notebooks Jupyter tương tác thực nghiệm
 │

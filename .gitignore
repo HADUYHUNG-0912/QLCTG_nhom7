@@ -37,3 +37,5 @@ clean_chapter2_temp.md
 # Progress management sheets (Local only - Khong push len Git theo yeu cau)
 *.xlsx
 *.xls
+*KE_HOACH_PHAN_CONG_NHOM7*.csv
+*sheet_template*.csv
