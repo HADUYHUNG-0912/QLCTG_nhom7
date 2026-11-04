@@ -1,186 +1,169 @@
-# PRACTICE 4 – MULTIVARIATE TIME SERIES FORECASTING
-## DỰ BÁO CHUỖI THỜI GIAN ĐA BIẾN: ĐIỆN NĂNG TIÊU THỤ & THỜI TIẾT (ELECTRICITY LOAD + WEATHER)
+# BÀI TẬP THỰC HÀNH: DỰ ĐOÁN CHUỖI THỜI GIAN SỬ DỤNG MACHINE LEARNING MODELS
+## (TIME SERIES FORECASTING USING MACHINE LEARNING MODELS)
 
 > **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)  
-> **Chủ đề:** Multivariate Time Series Forecasting (Thống kê vs Machine Learning vs Deep Learning)  
-> **Bộ dữ liệu chính:** Electricity Load Diagrams Dataset (UCI) kết hợp dữ liệu thời tiết (Weather Data)  
-> **Bộ dữ liệu nâng cao:** METR-LA / PEMS-BAY (California Highway Sensors)  
+> **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
+> **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
+> **Bộ dữ liệu thực nghiệm:** [Hourly Energy Consumption (PJM) - AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)
 
 ---
 
-## 🎯 1. MỤC TIÊU CỦA BÀI THỰC HÀNH (OBJECTIVES)
+## 🎯 MỤC TIÊU (OBJECTIVES)
 
-Trong bài thực hành này, sinh viên sẽ xây dựng, thực nghiệm và so sánh các mô hình dự báo chuỗi thời gian đa biến (Multivariate Time Series) dựa trên dữ liệu phụ tải điện năng và các yếu tố thời tiết ngoại sinh:
-1. **Hiểu bản chất mô hình hóa chuỗi thời gian đa biến:** Cách tích hợp thông tin lịch sử của nhiều biến số phụ thuộc lẫn nhau vào quá trình dự báo.
-2. **Triển khai và đối chuẩn 3 trường phái mô hình tiêu biểu:**
-   * **VAR (Vector Autoregression):** Đại diện cho trường phái **Mô hình Thống kê cổ điển (Statistical Baseline)**.
-   * **XGBoost Regressor:** Đại diện cho trường phái **Học máy (Machine Learning / Gradient Boosting)**.
-   * **LSTM (Long Short-Term Memory):** Đại diện cho trường phái **Học sâu (Deep Learning / Recurrent Neural Networks)**.
-3. **Đánh giá và so sánh định lượng chất lượng dự báo qua 3 chỉ số chuẩn:**
-   * $\text{RMSE}$ (Root Mean Squared Error)
-   * $\text{MAE}$ (Mean Absolute Error)
-   * $\text{MAPE}$ (Mean Absolute Percentage Error)
+- **Chuyển bài toán chuỗi thời gian $\rightarrow$ học có giám sát** (Transforming Time Series into Supervised Learning via Feature Engineering).
+- **Huấn luyện mô hình XGBoost Regressor** (`xgboost.XGBRegressor`) chuyên sâu cho bài toán hồi quy chuỗi thời gian.
+- **Đánh giá chất lượng dự báo** qua các chỉ số định lượng chuẩn mực (MAE, RMSE, MAPE, $R^2$) và trực quan hóa Actual vs Predicted.
 
 ---
 
-## 📊 2. DATASET VÀ BÀI TOÁN DỰ BÁO (PROBLEM FORMULATION)
+## 📝 BÀI TẬP THỰC HÀNH CỐT LÕI (CORE WORKFLOW)
 
-### 2.1. Các biến số quan sát
-Sử dụng bộ dữ liệu **Electricity Load Diagrams Dataset (UCI)** tích hợp thông tin khí tượng, gồm 4 biến số:
-* $\text{load}$: Lượng điện năng tiêu thụ (Biến mục tiêu chính cần dự báo).
-* $\text{temperature}$: Nhiệt độ không khí.
-* $\text{humidity}$: Độ ẩm không khí.
-* $\text{wind\_speed}$: Tốc độ gió.
+Cho một chuỗi thời gian đơn biến $y_t$, hãy dự đoán giá trị tại thời điểm tiếp theo dựa trên các giá trị trong quá khứ ($y_t$ hoặc $y_{t+1}$ từ $y_{t-1}, y_{t-2}, \dots, y_{t-p}$).  
+Thực hiện tuần tự theo 7 bước dưới đây:
 
-Tại mỗi bước thời gian $t$, vector quan sát đa biến được định nghĩa là:
-$$X_t = [\text{load}_t, \text{temp}_t, \text{humidity}_t, \text{wind}_t]^T$$
+### Bước 1. Chuẩn bị dữ liệu (Data Ingestion & Preprocessing)
+- Tải tệp dữ liệu `AEP_hourly.csv` từ bộ dữ liệu PJM Hourly Energy Consumption.
+- Chuyển đổi cột mốc thời gian (`Datetime`) thành kiểu `pd.DatetimeIndex`.
+- Sắp xếp tăng dần theo trục thời gian (`df.sort_index(inplace=True)`).
+- Kiểm tra tính liên tục, kiểm tra giá trị khuyết thiếu (`isna().sum()`) và trùng lặp chỉ mục (`index.has_duplicates`).
 
-### 2.2. Mục tiêu dự báo (Forecasting Horizon)
-Sử dụng lịch sử của cả 4 biến số trong **24 giờ gần nhất** (cửa sổ quá khứ $L = 24$) để dự đoán lượng điện năng tiêu thụ ở bước tiếp theo ($t+1$):
-$$X_{t-24:t} \Longrightarrow \text{load}_{t+1}$$
+### Bước 2. Tạo lag features (Supervised Learning Transformation)
+- Biến đổi bài toán chuỗi thời gian thành bài toán học máy có giám sát bằng kỹ thuật trượt độ trễ:
+  $$X_t = [y_{t-1}, y_{t-2}, \dots, y_{t-p}]$$
+- Sử dụng hàm `.shift(1)`, `.shift(2)`, $\dots$, `.shift(p)` trong Pandas để tạo các cột độ trễ tương ứng.
+- Xử lý các giá trị NaN phát sinh ở đầu chuỗi sau khi tạo lag features (`dropna()`).
 
----
+### Bước 3. Chia ma trận đặc trưng và biến mục tiêu ($X - y$)
+- **Ma trận đặc trưng ($X$):** Gồm các cột lag features $y_{t-1}, \dots, y_{t-p}$ (và các đặc trưng bổ sung nếu có).
+- **Vector mục tiêu ($y$):** Giá trị thực tế cần dự đoán tại thời điểm hiện tại $y_t$ (hoặc bước tiếp theo $y_{t+1}$).
 
-## 🔍 3. KHÁM PHÁ VÀ THẤU HIỂU DỮ LIỆU (DATA UNDERSTANDING)
+### Bước 4. Chia tập Train / Test theo thời gian (Time-Based Train/Test Split)
+- **Quy tắc bắt buộc:** Chia theo thứ tự thời gian tuần tự (ví dụ: $80\%$ quan sát đầu dùng làm tập Huấn luyện - Train, $20\%$ quan sát sau dùng làm tập Kiểm thử - Test).
+- **Cấm kỵ:** Tuyệt đối **KHÔNG dùng hàm ngẫu nhiên `train_test_split(shuffle=True)`** để tránh hiện tượng rò rỉ dữ liệu tương lai vào quá khứ (Data Leakage / Lookahead Bias).
 
-Trước khi xây dựng mô hình, cần phân tích khám phá (EDA) để hiểu sâu sắc hành vi của dữ liệu, đặc biệt là mối tương quan và tác động qua lại giữa thời tiết và phụ tải điện:
+### Bước 5. Huấn luyện mô hình XGBoost (Model Training)
+- Khởi tạo mô hình `XGBRegressor` từ thư viện `xgboost`.
+- Thiết lập các siêu tham số cơ bản ban đầu:
+  ```python
+  from xgboost import XGBRegressor
 
-* **Kiểm tra chất lượng dữ liệu:**
-  * Giá trị khuyết thiếu (Missing values / NaNs).
-  * Điểm dị biệt (Outliers / Anomalies).
-  * Tính mùa vụ (Seasonality): Chu kỳ ngày (Daily 24h), chu kỳ tuần (Weekly 168h).
-* **Trực quan hóa:**
-  * Biểu đồ đường của `load` theo trục thời gian.
-  * Biểu đồ phân tán (Scatter plot): `load` vs `temperature` (quan sát hình thái phi tuyến chữ U hoặc V).
-  * Ma trận hệ số tương quan (Correlation Matrix Heatmap) giữa 4 biến: `load`, `temperature`, `humidity`, `wind_speed`.
+  model = XGBRegressor(
+      n_estimators=1000,
+      learning_rate=0.01,
+      max_depth=5,
+      early_stopping_rounds=50,
+      objective='reg:squarederror',
+      random_state=42
+  )
+  model.fit(
+      X_train, y_train,
+      eval_set=[(X_train, y_train), (X_test, y_test)],
+      verbose=100
+  )
+  ```
 
----
+### Bước 6. Dự đoán và đánh giá chất lượng (Forecasting & Evaluation)
+- Dự báo trên tập kiểm thử: $\hat{y}_{\text{test}} = \operatorname{model.predict}(X_{\text{test}})$.
+- Tính toán các chỉ số sai số đánh giá:
+  - **MAE (Mean Absolute Error):**
+    $$\text{MAE} = \frac{1}{n} \sum_{t=1}^{n} |y_t - \hat{y}_t|$$
+  - **RMSE (Root Mean Squared Error):**
+    $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{t=1}^{n} (y_t - \hat{y}_t)^2}$$
+  - **MAPE (Mean Absolute Percentage Error):**
+    $$\text{MAPE} = \frac{1}{n} \sum_{t=1}^{n} \left| \frac{y_t - \hat{y}_t}{y_t} \right| \times 100\%$$
+  - **Hệ số xác định ($R^2$ Score):** Đánh giá tỷ lệ phương sai mà mô hình giải thích được.
+- Vẽ biểu đồ đối chứng trực quan giữa chuỗi thực tế ($y_{\text{test}}$) và chuỗi dự báo ($\hat{y}_{\text{test}}$) trên cùng một đồ thị theo thời gian.
 
-## ⚙️ 4. TIỀN XỬ LÝ DỮ LIỆU (PREPROCESSING)
-
-### 4.1. Chuẩn hóa dữ liệu (Feature Scaling)
-Tất cả 4 biến số phải được chuẩn hóa bằng **`StandardScaler`** (đưa về phân phối chuẩn có $\mu = 0, \sigma = 1$):
-* **Lý do:**
-  * Giúp mạng **LSTM** học ổn định, tránh hiện tượng bùng nổ hoặc tiêu biến đạo hàm (Exploding/Vanishing Gradients).
-  * Loại bỏ thiên lệch (bias) do chênh lệch độ lớn và đơn vị đo (Megawatt vs $^\circ\text{C}$ vs $\%$ vs $\text{m/s}$).
-  * Cải thiện tốc độ hội tụ và độ chính xác của **VAR** và **XGBoost**.
-
-### 4.2. Phân chia tập dữ liệu theo trình tự thời gian (Temporal Split)
-Dữ liệu chuỗi thời gian phải được cắt tuần tự đơn điệu theo thời gian, **tuyệt đối không shuffle**:
-* **Tập Huấn luyện (Train set):** $70\%$ dữ liệu thời gian đầu.
-* **Tập Xác thực (Validation set):** $15\%$ dữ liệu thời gian tiếp theo (dùng điều chỉnh siêu tham số và early stopping).
-* **Tập Kiểm thử (Test set):** $15\%$ dữ liệu thời gian cuối cùng (dùng đánh giá và đối chuẩn cuối cùng).
-
----
-
-## 🧬 5. TRÍCH XUẤT ĐẶC TRƯNG CHO ML VÀ DL (FEATURE ENGINEERING)
-
-### 5.1. Cửa sổ trễ (Lag Window)
-* Độ dài cửa sổ lịch sử: $L = 24$ (24 giờ trước).
-* Mỗi mẫu quan sát tại thời điểm $t$ có ma trận/vector lịch sử gồm 96 đặc trưng trễ:
-  $$[\text{load}_{t-1}, \dots, \text{load}_{t-24}, \; \text{temp}_{t-1}, \dots, \text{temp}_{t-24}, \; \text{humidity}_{t-1}, \dots, \text{humidity}_{t-24}, \; \text{wind}_{t-1}, \dots, \text{wind}_{t-24}]$$
-
-### 5.2. Rolling Features (Đặc thù bổ trợ riêng cho XGBoost)
-Cây quyết định trong XGBoost không tự duy trì trạng thái bộ nhớ như RNN, do đó cần trích xuất thêm các đặc trưng thống kê cuộn (lưu ý tính trên dữ liệu trễ để tránh Lookahead Bias):
-* **Rolling Mean 6 giờ:** Trung bình trượt của phụ tải trong 6 giờ qua.
-* **Rolling Standard Deviation 24 giờ:** Độ lệch chuẩn trượt đo lường mức độ biến động trong ngày.
-* **Load Trend:** Độ biến thiên xu hướng ngày:
-  $$\text{Trend}_t = \text{load}_t - \text{load}_{t-24}$$
-
----
-
-## 🤖 6. MÔ HÌNH 1 – VECTOR AUTOREGRESSION (VAR - STATISTICAL BASELINE)
-
-Mô hình thống kê đồng thời mô hình hóa mối quan hệ tuyến tính động giữa tất cả các chuỗi thời gian trong hệ thống:
-
-1. **Kiểm tra tính dừng (Stationarity Test):**
-   * Thực hiện kiểm định **ADF (Augmented Dickey-Fuller Test)** cho cả 4 chuỗi.
-   * Nếu có chuỗi không dừng ($p\text{-value} > 0.05$) $\Longrightarrow$ thực hiện lấy sai phân bậc 1 (first differencing $\Delta X_t = X_t - X_{t-1}$).
-2. **Lựa chọn bậc trễ tối ưu $p$:**
-   * Thử nghiệm $p \in [1, 24]$, chọn $p$ tối ưu dựa trên tiêu chuẩn thông tin **AIC** (Akaike Information Criterion) hoặc **BIC** (Bayesian Information Criterion).
-3. **Huấn luyện mô hình VAR:**
-   $$X_t = \sum_{i=1}^p A_i X_{t-i} + \varepsilon_t$$
-   * Mô hình VAR dự báo đồng thời toàn bộ vector $[\text{load}_{t+1}, \text{temp}_{t+1}, \text{humidity}_{t+1}, \text{wind}_{t+1}]$.
-   * Khi đánh giá sai số, chỉ trích xuất cột $\text{load}$ (và đảo chuẩn hóa/tích lũy sai phân về lại thang đo gốc).
+### Bước 7. Phân tích Feature Importance (Độ quan trọng của đặc trưng)
+- Trích xuất độ quan trọng của các độ trễ: `model.feature_importances_`.
+- Vẽ biểu đồ cột trực quan hóa thứ hạng quan trọng của các lag (`plot_importance`).
+- Phân tích và giải thích: **Lag nào có ảnh hưởng mạnh nhất đến giá trị dự báo?** (Ví dụ: Lag 1h trước, Lag 24h trước - chu kỳ 1 ngày, hoặc Lag 168h trước - chu kỳ 1 tuần).
 
 ---
 
-## 🌲 7. MÔ HÌNH 2 – XGBOOST REGRESSOR (MACHINE LEARNING)
+## 🚀 BÀI TẬP NÂNG CAO (ADVANCED TASKS)
 
-Ứng dụng thuật toán tăng cường độ dốc (Gradient Boosted Decision Trees):
+Sau khi hoàn thành 7 bước cơ bản, triển khai tiếp 4 nội dung nâng cao sau:
 
-1. **Định dạng Input / Output:**
-   * **Input ($X_t$):** Vector phẳng 1 chiều (Flat Vector) gồm 96 lag features ($24 \times 4$) kết hợp các rolling features.
-   * **Output ($y_t$):** Giá trị vô hướng $\text{load}_{t+1}$.
-2. **Chiến lược Huấn luyện & Tinh chỉnh:**
-   * Điều chỉnh các siêu tham số chính: `max_depth`, `n_estimators`, `learning_rate`.
-   * Sử dụng cơ chế **Early Stopping** trên tập Validation để chống overfitting.
-   * Trích xuất **Feature Importance** để phân tích mức độ đóng góp của từng biến khí tượng so với các biến lag nội sinh của điện năng.
+### 1. Thêm Rolling Mean & Rolling Std (Rolling Window Features)
+- Tạo thêm các đặc trưng thống kê trượt để cung cấp mức nền xu hướng và mức độ biến động cục bộ:
+  - `rolling_mean_24`: Trung bình trượt 24 giờ.
+  - `rolling_std_24`: Độ lệch chuẩn trượt 24 giờ.
+  - `rolling_mean_168`: Trung bình trượt 1 tuần (168 giờ).
+- *Lưu ý kỹ thuật:* Luôn tính rolling trên các giá trị đã trễ (dùng `.shift(1).rolling(w)`) để tránh rò rỉ dữ liệu tại thời điểm dự báo $t$.
 
----
+### 2. Dự báo Đa bước (Multi-Step Ahead Forecasting)
+- Mở rộng bài toán từ dự báo 1 bước ($t+1$) sang dự báo nhiều bước trong tương lai ($t+1, t+2, \dots, t+24$):
+  - **Chiến lược Đệ quy (Recursive Strategy):** Lấy giá trị dự báo $\hat{y}_{t+1}$ làm đầu vào để dự báo tiếp $\hat{y}_{t+2}$.
+  - **Chiến lược Trực tiếp (Direct Strategy):** Huấn luyện $H$ mô hình độc lập, mỗi mô hình chuyên dự báo cho một bước trễ tương ứng $t+h$.
+  - **Chiến lược Đa đầu ra (Multi-Output Regressor):** Sử dụng mô hình hỗ trợ xuất vector nhiều giá trị tương lai cùng lúc.
 
-## 🧠 8. MÔ HÌNH 3 – LSTM (DEEP LEARNING)
+### 3. Tinh chỉnh Siêu tham số bằng `TimeSeriesSplit` (Hyperparameter Tuning)
+- Sử dụng phương pháp Cross-Validation đặc thù cho chuỗi thời gian: `TimeSeriesSplit` từ `sklearn.model_selection` (mở rộng cửa sổ huấn luyện Rolling / Expanding Window, không xáo trộn).
+- Kết hợp với `GridSearchCV` hoặc `RandomizedSearchCV` để tìm bộ siêu tham số tối ưu:
+  - `max_depth` (3, 5, 7, 9)
+  - `learning_rate` (0.01, 0.05, 0.1)
+  - `n_estimators` (300, 500, 1000)
+  - `subsample` và `colsample_bytree` (0.7, 0.8, 1.0)
 
-Ứng dụng mạng nơ-ron hồi quy Long Short-Term Memory chuyên biệt cho dữ liệu dạng chuỗi:
-
-1. **Định dạng dữ liệu đầu vào (3D Tensor):**
-   $$\text{Shape} = (\text{batch\_samples}, \; \text{timesteps}=24, \; \text{features}=4)$$
-2. **Kiến trúc mạng (Network Architecture):**
-   * **Layer 1:** $\text{LSTM}(64 \text{ units}, \text{return\_sequences}=\text{True})$
-   * **Layer 2:** $\text{LSTM}(32 \text{ units}, \text{return\_sequences}=\text{False})$
-   * **Output Layer:** $\text{Dense}(1)$ (dự báo giá trị $\text{load}_{t+1}$)
-3. **Cấu hình Huấn luyện:**
-   * **Hàm mất mát (Loss):** $\text{MSE}$ (Mean Squared Error).
-   * **Thuật toán tối ưu (Optimizer):** $\text{Adam}$.
-   * Kết hợp kỹ thuật Early Stopping / Model Checkpoint theo dõi `val_loss`.
-
----
-
-## 🔁 9. KIỂM THỬ THỰC TẾ: BACKTESTING (WALK-FORWARD VALIDATION)
-
-Áp dụng quy trình kiểm thử cuộn (Walk-forward Validation / Rolling-origin Backtest) cho cả 3 mô hình trên tập Test:
-$$\text{Train / Update} \longrightarrow \text{Predict } t+1 \longrightarrow \text{Thêm thực tế } t+1 \text{ vào chuỗi} \longrightarrow \text{Predict } t+2 \longrightarrow \dots$$
-* Quy trình này mô phỏng chân thực cách hệ thống điều độ lưới điện vận hành trong thực tế: liên tục cập nhật dữ liệu mới nhất để đưa ra dự báo tiếp theo.
+### 4. So sánh Thực nghiệm với Random Forest (Benchmark Comparison)
+- Huấn luyện song song mô hình `RandomForestRegressor` trên cùng tập đặc trưng $X$ và nhãn $y$.
+- Lập bảng so sánh đối chứng giữa **XGBoost** và **Random Forest**:
+  - Thời gian huấn luyện (Training Time).
+  - Tốc độ suy luận (Inference Speed).
+  - Độ chính xác sai số (MAE, RMSE, MAPE).
+  - Khả năng tổng quát hóa trên tập kiểm thử (Overfitting Assessment).
 
 ---
 
-## 📈 10. ĐÁNH GIÁ VÀ ĐỐI CHUẨN CÁC MÔ HÌNH (MODEL EVALUATION)
+## ❓ CÂU HỎI LÝ LUẬN CẦN TRẢ LỜI (THEORETICAL QUESTIONS)
 
-Sử dụng 3 thước đo định lượng trên tập kiểm thử (đưa về đơn vị gốc trước khi tính):
-1. **Root Mean Squared Error (RMSE):**
-   $$\text{RMSE} = \sqrt{\frac{1}{N} \sum_{t=1}^N (y_t - \hat{y}_t)^2}$$
-2. **Mean Absolute Error (MAE):**
-   $$\text{MAE} = \frac{1}{N} \sum_{t=1}^N |y_t - \hat{y}_t|$$
-3. **Mean Absolute Percentage Error (MAPE):**
-   $$\text{MAPE} = \frac{1}{N} \sum_{t=1}^N \left| \frac{y_t - \hat{y}_t}{y_t} \right| \times 100\%$$
+Trình bày câu trả lời chi tiết và lập luận khoa học cho 3 câu hỏi dưới đây:
 
-* **Bảng so sánh tổng hợp:** Lập bảng đối sánh trực diện hiệu năng (RMSE, MAE, MAPE, thời gian huấn luyện, thời gian dự báo) giữa:
-  $$\text{VAR (Statistical)} \quad \text{vs} \quad \text{XGBoost (ML)} \quad \text{vs} \quad \text{LSTM (DL)}$$
+### Câu 1: So sánh XGBoost với Linear Regression trong bài toán dự báo chuỗi thời gian?
+- *Gợi ý trả lời:*
+  - Khả năng nắm bắt mối quan hệ phi tuyến tính phức tạp và tương tác bậc cao giữa các đặc trưng (XGBoost vượt trội nhờ cấu trúc cây quyết định phân nhánh).
+  - Độ nhạy với hiện tượng đa cộng tuyến (Multicollinearity) giữa các lag kề cận ($y_{t-1}, y_{t-2}$ tương quan rất cao, Linear Regression dễ bị phình to phương sai hệ số, trong khi XGBoost chọn đặc trưng tốt nhất tại mỗi nút chia).
+  - Khả năng ngoại suy xu hướng dài hạn (Linear Regression ngoại suy tuyến tính tốt ra ngoài miền giá trị, còn Decision Tree/XGBoost bị giới hạn trong khoảng $[y_{\min}, y_{\max}]$ của tập huấn luyện nếu không khử trend trước).
+
+### Câu 2: Điều gì xảy ra khi tăng số lượng độ trễ (lags $p$)?
+- *Gợi ý trả lời:*
+  - **Lợi ích:** Mô hình tiếp nhận thêm thông tin quá khứ ở các chu kỳ xa hơn (ví dụ lag 24h, 168h), giúp nhận diện đầy đủ các nhịp tuần hoàn ngày và tuần.
+  - **Rủi ro:** 
+    - Hiện tượng quá khớp (Overfitting): Thêm quá nhiều lag không cần thiết tạo ra nhiễu thông tin.
+    - Lời nguyền số chiều (Curse of Dimensionality) và tăng thời gian tính toán.
+    - Mất mát dữ liệu đầu chuỗi: Cần bỏ $p$ dòng đầu tiên do chứa NaN khi tạo `.shift(p)`.
+
+### Câu 3: Khi nào mô hình XGBoost phù hợp hơn mô hình truyền thống ARIMA/SARIMA?
+- *Gợi ý trả lời:*
+  - **Nên dùng XGBoost khi:**
+    - Chuỗi thời gian có mối quan hệ phi tuyến tính mạnh, cấu trúc mùa vụ phức tạp nhiều chu kỳ đan xen (Intra-day, Weekly, Annual Seasonality).
+    - Có nhiều biến ngoại sinh (Exogenous variables): Nhiệt độ, độ ẩm, ngày lễ, giá điện, biến lịch (Hour, DayOfWeek, Month).
+    - Tập dữ liệu có kích thước lớn (hàng chục/hàng trăm nghìn quan sát như dữ liệu đo từng giờ của PJM).
+  - **Nên dùng ARIMA khi:**
+    - Chuỗi thời gian đơn biến tuyến tính, kích thước mẫu nhỏ hoặc vừa.
+    - Cần mô hình có cơ sở thống kê suy diễn chặt chẽ, dễ diễn giải khoảng tin cậy giải tích, hoặc khi cần ngoại suy xu hướng tuyến tính thuần túy.
 
 ---
 
-## 💡 11. CÂU HỎI PHÂN TÍCH LÝ LUẬN (ANALYTICAL QUESTIONS)
+## 📊 THÔNG TIN BỘ DỮ LIỆU (DATASET SPECIFICATION)
 
-Sau khi hoàn thành thực nghiệm, sinh viên phải trả lời 6 câu hỏi thảo luận chuyên sâu:
-1. **Biến thời tiết nào ảnh hưởng mạnh nhất đến điện năng?** (Dựa trên ma trận tương quan, trọng số hồi quy VAR, và Feature Importance của XGBoost).
-2. **Khi nào mô hình VAR thất bại?** (Xét về giả định tuyến tính, vấn đề bùng nổ tham số khi số chiều $K$ hoặc bậc trễ $p$ lớn, và chuỗi phi tuyến/phi chuẩn).
-3. **XGBoost học được thông tin gì từ các biến thời tiết?** (Các ngưỡng phân chia nhiệt độ cực đoan mùa hè/mùa đông, tương tác phi tuyến giữa nhiệt độ và độ ẩm).
-4. **Mô hình LSTM học được những chu kỳ nào?** (Khả năng ghi nhớ chu kỳ ngày 24h và chu kỳ tuần qua cổng quên/cổng nhớ so với các biến lag cố định).
-5. **Mô hình LSTM có bị Overfitting không?** (Đánh giá qua khoảng cách giữa Train Loss và Validation Loss trên đồ thị Learning Curve, các biện pháp kiểm soát: Dropout, Early Stopping).
-6. **Sự khác biệt cốt lõi giữa Machine Learning (XGBoost) và Deep Learning (LSTM) trong bài toán này?** (Yêu cầu Feature Engineering thủ công vs Biểu diễn không gian ẩn tuần tự End-to-End, chi phí tính toán, khả năng ngoại suy và tính diễn giải).
+- **Tên bộ dữ liệu:** **Hourly Energy Consumption** (PJM Interconnection LLC)
+- **Mô tả:** Bộ dữ liệu ghi nhận mức tiêu thụ điện năng hàng giờ trong hơn 10 năm liên tục từ PJM Interconnection (tổ chức truyền tải điện khu vực phục vụ nhiều bang tại Hoa Kỳ), đơn vị đo lường tính bằng **Megawatt (MW)**.
+- **Tệp dữ liệu thực nghiệm chỉ định:** `AEP_hourly.csv` (American Electric Power).
+- **Đường dẫn tải trực tiếp:** [https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)
+- **Vị trí lưu trữ trong dự án:**
+  ```text
+  time-series-lab2/data/raw/AEP_hourly.csv
+  ```
 
 ---
 
-## 🚀 12. BÀI TẬP NÂNG CAO – DỰ BÁO LƯU LƯỢNG GIAO THÔNG (TRAFFIC FORECASTING)
+## 📋 CẤU TRÚC BÀI NỘP VÀ TIÊU CHÍ NGHIỆM THU
 
-Dành cho phần mở rộng nghiên cứu:
-* **Bộ dữ liệu chuẩn:** **METR-LA** hoặc **PEMS-BAY** (Cảm biến đường cao tốc California).
-  * Gồm tốc độ lưu thông phương tiện tại **207 trạm đo**.
-  * Tần suất lấy mẫu: **5 phút / lần** trong nhiều tháng.
-  * Vector trạng thái tại mỗi thời điểm: $X_t = [\text{speed}_1, \text{speed}_2, \dots, \text{speed}_{207}]^T$.
-* **Bài toán dự báo đa bước không gian - thời gian (Spatio-Temporal):**
-  $$[X_{t-12}, \dots, X_t] \Longrightarrow X_{t+3}, \; X_{t+6}, \; X_{t+12}$$
-  *(Dự báo trước tương lai tại các mốc 15 phút, 30 phút, và 60 phút).*
-* **Tài liệu tham khảo chuyên sâu:**
-  * Bài báo gốc: *Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting (DCRNN)*.
-  * Đóng vai trò là bài toán chuẩn benchmark quốc tế cho Deep Learning trên đồ thị chuỗi thời gian (Spatio-Temporal Graph Neural Networks).
+1. **Thư mục dự án:** [`time-series-lab2/`](../)
+2. **Notebook thực thi:** `notebooks/bt_xgboost_energy.ipynb` (hoặc các notebook chia nhỏ theo từng bước).
+3. **Mã nguồn script CLI:** `src/xgboost_forecasting.py`.
+4. **Hình ảnh trực quan:** Lưu trong `outputs/figures/` (Actual vs Predicted, Feature Importance, Multi-step Forecast, Rolling Stats).
+5. **Bảng kết quả:** Lưu trong `outputs/tables/` (Bảng so sánh MAE, RMSE, MAPE giữa XGBoost, Random Forest, Linear Regression).
+6. **Báo cáo phân tích:** Trả lời đầy đủ 3 câu hỏi lý luận và tổng kết bài học kinh nghiệm.
