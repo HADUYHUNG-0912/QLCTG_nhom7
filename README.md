@@ -1,5 +1,5 @@
 # QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG) - NHÓM 7
-## BÀI THỰC HÀNH LAB 2: KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
+## BÀI THỰC HÀNH LAB 1 (CHƯƠNG 2): KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
 
 [![Python Version](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![Course](https://img.shields.io/badge/Course-QLCTG%20--%20UTH-orange.svg)](https://ut.edu.vn/)
@@ -14,12 +14,12 @@
 
 ---
 
-## 1. CẤU TRÚC THƯ MỤC CHUẨN HÓA DỰ ÁN (`time-series-lab2/`)
+## 1. CẤU TRÚC THƯ MỤC CHUẨN HÓA DỰ ÁN (`time-series-lab1/`)
 
 Toàn bộ mã nguồn, dữ liệu thực nghiệm, tài liệu đặc tả và kết quả xuất ra được chuẩn hóa theo kiến trúc module hóa:
 
 ```text
-time-series-lab2/
+time-series-lab1/
 ├── README.md               # Giới thiệu, cài đặt, thứ tự chạy
 ├── requirements.txt        # Danh sách các thư viện phụ thuộc
 │
@@ -82,36 +82,36 @@ time-series-lab2/
 Khởi chạy terminal từ thư mục gốc của repository:
 ```bash
 # Cài đặt toàn bộ thư viện cần thiết
-pip install -r time-series-lab2/requirements.txt
+pip install -r time-series-lab1/requirements.txt
 ```
 
 ### 2.2. Chạy tương tác qua Jupyter Notebooks
-Khởi động Jupyter và mở từng notebook trong thư mục [`time-series-lab2/notebooks/`](time-series-lab2/notebooks/):
+Khởi động Jupyter và mở từng notebook trong thư mục [`time-series-lab1/notebooks/`](time-series-lab1/notebooks/):
 ```bash
-jupyter notebook time-series-lab2/notebooks/
+jupyter notebook time-series-lab1/notebooks/
 ```
 Thứ tự thực thi khuyến nghị:
-1. [`bt1_acf_pacf.ipynb`](time-series-lab2/notebooks/bt1_acf_pacf.ipynb): Khám phá tự tương quan ACF/PACF đến 40 lags.
-2. [`bt2_white_noise.ipynb`](time-series-lab2/notebooks/bt2_white_noise.ipynb): Kiểm định Ljung-Box Test đối chứng White Noise vs AirPassengers.
-3. [`bt3_decomposition.ipynb`](time-series-lab2/notebooks/bt3_decomposition.ipynb): Phân rã mô hình Nhân và STL Loess.
-4. [`bt4_data_quality.ipynb`](time-series-lab2/notebooks/bt4_data_quality.ipynb): Nội suy bù khuyết và làm sạch bằng Hampel Filter.
-5. [`bt5_visualization.ipynb`](time-series-lab2/notebooks/bt5_visualization.ipynb): Trực quan hóa Rolling Stats, Seasonal Plot và Seasonality Heatmap.
+1. [`bt1_acf_pacf.ipynb`](time-series-lab1/notebooks/bt1_acf_pacf.ipynb): Khám phá tự tương quan ACF/PACF đến 40 lags.
+2. [`bt2_white_noise.ipynb`](time-series-lab1/notebooks/bt2_white_noise.ipynb): Kiểm định Ljung-Box Test đối chứng White Noise vs AirPassengers.
+3. [`bt3_decomposition.ipynb`](time-series-lab1/notebooks/bt3_decomposition.ipynb): Phân rã mô hình Nhân và STL Loess.
+4. [`bt4_data_quality.ipynb`](time-series-lab1/notebooks/bt4_data_quality.ipynb): Nội suy bù khuyết và làm sạch bằng Hampel Filter.
+5. [`bt5_visualization.ipynb`](time-series-lab1/notebooks/bt5_visualization.ipynb): Trực quan hóa Rolling Stats, Seasonal Plot và Seasonality Heatmap.
 
 ### 2.3. Chạy tự động dòng lệnh qua Python Scripts (`src/`)
 Chạy lần lượt các script để tái tạo toàn bộ biểu đồ và bảng kết quả:
 ```bash
-python time-series-lab2/src/bt1_acf_pacf.py
-python time-series-lab2/src/bt2_white_noise.py
-python time-series-lab2/src/bt3_decomposition.py
-python time-series-lab2/src/bt4_data_quality.py
-python time-series-lab2/src/bt5_visualization.py
+python time-series-lab1/src/bt1_acf_pacf.py
+python time-series-lab1/src/bt2_white_noise.py
+python time-series-lab1/src/bt3_decomposition.py
+python time-series-lab1/src/bt4_data_quality.py
+python time-series-lab1/src/bt5_visualization.py
 ```
 
 ---
 
 ## 3. TỔNG KẾT KẾT QUẢ THỰC NGHIỆM CHÍNH (KEY FINDINGS)
 
-Trích xuất từ báo cáo nghiệm thu [`time-series-lab2/docs/bt6_report.md`](time-series-lab2/docs/bt6_report.md) và bảng số liệu [`time-series-lab2/outputs/tables/ket_qua_bai_tap_tong_hop.md`](time-series-lab2/outputs/tables/ket_qua_bai_tap_tong_hop.md):
+Trích xuất từ báo cáo nghiệm thu [`time-series-lab1/docs/bt6_report.md`](time-series-lab1/docs/bt6_report.md) và bảng số liệu [`time-series-lab1/outputs/tables/ket_qua_bai_tap_tong_hop.md`](time-series-lab1/outputs/tables/ket_qua_bai_tap_tong_hop.md):
 
 | Bài tập | Nội dung thực nghiệm | Kết quả định lượng nổi bật | Kết luận học thuật |
 | :---: | :--- | :--- | :--- |
@@ -126,13 +126,13 @@ Trích xuất từ báo cáo nghiệm thu [`time-series-lab2/docs/bt6_report.md`
 
 ## 4. DANH MỤC TÀI LIỆU KỸ THUẬT CHI TIẾT (`docs/`)
 
-- 📘 [**Mô tả Đề bài & Hướng dẫn Thực hành (lab2_description.md)**](time-series-lab2/docs/lab2_description.md)
-- 📗 [**Giới thiệu & Quyền sử dụng Dữ liệu (data_introduction.md)**](time-series-lab2/docs/data_introduction.md)
-- 📙 [**Quyết định Xử lý Dữ liệu & Lý do Kỹ thuật (data_processing.md)**](time-series-lab2/docs/data_processing.md)
-- 📕 [**Cơ sở Lý thuyết & 12 Câu hỏi Ôn tập Cuối chương 2 (theory.md)**](time-series-lab2/docs/theory.md)
-- 📓 [**Ghi chú Bài giảng Từ Slide Giảng viên (lecture_notes.md)**](time-series-lab2/docs/lecture_notes.md)
-- 📑 [**Báo cáo Kỹ thuật Tổng kết Nghiệm thu Bài 6 (bt6_report.md)**](time-series-lab2/docs/bt6_report.md)
-- 📁 [**Hồ sơ Quản lý Dự án & Báo cáo Word (project_management/)**](time-series-lab2/docs/project_management/)
+- 📘 [**Mô tả Đề bài & Hướng dẫn Thực hành (lab2_description.md)**](time-series-lab1/docs/lab2_description.md)
+- 📗 [**Giới thiệu & Quyền sử dụng Dữ liệu (data_introduction.md)**](time-series-lab1/docs/data_introduction.md)
+- 📙 [**Quyết định Xử lý Dữ liệu & Lý do Kỹ thuật (data_processing.md)**](time-series-lab1/docs/data_processing.md)
+- 📕 [**Cơ sở Lý thuyết & 12 Câu hỏi Ôn tập Cuối chương 2 (theory.md)**](time-series-lab1/docs/theory.md)
+- 📓 [**Ghi chú Bài giảng Từ Slide Giảng viên (lecture_notes.md)**](time-series-lab1/docs/lecture_notes.md)
+- 📑 [**Báo cáo Kỹ thuật Tổng kết Nghiệm thu Bài 6 (bt6_report.md)**](time-series-lab1/docs/bt6_report.md)
+- 📁 [**Hồ sơ Quản lý Dự án & Báo cáo Word (project_management/)**](time-series-lab1/docs/project_management/)
 
 ---
 

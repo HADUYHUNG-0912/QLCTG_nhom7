@@ -1,5 +1,5 @@
 # TIME SERIES LAB - QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG)
-## BÀI THỰC HÀNH SỐ 2: KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
+## BÀI THỰC HÀNH SỐ 1 (CHƯƠNG 2): KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
 
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
 > **Giảng viên hướng dẫn:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
@@ -13,7 +13,7 @@
 Cấu trúc thư mục được thiết kế và module hóa chuẩn mực theo quy chuẩn kỹ thuật:
 
 ```text
-time-series-lab/
+time-series-lab1/
 ├── README.md               # Giới thiệu, cài đặt, thứ tự chạy
 ├── requirements.txt        # Danh sách thư viện phụ thuộc
 │
@@ -75,7 +75,7 @@ time-series-lab/
 - Hệ điều hành: Windows, macOS, hoặc Linux.
 
 ### 2.2. Các bước cài đặt
-Khởi chạy terminal tại thư mục `time-series-lab/`:
+Khởi chạy terminal tại thư mục `time-series-lab1/`:
 
 ```bash
 # Di chuyển vào thư mục dự án
