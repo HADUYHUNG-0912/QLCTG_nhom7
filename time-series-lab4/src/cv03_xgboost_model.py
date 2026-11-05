@@ -100,13 +100,11 @@ def step1_build_flat_features(df_scaled: pd.DataFrame, lag: int = 24) -> pd.Data
 
     # --- Trend feature: load_lag1 - load_lag25 ---
     # Đại diện cho xu hướng 24h qua
-    if lag >= 25:
-        df_feat["load_trend"] = (
-            df_scaled[TARGET].shift(1) - df_scaled[TARGET].shift(25)
-        )
-    else:
-        # Nếu lag < 25, dùng sai phân 1 bước
-        df_feat["load_trend"] = df_scaled[TARGET].shift(1).diff(1)
+    # Xu hướng 24 giờ: load(t-1) - load(t-25)
+    df_feat["load_trend"] = (
+        df_scaled[TARGET].shift(1)
+        - df_scaled[TARGET].shift(25)
+    )
 
     # --- Target: giá trị load tại bước t (hiện tại) ---
     df_feat["load_t0"] = df_scaled[TARGET].values
@@ -167,37 +165,39 @@ def step2_train_xgboost(X_train: pd.DataFrame, y_train: pd.Series,
         verbosity          = 1,
     )
 
-    evals_result = {}
+
     model.fit(
         X_train, y_train,
-        eval_set        = [(X_train, y_train), (X_val, y_val)],
-        verbose         = 100,
-        callbacks       = None,     # early_stopping_rounds dùng trực tiếp trong fit
+        eval_set=[(X_train, y_train), (X_val, y_val)],
+        verbose=100,
     )
 
-    # TODO (CV03): Lấy evals_result từ model.evals_result() sau khi fit
-    #   evals_result = model.evals_result()
-    #   train_rmse   = evals_result["validation_0"]["rmse"]
-    #   val_rmse     = evals_result["validation_1"]["rmse"]
+    evals_result = model.evals_result()
+    train_rmse = evals_result["validation_0"]["rmse"]
+    val_rmse = evals_result["validation_1"]["rmse"]
 
     best_iter = model.best_iteration
-    print(f"\n  Best iteration  : {best_iter}")
-    print(f"  Best val RMSE   : {model.best_score:.4f}")
+    print(f"Best iteration: {best_iter}")
+    print(f"Best val RMSE: {model.best_score:.4f}")
 
-    # --- Vẽ Learning Curve ---
-    # TODO (CV03): uncomment sau khi có evals_result
-    # fig, ax = plt.subplots(figsize=(10, 4))
-    # ax.plot(train_rmse, label="Train RMSE", color="steelblue")
-    # ax.plot(val_rmse,   label="Val RMSE",   color="tomato")
-    # ax.axvline(x=best_iter, color="green", linestyle="--", label=f"Best iter={best_iter}")
-    # ax.set_xlabel("Số cây (n_estimators)")
-    # ax.set_ylabel("RMSE (scaled)")
-    # ax.set_title("XGBoost Learning Curve")
-    # ax.legend(); ax.grid(alpha=0.3)
-    # fig.tight_layout()
-    # fig.savefig(FIGURES_DIR / "xgb_learning_curve.png", dpi=150, bbox_inches="tight")
-    # plt.close(fig)
-    # print(f"  Đã lưu: {FIGURES_DIR / 'xgb_learning_curve.png'}")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(train_rmse, label="Train RMSE", color="steelblue")
+    ax.plot(val_rmse, label="Val RMSE", color="tomato")
+    ax.axvline(best_iter, color="green", linestyle="--",
+               label=f"Best iter={best_iter}")
+
+    ax.set_xlabel("Số cây (n_estimators)")
+    ax.set_ylabel("RMSE (scaled)")
+    ax.set_title("XGBoost Learning Curve")
+    ax.legend()
+    ax.grid(alpha=0.3)
+
+    fig.tight_layout()
+    fig.savefig(FIGURES_DIR / "xgb_learning_curve.png",
+                dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+    print("Đã lưu xgb_learning_curve.png")
 
     print("[STEP 2 DONE]\n")
     return model, evals_result
@@ -336,30 +336,50 @@ def step5_answer_questions() -> dict:
     """
     answers = {}
 
-    # --- Q1: XGBoost khác VAR ở điểm cốt lõi nào? ---
+    # Q1: XGBoost khác VAR ở điểm cốt lõi nào?
     answers["Q1_XGB_vs_VAR"] = """
-    TODO (CV03):
-    - VAR là mô hình tuyến tính, mô hình hoá mối quan hệ tuyến tính giữa các biến.
-    - XGBoost là ensemble cây quyết định, có thể nắm bắt phi tuyến.
-    - ...
+    VAR là mô hình chuỗi thời gian tuyến tính, sử dụng các
+    giá trị trễ của nhiều biến để dự báo.
+
+    XGBoost là mô hình học máy kết hợp nhiều cây quyết định,
+    có khả năng học các mối quan hệ phi tuyến và tương tác
+    phức tạp giữa các đặc trưng.
+
+    Trong bài toán dự báo phụ tải điện, XGBoost có thể học
+    quan hệ giữa phụ tải quá khứ và các yếu tố thời tiết.
     """
 
-    # --- Q2: XGBoost học gì từ các biến thời tiết (temp, humidity, wind)? ---
+    # Q2: XGBoost học gì từ các biến thời tiết?
     answers["Q2_XGB_weather_features"] = """
-    TODO (CV03):
-    - Dựa vào feature importance (Step 4), biến nào có Gain cao nhất?
-    - Giải thích cơ chế: XGBoost dùng split tại các ngưỡng nhiệt độ/độ ẩm...
-    - ...
+    XGBoost sử dụng nhiệt độ, độ ẩm và tốc độ gió trong
+    quá khứ để hỗ trợ dự báo lượng điện tiêu thụ.
+
+    Mô hình có thể học các ngưỡng và tương tác phi tuyến
+    giữa thời tiết với nhu cầu sử dụng điện.
+
+    Kết quả Feature Importance cho thấy load_lag24 và
+    load_lag1 quan trọng nhất. Trong nhóm biến thời tiết,
+    temp_lag1 và temp_lag2 xuất hiện trong Top 20.
+    Một số biến humidity_lag cũng có đóng góp.
+
+    Gain phản ánh mức cải thiện khi đặc trưng được dùng
+    để chia nhánh, không chứng minh quan hệ nhân quả.
     """
 
-    # --- Q3: XGBoost có ưu điểm gì so với LSTM trong bài toán này? ---
+    # Q3: XGBoost có ưu điểm gì so với LSTM?
     answers["Q3_XGB_vs_LSTM"] = """
-    TODO (CV03):
-    - Tốc độ train/inference nhanh hơn LSTM
-    - Không cần nhiều dữ liệu để fit tốt
-    - Feature importance dễ diễn giải (interpretability)
-    - Nhược điểm: không mô hình hoá sequential dependency tự nhiên như LSTM
-    - ...
+    XGBoost thường dễ huấn luyện và điều chỉnh hơn LSTM
+    trên dữ liệu dạng bảng với các lag features đã tạo sẵn.
+
+    XGBoost cho phép phân tích Feature Importance,
+    giúp giải thích những đặc trưng quan trọng.
+
+    LSTM có khả năng học phụ thuộc theo chuỗi thông qua
+    kiến trúc mạng nơ-ron hồi tiếp, trong khi XGBoost
+    cần tạo các đặc trưng trễ và rolling thủ công.
+
+    Chưa thể kết luận mô hình nào tốt hơn nếu chưa
+    so sánh trên cùng tập dữ liệu và điều kiện đánh giá.
     """
 
     for q, a in answers.items():
