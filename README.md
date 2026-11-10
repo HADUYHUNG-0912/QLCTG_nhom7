@@ -1,4 +1,4 @@
-# QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG) - NHÓM 7
+# PHÂN TÍCH DỮ LIỆU CHUỖI THỜI GIAN VÀ DỰ BÁO - NHÓM 7
 ## BÀI THỰC HÀNH LAB 1 (CHƯƠNG 2): KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
 
 [![Python Version](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/)
@@ -149,4 +149,4 @@ Trích xuất từ báo cáo nghiệm thu [`time-series-lab1/docs/bt6_report.md`
 | **CV07** | Nhóm 7 (Hà Duy Hưng tổng hợp) | Bài tập 6: Báo cáo kỹ thuật tổng kết nghiệm thu & nộp bài | **Hoàn thành (Done)** |
 
 ---
-*Dự án được thực hiện phục vụ học phần Quản lý & Khai phá Chuỗi Thời gian (QLCTG) - Đại học Giao thông Vận tải TP.HCM (UTH), Học kỳ 1 Năm học 2026.*
+*Dự án được thực hiện phục vụ học phần Phân tích dữ liệu chuỗi thời gian và dự báo - Đại học Giao thông Vận tải TP.HCM (UTH), Học kỳ 1 Năm học 2026.*

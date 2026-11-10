@@ -1,4 +1,4 @@
-# TIME SERIES LAB 2 - QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG)
+# TIME SERIES LAB 2 - PHÂN TÍCH DỮ LIỆU CHUỖI THỜI GIAN VÀ DỰ BÁO
 ## BÀI THỰC HÀNH SỐ 3: DỰ ĐOÁN CHUỖI THỜI GIAN SỬ DỤNG MACHINE LEARNING MODELS (XGBOOST REGRESSOR)
 
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  

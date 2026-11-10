@@ -1,4 +1,4 @@
-# TIME SERIES LAB 3 — NHÓM 7 (QLCTG)
+# TIME SERIES LAB 3 — NHÓM 7 (Phân tích dữ liệu chuỗi thời gian và dự báo)
 ## BÀI THỰC HÀNH 4: MULTIVARIATE TIME SERIES FORECASTING
 ### (VAR vs XGBoost vs LSTM)
 
@@ -42,6 +42,7 @@ python src/cv06_report_synthesis.py
 
 ## 4. TÀI LIỆU
 
+- [Kiến trúc Pipeline Training & Inference](PIPELINE.md)
 - [Đề bài đầy đủ](docs/DE_BAI_LAB.md)
 - [Kế hoạch phân công](docs/KE_HOACH_PHAN_CONG_NHOM7.md)
 - [Báo cáo kỹ thuật](docs/BAO_CAO_LAB4_NHOM7.md) *(CV06 sẽ tạo)*

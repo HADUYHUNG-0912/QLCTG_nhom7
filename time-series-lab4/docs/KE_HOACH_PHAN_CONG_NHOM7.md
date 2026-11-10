@@ -1,6 +1,6 @@
 # KẾ HOẠCH THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ — NHÓM 7
 ## BÀI THỰC HÀNH 4: MULTIVARIATE TIME SERIES FORECASTING
-### Môn học: Quản lý & Khai phá Chuỗi Thời gian (QLCTG)
+### Môn học: Phân tích dữ liệu chuỗi thời gian và dự báo
 
 > **Nhóm trưởng:** Hà Duy Hưng (CV01 — Lead)  
 > **Tổng số thành viên:** 6 người  

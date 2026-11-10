@@ -1,4 +1,4 @@
-# BẢNG TỔNG HỢP KẾT QUẢ THỰC NGHIỆM LAB 2 (QLCTG - NHÓM 7)
+# BẢNG TỔNG HỢP KẾT QUẢ THỰC NGHIỆM LAB 2 (Phân tích dữ liệu chuỗi thời gian và dự báo - NHÓM 7)
 
 Dưới đây là các bảng số liệu trích xuất từ chuỗi thực nghiệm trên bộ dữ liệu `AirPassengers.csv` (144 quan sát, từ 01/1949 đến 12/1960).
 

@@ -1,4 +1,4 @@
-# TIME SERIES LAB - QUẢN LÝ & KHAI PHÁ CHUỖI THỜI GIAN (QLCTG)
+# TIME SERIES LAB - PHÂN TÍCH DỮ LIỆU CHUỖI THỜI GIAN VÀ DỰ BÁO
 ## BÀI THỰC HÀNH SỐ 1 (CHƯƠNG 2): KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
 
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  

@@ -1,16 +1,15 @@
-# ĐỀ BÀI VÀ HƯỚNG DẪN THỰC HÀNH LAB 2
-## KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU CHUỖI THỜI GIAN
-**(Time Series Exploratory Data Analysis & Data Quality Engineering)**
+# BÀI TẬP THỰC HÀNH: KHÁM PHÁ ĐẶC TÍNH DỮ LIỆU & LÀM SẠCH CHẤT LƯỢNG TIME SERIES
+## (TIME SERIES EXPLORATORY DATA ANALYSIS & DATA QUALITY ENGINEERING)
 
-- **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)
-- **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)
-- **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)
-- **Nhóm thực hiện:** Nhóm 7
-- **Bộ dữ liệu thực nghiệm:** `AirPassengers.csv` (144 quan sát tháng, từ 01/1949 đến 12/1960)
+> **Môn học:** Phân tích dữ liệu chuỗi thời gian và dự báo  
+> **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
+> **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
+> **Nhóm thực hiện:** Nhóm 7  
+> **Bộ dữ liệu thực nghiệm:** `AirPassengers.csv` (144 quan sát tháng, từ 01/1949 đến 12/1960)  
 
 ---
 
-## MỤC TIÊU TỔNG QUAN CỦA BÀI THỰC HÀNH
+## 🎯 MỤC TIÊU TỔNG QUAN CỦA BÀI THỰC HÀNH
 
 Sau khi hoàn thành 6 bài tập trong đợt thực hành này, sinh viên phải nắm vững:
 1. Bản chất toán học của hàm tự tương quan (ACF) và tự tương quan riêng phần (PACF), ý nghĩa của các độ trễ (lags) và cách suy luận tính dừng, xu hướng, mùa vụ.
@@ -22,7 +21,7 @@ Sau khi hoàn thành 6 bài tập trong đợt thực hành này, sinh viên ph�
 
 ---
 
-## NỘI DUNG CHI TIẾT 6 BÀI TẬP THỰC HÀNH
+## 📝 NỘI DUNG CHI TIẾT 6 BÀI TẬP THỰC HÀNH
 
 ### BÀI TẬP 1: TÍNH VÀ PHÂN TÍCH BIỂU ĐỒ ACF & PACF
 - **Mã nguồn:** `notebooks/bt1_acf_pacf.ipynb` hoặc `src/bt1_acf_pacf.py`
@@ -120,7 +119,7 @@ Sau khi hoàn thành 6 bài tập trong đợt thực hành này, sinh viên ph�
 
 ---
 
-## TIÊU CHÍ ĐÁNH GIÁ NGHIỆM THU (RUBRICS)
+## 📋 TIÊU CHÍ ĐÁNH GIÁ NGHIỆM THU (RUBRICS)
 
 | Hạng mục | Trọng số | Tiêu chí đạt điểm tối đa |
 | :--- | :---: | :--- |
@@ -128,3 +127,4 @@ Sau khi hoàn thành 6 bài tập trong đợt thực hành này, sinh viên ph�
 | **Chất lượng mã nguồn** | 30% | Mã nguồn viết module hóa, có chú thích giải thích rõ ràng, chạy thông suốt không lỗi, tương thích cả CLI và Jupyter Notebooks. |
 | **Phân tích học thuật & Trực quan** | 30% | Biểu đồ sắc nét, phông chữ hiển thị chuẩn tiếng Việt, đồ thị đầy đủ nhãn trục, chú giải và tiêu đề. Phân tích sâu sắc, lập luận logic. |
 | **Báo cáo tổng hợp** | 25% | Báo cáo Markdown & Word đầy đủ các phần, công thức toán học rõ ràng, bảng kết quả định lượng chuẩn xác và liên kết chéo thông minh. |
+

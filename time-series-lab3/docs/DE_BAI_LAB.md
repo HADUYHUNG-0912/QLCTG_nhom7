@@ -1,7 +1,7 @@
 # BÀI TẬP THỰC HÀNH: DỰ ĐOÁN CHUỖI THỜI GIAN SỬ DỤNG MACHINE LEARNING MODELS
 ## (TIME SERIES FORECASTING USING MACHINE LEARNING MODELS)
 
-> **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)  
+> **Môn học:** Phân tích dữ liệu chuỗi thời gian và dự báo  
 > **Đơn vị đào tạo:** Khoa Công nghệ Thông tin - Trường Đại học Giao thông Vận tải TP.HCM (UTH)  
 > **Giảng viên phụ trách:** PhD. Nguyễn Thị Khánh Tiên (`tienntk@ut.edu.vn`)  
 > **Bộ dữ liệu thực nghiệm:** [Hourly Energy Consumption (PJM) - AEP_hourly.csv](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption?select=AEP_hourly.csv)

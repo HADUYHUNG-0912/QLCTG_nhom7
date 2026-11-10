@@ -1,7 +1,7 @@
 # PRACTICE 4 – MULTIVARIATE TIME SERIES FORECASTING
 ## DỰ BÁO CHUỖI THỜI GIAN ĐA BIẾN: ĐIỆN NĂNG TIÊU THỤ & THỜI TIẾT (ELECTRICITY LOAD + WEATHER)
 
-> **Môn học:** Quản lý & Khai phá Chuỗi Thời Gian (QLCTG)  
+> **Môn học:** Phân tích dữ liệu chuỗi thời gian và dự báo  
 > **Chủ đề:** Multivariate Time Series Forecasting (Thống kê vs Machine Learning vs Deep Learning)  
 > **Bộ dữ liệu chính:** Electricity Load Diagrams Dataset (UCI) kết hợp dữ liệu thời tiết (Weather Data)  
 > **Bộ dữ liệu nâng cao:** METR-LA / PEMS-BAY (California Highway Sensors)  
