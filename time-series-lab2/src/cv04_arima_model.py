@@ -2,7 +2,7 @@
 # AI_AGENT_INSTRUCTIONS — ĐỌC TRƯỚC KHI THỰC HIỆN BẤT KỲ THAY ĐỔI NÀO
 # =============================================================================
 # MODULE     : CV04 — Xây dựng mô hình tiêu chuẩn ARIMA(p, d, q)
-# PHỤ TRÁCH  : Thành viên 4
+# PHỤ TRÁCH  : Hoàng
 # MÔ TẢ TASK : Huấn luyện 1–2 mô hình ARIMA tiêu chuẩn từ danh sách ứng viên
 #              đề xuất bởi CV03. Thực hiện chẩn đoán phần dư nghiêm ngặt
 #              (Residual Diagnostics) gồm kiểm định White Noise qua Ljung-Box

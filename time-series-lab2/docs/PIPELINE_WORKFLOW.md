@@ -7,11 +7,11 @@
 > **Kho mã nguồn:** `time-series-lab2`  
 > **Bộ dữ liệu thực nghiệm:** **Dataset 1: Monthly Retail Sales** (`a10.csv` — 204 quan sát tháng 07/1991 – 06/2008)  
 > **Cơ cấu nhân sự (6 thành viên):**  
-> * **Thành viên 1** — EDA, Tiền xử lý, Kiểm toán chuỗi thời gian & Phân chia dữ liệu 80/20 (CV01).  
-> * **Thành viên 2** — Kiểm định tính dừng ADF & Sai phân bậc $d$ (CV02).  
-> * **Thành viên 3** — Phân tích tương quan động ACF / PACF & Lựa chọn bậc trễ $(p, q)$ (CV03).  
-> * **Thành viên 4** — Xây dựng mô hình ARIMA, Chẩn đoán phần dư & Đánh giá (CV04).  
-> * **Thành viên 5** — Xây dựng mô hình mùa vụ SARIMA & Đối chuẩn Benchmark với ARIMA (CV05).  
+> * **Hiệp** — EDA, Tiền xử lý, Kiểm toán chuỗi thời gian & Phân chia dữ liệu 80/20 (CV01).  
+> * **Phương** — Kiểm định tính dừng ADF & Sai phân bậc $d$ (CV02).  
+> * **Trâm** — Phân tích tương quan động ACF / PACF & Lựa chọn bậc trễ $(p, q)$ (CV03).  
+> * **Hoàng** — Xây dựng mô hình ARIMA, Chẩn đoán phần dư & Đánh giá (CV04).  
+> * **Khải** — Xây dựng mô hình mùa vụ SARIMA & Đối chuẩn Benchmark với ARIMA (CV05).  
 > * **Hà Duy Hưng (Lead)** — Quản trị Pipeline tổng thể, Tổng hợp Báo cáo Kỹ thuật & Trả lời toàn bộ 12 câu hỏi lý luận chuyên sâu (CV06).  
 
 ---
@@ -35,8 +35,8 @@
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV01                                                                                                  │
-│ THÀNH VIÊN   : Thành viên 1                                                                                          │
-│ TỆP THỰC THI : src/cv01_eda_and_preprocessing.py | notebooks/cv01_member1_eda_preprocessing.ipynb                   │
+│ THÀNH VIÊN   : Hiệp                                                                                          │
+│ TỆP THỰC THI : src/cv01_eda_and_preprocessing.py | notebooks/cv01_eda_and_preprocessing.ipynb                   │
 │ ĐẦU VÀO      : data/raw/a10.csv                                                                                      │
 │ NHIỆM VỤ     : • Audit dữ liệu: 0% missing, 0 duplicate, thiết lập DatetimeIndex tần suất tháng (freq='MS')          │
 │                • Phân tích EDA: Biểu đồ đường (Line plot), phân rã Xu hướng (Trend) & Mùa vụ 12 tháng (Seasonality)  │
@@ -58,8 +58,8 @@
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV02                                                                                                  │
-│ THÀNH VIÊN   : Thành viên 2                                                                                          │
-│ TỆP THỰC THI : src/cv02_stationarity_and_differencing.py | notebooks/cv02_member2_stationarity_differencing.ipynb    │
+│ THÀNH VIÊN   : Phương                                                                                          │
+│ TỆP THỰC THI : src/cv02_stationarity_and_differencing.py | notebooks/cv02_stationarity_and_differencing.ipynb    │
 │ ĐẦU VÀO      : data/processed/train.csv                                                                              │
 │ NHIỆM VỤ     : • Kiểm định ADF trên chuỗi Train gốc: ADF statistic, p-value so với ngưỡng alpha = 0.05               │
 │                • Nếu chuỗi không dừng: Thực hiện lấy sai phân bậc 1 (d = 1)                                          │
@@ -80,8 +80,8 @@
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV03                                                                                                  │
-│ THÀNH VIÊN   : Thành viên 3                                                                                          │
-│ TỆP THỰC THI : src/cv03_acf_pacf_analysis.py | notebooks/cv03_member3_acf_pacf_analysis.ipynb                        │
+│ THÀNH VIÊN   : Trâm                                                                                          │
+│ TỆP THỰC THI : src/cv03_acf_pacf_analysis.py | notebooks/cv03_acf_pacf_analysis.ipynb                        │
 │ ĐẦU VÀO      : data/processed/train_differenced.csv                                                                  │
 │ NHIỆM VỤ     : • Tính và vẽ hàm tự tương quan (ACF) và hàm tự tương quan riêng phần (PACF) đến lag 40                │
 │                • Xác định hiện tượng cắt cụt (Cut-off) hoặc suy giảm dần (Tail-off) để gợi ý p và q                  │
@@ -104,10 +104,10 @@
 ═══════════════════════════════════════════════════   ═══════════════════════════════════════════════════
 ┌─────────────────────────────────────────────────┐   ┌─────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV04                             │   │ MÃ CÔNG VIỆC : CV05                             │
-│ THÀNH VIÊN   : Thành viên 4                     │   │ THÀNH VIÊN   : Thành viên 5                     │
+│ THÀNH VIÊN   : Hoàng                     │   │ THÀNH VIÊN   : Khải                     │
 │ TỆP THỰC THI :                                  │   │ TỆP THỰC THI :                                  │
 │   src/cv04_arima_model.py                       │   │   src/cv05_sarima_model.py                      │
-│   notebooks/cv04_member4_arima_model.ipynb      │   │   notebooks/cv05_member5_sarima_model.ipynb     │
+│   notebooks/cv04_arima_model.ipynb      │   │   notebooks/cv05_sarima_model.ipynb     │
 │ ĐẦU VÀO      : train.csv, test.csv,             │   │ ĐẦU VÀO      : train.csv, test.csv,             │
 │                cv03_candidate_orders.csv        │   │                cv03_candidate_orders.csv        │
 │ NHIỆM VỤ     :                                  │   │ NHIỆM VỤ     :                                  │
@@ -138,7 +138,7 @@
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV06                                                                                                  │
 │ THÀNH VIÊN   : Hà Duy Hưng (Lead)                                                                                    │
-│ TỆP THỰC THI : src/cv06_report_synthesis.py | notebooks/cv06_hung_lead_report_synthesis.ipynb                       │
+│ TỆP THỰC THI : src/cv06_report_synthesis.py | notebooks/cv06_report_synthesis.ipynb                       │
 │ ĐẦU VÀO      : Toàn bộ bảng dữ liệu trong outputs/tables/*.csv và biểu đồ trong outputs/figures/*.png               │
 │ NHIỆM VỤ     : • Tổng hợp và đối chiếu bảng so sánh hoàn chỉnh (AIC, BIC, MAE, RMSE, MAPE giữa ARIMA và SARIMA)     │
 │                • Trả lời chi tiết và khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu trong đề bài                     │
@@ -164,7 +164,7 @@
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                 PHA 1: KHỞI TẠO HỢP ĐỒNG DỮ LIỆU (2 PHÚT)                               │
-│                         Lead Hưng / Thành viên 1 sinh train.csv (80%) & test.csv (20%)                  │
+│                         Lead Hưng / Hiệp sinh train.csv (80%) & test.csv (20%)                  │
 └────────────────────────────────────────────────────┬────────────────────────────────────────────────────┘
                                                      │ (Giải phóng điểm nghẽn - Unblock 100%)
                      ┌───────────────────────────────┼───────────────────────────────┐
@@ -192,12 +192,12 @@
 
 | Mã CV | Thành viên phụ trách | Tính chất thực thi | Phụ thuộc đầu vào (Prerequisites) | Khả năng chạy song song |
 | :---: | :--- | :---: | :--- | :--- |
-| **CV01 (Split)** | Thành viên 1 (hoặc Lead) | **Tuần tự (Cổng 1)** | `data/raw/a10.csv` | Chạy đầu tiên trong 2 phút để tạo `train.csv` và `test.csv`. |
-| **CV01 (EDA)** | Thành viên 1 | **Song song 100%** | `train.csv` | Chạy song song độc lập với CV02, CV03, CV04, CV05, CV06. |
-| **CV02** | Thành viên 2 | **Song song 100%** | `train.csv` | Lấy sai phân `diff(1)` và kiểm định ADF; chạy song song với tất cả các bước khác. |
-| **CV03** | Thành viên 3 | **Song song 100%** | `train.csv` | Đọc `train.csv`, tính `diff(1)` và vẽ ACF/PACF 40 lags; không cần đợi CV02. |
-| **CV04** | Thành viên 4 | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện các mô hình $\text{ARIMA}(1,1,1), (2,1,1)$; chạy hoàn toàn song song với SARIMA. |
-| **CV05** | Thành viên 5 | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện $\text{SARIMA}(1,1,1)(0,1,1)_{12}$; chỉ cần đợi CV04 ở bước cuối để ghép bảng Benchmark. |
+| **CV01 (Split)** | Hiệp (hoặc Lead Hưng) | **Tuần tự (Cổng 1)** | `data/raw/a10.csv` | Chạy đầu tiên trong 2 phút để tạo `train.csv` và `test.csv`. |
+| **CV01 (EDA)** | Hiệp | **Song song 100%** | `train.csv` | Chạy song song độc lập với CV02, CV03, CV04, CV05, CV06. |
+| **CV02** | Phương | **Song song 100%** | `train.csv` | Lấy sai phân `diff(1)` và kiểm định ADF; chạy song song với tất cả các bước khác. |
+| **CV03** | Trâm | **Song song 100%** | `train.csv` | Đọc `train.csv`, tính `diff(1)` và vẽ ACF/PACF 40 lags; không cần đợi CV02. |
+| **CV04** | Hoàng | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện các mô hình $\text{ARIMA}(1,1,1), (2,1,1)$; chạy hoàn toàn song song với SARIMA. |
+| **CV05** | Khải | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện $\text{SARIMA}(1,1,1)(0,1,1)_{12}$; chỉ cần đợi CV04 ở bước cuối để ghép bảng Benchmark. |
 | **CV06** | **Hà Duy Hưng (Lead)** | **Song song từ đầu** | Đề bài `DE_BAI_LAB02.md` | Soạn khung báo cáo và giải quyết 12 câu hỏi lý thuyết; chỉ đợi bảng metrics ở bước nghiệm thu cuối. |
 
 ---
@@ -206,18 +206,18 @@
 
 | Mã CV | Thành viên | Vai trò phụ trách | Tệp mã nguồn & Notebook | Hợp đồng Đầu vào (Input) | Hợp đồng Đầu ra (Deliverables) | Câu hỏi lý luận chịu trách nhiệm |
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CV01** | **Thành viên 1** | EDA, Tiền xử lý & Split 80/20 | • `src/cv01_eda_and_preprocessing.py`<br>• `notebooks/cv01_member1_eda_preprocessing.ipynb` | • `data/raw/a10.csv` | • `data/processed/train.csv`<br>• `data/processed/test.csv`<br>• `cv01_eda_timeseries.png`<br>• `cv01_monthly_seasonality_boxplot.png`<br>• `cv01_data_summary.csv`, `cv01_split_info.csv` | • Câu hỏi 1, 2, 3 (Bài 1): Xu hướng, Mùa vụ, Tính dừng trực quan. |
-| **CV02** | **Thành viên 2** | Kiểm định ADF & Sai phân xác định $d$ | • `src/cv02_stationarity_and_differencing.py`<br>• `notebooks/cv02_member2_stationarity_differencing.ipynb` | • `data/processed/train.csv` | • `data/processed/train_differenced.csv`<br>• `cv02_adf_test_summary.csv`<br>• `cv02_adf_before_after_differencing.png` | • Câu hỏi 1, 2, 3 (Bài 2): Bản chất $H_0$, ý nghĩa $p$-value.<br>• Câu hỏi 1, 2 (Bài 3): Tính dừng sau sai phân, giá trị tham số $d$. |
-| **CV03** | **Thành viên 3** | Phân tích tương quan ACF/PACF & Bậc trễ | • `src/cv03_acf_pacf_analysis.py`<br>• `notebooks/cv03_member3_acf_pacf_analysis.ipynb` | • `data/processed/train_differenced.csv` | • `cv03_acf_pacf_plots.png`<br>• `cv03_lag_correlation_analysis.png`<br>• `cv03_candidate_orders.csv` | • Câu hỏi 1, 2, 3 (Bài 4): Điểm cắt cụt ACF/PACF, đề xuất bộ tham số $(p, d, q)$ khởi tạo. |
-| **CV04** | **Thành viên 4** | Xây dựng mô hình tiêu chuẩn ARIMA(p,d,q) | • `src/cv04_arima_model.py`<br>• `notebooks/cv04_member4_arima_model.ipynb` | • `train.csv`, `test.csv`<br>• `cv03_candidate_orders.csv` | • `outputs/models/arima_model.pkl`<br>• `cv04_arima_metrics.csv`<br>• `cv04_residual_stats.csv`<br>• `cv04_arima_residual_diag.png`<br>• `cv04_arima_forecast_vs_actual.png` | • Câu hỏi 1–5 (Bài 5): Tại sao không shuffle, ý nghĩa $p, d, q$, hội tụ, kiểm định phần dư White Noise. |
-| **CV05** | **Thành viên 5** | Xây dựng mô hình mùa vụ SARIMA & Benchmark | • `src/cv05_sarima_model.py`<br>• `notebooks/cv05_member5_sarima_model.ipynb` | • `train.csv`, `test.csv`<br>• `arima_model.pkl`<br>• `cv04_arima_metrics.csv` | • `outputs/models/sarima_model.pkl`<br>• `cv05_sarima_metrics.csv`<br>• `cv05_model_benchmark_table.csv`<br>• `cv05_sarima_forecast_vs_actual.png`<br>• `cv05_arima_vs_sarima_comparison.png` | • Câu hỏi 6–9 (Bài 5): Dự báo bám xu hướng, vị trí sai lệch lớn nhất, độ nhạy outlier, ý nghĩa RMSE. |
-| **CV06** | **Hà Duy Hưng (Lead)** | Quản trị Pipeline, Tổng hợp Báo cáo & Lập luận toàn diện | • `src/cv06_report_synthesis.py`<br>• `notebooks/cv06_hung_lead_report_synthesis.ipynb` | • Toàn bộ CSV trong `outputs/tables/`<br>• Toàn bộ PNG trong `outputs/figures/` | • `docs/BAO_CAO_LAB02_NHOM7.md`<br>• `outputs/tables/final_summary_report.csv`<br>• `outputs/figures/cv06_summary_dashboard.png` | • Hợp nhất và phản biện khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu của bài Lab. |
+| **CV01** | **Hiệp** | EDA, Tiền xử lý & Split 80/20 | • `src/cv01_eda_and_preprocessing.py`<br>• `notebooks/cv01_eda_and_preprocessing.ipynb` | • `data/raw/a10.csv` | • `data/processed/train.csv`<br>• `data/processed/test.csv`<br>• `cv01_eda_timeseries.png`<br>• `cv01_monthly_seasonality_boxplot.png`<br>• `cv01_data_summary.csv`, `cv01_split_info.csv` | • Câu hỏi 1, 2, 3 (Bài 1): Xu hướng, Mùa vụ, Tính dừng trực quan. |
+| **CV02** | **Phương** | Kiểm định ADF & Sai phân xác định $d$ | • `src/cv02_stationarity_and_differencing.py`<br>• `notebooks/cv02_stationarity_and_differencing.ipynb` | • `data/processed/train.csv` | • `data/processed/train_differenced.csv`<br>• `cv02_adf_test_summary.csv`<br>• `cv02_adf_before_after_differencing.png` | • Câu hỏi 1, 2, 3 (Bài 2): Bản chất $H_0$, ý nghĩa $p$-value.<br>• Câu hỏi 1, 2 (Bài 3): Tính dừng sau sai phân, giá trị tham số $d$. |
+| **CV03** | **Trâm** | Phân tích tương quan ACF/PACF & Bậc trễ | • `src/cv03_acf_pacf_analysis.py`<br>• `notebooks/cv03_acf_pacf_analysis.ipynb` | • `data/processed/train_differenced.csv` | • `cv03_acf_pacf_plots.png`<br>• `cv03_lag_correlation_analysis.png`<br>• `cv03_candidate_orders.csv` | • Câu hỏi 1, 2, 3 (Bài 4): Điểm cắt cụt ACF/PACF, đề xuất bộ tham số $(p, d, q)$ khởi tạo. |
+| **CV04** | **Hoàng** | Xây dựng mô hình tiêu chuẩn ARIMA(p,d,q) | • `src/cv04_arima_model.py`<br>• `notebooks/cv04_arima_model.ipynb` | • `train.csv`, `test.csv`<br>• `cv03_candidate_orders.csv` | • `outputs/models/arima_model.pkl`<br>• `cv04_arima_metrics.csv`<br>• `cv04_residual_stats.csv`<br>• `cv04_arima_residual_diag.png`<br>• `cv04_arima_forecast_vs_actual.png` | • Câu hỏi 1–5 (Bài 5): Tại sao không shuffle, ý nghĩa $p, d, q$, hội tụ, kiểm định phần dư White Noise. |
+| **CV05** | **Khải** | Xây dựng mô hình mùa vụ SARIMA & Benchmark | • `src/cv05_sarima_model.py`<br>• `notebooks/cv05_sarima_model.ipynb` | • `train.csv`, `test.csv`<br>• `arima_model.pkl`<br>• `cv04_arima_metrics.csv` | • `outputs/models/sarima_model.pkl`<br>• `cv05_sarima_metrics.csv`<br>• `cv05_model_benchmark_table.csv`<br>• `cv05_sarima_forecast_vs_actual.png`<br>• `cv05_arima_vs_sarima_comparison.png` | • Câu hỏi 6–9 (Bài 5): Dự báo bám xu hướng, vị trí sai lệch lớn nhất, độ nhạy outlier, ý nghĩa RMSE. |
+| **CV06** | **Hà Duy Hưng (Lead)** | Quản trị Pipeline, Tổng hợp Báo cáo & Lập luận toàn diện | • `src/cv06_report_synthesis.py`<br>• `notebooks/cv06_report_synthesis.ipynb` | • Toàn bộ CSV trong `outputs/tables/`<br>• Toàn bộ PNG trong `outputs/figures/` | • `docs/BAO_CAO_LAB02_NHOM7.md`<br>• `outputs/tables/final_summary_report.csv`<br>• `outputs/figures/cv06_summary_dashboard.png` | • Hợp nhất và phản biện khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu của bài Lab. |
 
 ---
 
 ## 3. CHI TIẾT KỸ THUẬT TỪNG BƯỚC THỰC HIỆN
 
-### 3.1. Bước 1 — EDA, Tiền xử lý & Split Dữ liệu (CV01 - Thành viên 1)
+### 3.1. Bước 1 — EDA, Tiền xử lý & Split Dữ liệu (CV01 - Hiệp)
 * **Tiền xử lý chuỗi thời gian:**
   * Đọc `data/raw/a10.csv`, kiểm tra kiểu dữ liệu của `date` và ép kiểu sang `pd.to_datetime()`.
   * Đặt `date` làm `DatetimeIndex`, gán tần suất chu kỳ tháng đầu tháng: `df.index.freq = 'MS'`.
@@ -230,7 +230,7 @@
   * **Test set:** $20\%$ cuối chuỗi = $41$ tháng (từ tháng 02/2005 đến tháng 06/2008).
   * **Quy tắc vàng:** Tuyệt đối không dùng `shuffle=True`, bảo tồn tính thứ tự nhân quả thời gian.
 
-### 3.2. Bước 2 — Kiểm định tính dừng & Sai phân (CV02 - Thành viên 2)
+### 3.2. Bước 2 — Kiểm định tính dừng & Sai phân (CV02 - Phương)
 * **Kiểm định ADF trên chuỗi Train gốc:**
   * Giả thuyết $H_0$: Chuỗi tồn tại nghiệm đơn vị (Unit Root) $\implies$ Chuỗi không dừng.
   * Giả thuyết $H_1$: Chuỗi không có nghiệm đơn vị $\implies$ Chuỗi dừng.
@@ -240,7 +240,7 @@
   * Kiểm định ADF lần 2 trên $\Delta y_t$.
   * Nếu chuỗi đạt $p$-value $< 0.05 \implies$ Bác bỏ $H_0$, chuỗi đạt tính dừng với bậc sai phân $d = 1$.
 
-### 3.3. Bước 3 — Phân tích ACF / PACF & Lựa chọn bậc trễ (CV03 - Thành viên 3)
+### 3.3. Bước 3 — Phân tích ACF / PACF & Lựa chọn bậc trễ (CV03 - Trâm)
 * **Phân tích hàm tự tương quan (ACF & PACF):**
   * Vẽ ACF và PACF cho chuỗi dừng $\Delta y_t$ với độ dài $40$ lags (bao quát hơn 3 chu kỳ mùa vụ 12 tháng).
   * Xác định bậc tự hồi quy $p$ thông qua độ dài lag PACF cắt cụt (vượt dải tin cậy $\pm 1.96/\sqrt{N}$).
@@ -248,7 +248,7 @@
   * Quan sát sự xuất hiện của các gai nhọn (spikes) nổi bật tại các lag mùa vụ $12, 24, 36$ để chuẩn bị tham số cho SARIMA.
   * Đề xuất bảng các bộ tham số $(p, d, q)$ tiềm năng kèm AIC/BIC ban đầu.
 
-### 3.4. Bước 4 — Huấn luyện Mô hình ARIMA & Chẩn đoán phần dư (CV04 - Thành viên 4)
+### 3.4. Bước 4 — Huấn luyện Mô hình ARIMA & Chẩn đoán phần dư (CV04 - Hoàng)
 * **Xây dựng mô hình ARIMA:**
   * Fit các mô hình ứng viên trên tập Train (Ví dụ: $\text{ARIMA}(1, 1, 1)$, $\text{ARIMA}(2, 1, 1)$).
   * Chọn mô hình có AIC/BIC tối ưu nhất.
@@ -263,7 +263,7 @@
     $$\text{RMSE} = \sqrt{\frac{1}{N} \sum_{t=1}^N (y_t - \hat{y}_t)^2}$$
     $$\text{MAPE} = \frac{1}{N} \sum_{t=1}^N \left| \frac{y_t - \hat{y}_t}{y_t} \right| \times 100\%$$
 
-### 3.5. Bước 5 — Xây dựng mô hình mùa vụ SARIMA & Benchmark (CV05 - Thành viên 5)
+### 3.5. Bước 5 — Xây dựng mô hình mùa vụ SARIMA & Benchmark (CV05 - Khải)
 * **Tích hợp yếu tố mùa vụ:**
   * Chu kỳ mùa vụ: $s = 12$ (12 tháng trong năm).
   * Áp dụng sai phân mùa vụ: $D = 1$ ($\Delta_{12} y_t = y_t - y_{t-12}$).
@@ -278,7 +278,7 @@
 
 ### 3.6. Bước 6 — Quản trị Pipeline, Tổng hợp Báo cáo & Lập luận Chuyên sâu (CV06 - Hà Duy Hưng Lead)
 * **Quản trị Pipeline & Tích hợp liên tục:**
-  * Điều phối tiến độ các thành viên 1 đến 5, đảm bảo hợp đồng giao tiếp dữ liệu (I/O contracts) chuẩn xác giữa các bước.
+  * Điều phối tiến độ các thành viên (Hiệp, Phương, Trâm, Hoàng, Khải), đảm bảo hợp đồng giao tiếp dữ liệu (I/O contracts) chuẩn xác giữa các bước.
   * Kiểm duyệt mã nguồn, loại bỏ hoàn toàn hiện tượng rò rỉ dữ liệu (Lookahead bias), chuẩn hóa định dạng kết quả.
 * **Tổng kết nghiệm thu:**
   * Nạp toàn bộ kết quả thực nghiệm từ `outputs/tables/` và `outputs/figures/`.
@@ -314,12 +314,12 @@ time-series-lab2/
 │   └── BAO_CAO_LAB02_NHOM7.md                        # Báo cáo kỹ thuật tổng kết nghiệm thu (CV06 xuất bản)
 │
 ├── notebooks/                                        # 6 Jupyter Notebooks dành cho 6 thành viên thực nghiệm
-│   ├── cv01_member1_eda_preprocessing.ipynb          # Notebook của Thành viên 1
-│   ├── cv02_member2_stationarity_differencing.ipynb  # Notebook của Thành viên 2
-│   ├── cv03_member3_acf_pacf_analysis.ipynb          # Notebook của Thành viên 3
-│   ├── cv04_member4_arima_model.ipynb                # Notebook của Thành viên 4
-│   ├── cv05_member5_sarima_model.ipynb               # Notebook của Thành viên 5
-│   └── cv06_hung_lead_report_synthesis.ipynb         # Notebook của Hà Duy Hưng (Lead)
+│   ├── cv01_eda_and_preprocessing.ipynb          # Notebook của Hiệp
+│   ├── cv02_stationarity_and_differencing.ipynb  # Notebook của Phương
+│   ├── cv03_acf_pacf_analysis.ipynb          # Notebook của Trâm
+│   ├── cv04_arima_model.ipynb                # Notebook của Hoàng
+│   ├── cv05_sarima_model.ipynb               # Notebook của Khải
+│   └── cv06_report_synthesis.ipynb         # Notebook của Hà Duy Hưng (Lead)
 │
 ├── outputs/
 │   ├── figures/                                      # Biểu đồ trực quan hóa độ phân giải cao (DPI 150)
@@ -350,11 +350,11 @@ time-series-lab2/
 │       └── final_summary_report.csv                  # Bảng số liệu tổng hợp nghiệm thu cuối cùng
 │
 ├── src/                                              # 6 Python scripts module hóa độc lập
-│   ├── cv01_eda_and_preprocessing.py                 # Script CV01 (Thành viên 1)
-│   ├── cv02_stationarity_and_differencing.py         # Script CV02 (Thành viên 2)
-│   ├── cv03_acf_pacf_analysis.py                     # Script CV03 (Thành viên 3)
-│   ├── cv04_arima_model.py                           # Script CV04 (Thành viên 4)
-│   ├── cv05_sarima_model.py                          # Script CV05 (Thành viên 5)
+│   ├── cv01_eda_and_preprocessing.py                 # Script CV01 (Hiệp)
+│   ├── cv02_stationarity_and_differencing.py         # Script CV02 (Phương)
+│   ├── cv03_acf_pacf_analysis.py                     # Script CV03 (Trâm)
+│   ├── cv04_arima_model.py                           # Script CV04 (Hoàng)
+│   ├── cv05_sarima_model.py                          # Script CV05 (Khải)
 │   └── cv06_report_synthesis.py                      # Script CV06 (Hà Duy Hưng Lead)
 │
 └── tests/

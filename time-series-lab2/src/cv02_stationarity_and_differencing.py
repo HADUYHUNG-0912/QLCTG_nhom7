@@ -2,7 +2,7 @@
 # AI_AGENT_INSTRUCTIONS — ĐỌC TRƯỚC KHI THỰC HIỆN BẤT KỲ THAY ĐỔI NÀO
 # =============================================================================
 # MODULE     : CV02 — Kiểm định tính dừng ADF & Lấy sai phân xác định bậc d
-# PHỤ TRÁCH  : Thành viên 2
+# PHỤ TRÁCH  : Phương
 # MÔ TẢ TASK : Kiểm định Augmented Dickey-Fuller (ADF) trên chuỗi Train gốc
 #              để xác định tính không dừng (p-value ≥ 0.05). Thực hiện sai
 #              phân bậc 1 (d=1: Δy_t = y_t − y_{t-1}). Kiểm định ADF lần 2

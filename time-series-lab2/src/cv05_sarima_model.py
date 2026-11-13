@@ -2,7 +2,7 @@
 # AI_AGENT_INSTRUCTIONS — ĐỌC TRƯỚC KHI THỰC HIỆN BẤT KỲ THAY ĐỔI NÀO
 # =============================================================================
 # MODULE     : CV05 — Mô hình mùa vụ SARIMA(p,d,q)(P,D,Q)[12] & Benchmark
-# PHỤ TRÁCH  : Thành viên 5
+# PHỤ TRÁCH  : Khải
 # MÔ TẢ TASK : Xây dựng mô hình SARIMA với chu kỳ mùa vụ s=12, sai phân
 #              mùa vụ D=1 trên chuỗi a10.csv. Chẩn đoán phần dư nghiêm ngặt
 #              (kiểm định White Noise tại lag mùa vụ 12, 24). Dự báo ngoài mẫu

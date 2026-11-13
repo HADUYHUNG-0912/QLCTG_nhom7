@@ -2,7 +2,7 @@
 # AI_AGENT_INSTRUCTIONS — ĐỌC TRƯỚC KHI THỰC HIỆN BẤT KỲ THAY ĐỔI NÀO
 # =============================================================================
 # MODULE     : CV01 — EDA, Tiền xử lý dữ liệu & Phân chia tập Train/Test 80/20
-# PHỤ TRÁCH  : Thành viên 1
+# PHỤ TRÁCH  : Hiệp
 # MÔ TẢ TASK : Nạp a10.csv (204 tháng: 07/1991 – 06/2008), thiết lập
 #              DatetimeIndex tần suất tháng (freq='MS'), kiểm toán chất lượng
 #              dữ liệu (0% missing, 0 duplicate), phân tích khám phá EDA

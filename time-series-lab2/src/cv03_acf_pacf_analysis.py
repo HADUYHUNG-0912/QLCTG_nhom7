@@ -2,7 +2,7 @@
 # AI_AGENT_INSTRUCTIONS — ĐỌC TRƯỚC KHI THỰC HIỆN BẤT KỲ THAY ĐỔI NÀO
 # =============================================================================
 # MODULE     : CV03 — Phân tích tương quan động ACF / PACF & Đề xuất bậc (p, q)
-# PHỤ TRÁCH  : Thành viên 3
+# PHỤ TRÁCH  : Trâm
 # MÔ TẢ TASK : Tính toán và vẽ hàm tự tương quan (ACF) và hàm tự tương quan
 #              riêng phần (PACF) cho chuỗi dừng (Δy_t) đến 40 lags. Phân tích
 #              hiện tượng cắt cụt (cut-off) hoặc suy giảm dần (tail-off) để
