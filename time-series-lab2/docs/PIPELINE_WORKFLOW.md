@@ -7,12 +7,12 @@
 > **Kho mã nguồn:** `time-series-lab2`  
 > **Bộ dữ liệu thực nghiệm:** **Dataset 1: Monthly Retail Sales** (`a10.csv` — 204 quan sát tháng 07/1991 – 06/2008)  
 > **Cơ cấu nhân sự (6 thành viên):**  
-> * **Hà Duy Hưng (Lead)** — Quản trị Pipeline tổng thể, EDA, Tiền xử lý & Phân chia dữ liệu (CV01).  
+> * **Thành viên 1** — EDA, Tiền xử lý, Kiểm toán chuỗi thời gian & Phân chia dữ liệu 80/20 (CV01).  
 > * **Thành viên 2** — Kiểm định tính dừng ADF & Sai phân bậc $d$ (CV02).  
 > * **Thành viên 3** — Phân tích tương quan động ACF / PACF & Lựa chọn bậc trễ $(p, q)$ (CV03).  
 > * **Thành viên 4** — Xây dựng mô hình ARIMA, Chẩn đoán phần dư & Đánh giá (CV04).  
 > * **Thành viên 5** — Xây dựng mô hình mùa vụ SARIMA & Đối chuẩn Benchmark với ARIMA (CV05).  
-> * **Thành viên 6** — Tổng hợp Báo cáo Kỹ thuật & Giải đáp toàn bộ câu hỏi lý luận (CV06).  
+> * **Hà Duy Hưng (Lead)** — Quản trị Pipeline tổng thể, Tổng hợp Báo cáo Kỹ thuật & Trả lời toàn bộ 12 câu hỏi lý luận chuyên sâu (CV06).  
 
 ---
 
@@ -35,8 +35,8 @@
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV01                                                                                                  │
-│ THÀNH VIÊN   : Hà Duy Hưng (Lead)                                                                                    │
-│ TỆP THỰC THI : src/cv01_eda_and_preprocessing.py | notebooks/cv01_hung_eda_preprocessing.ipynb                       │
+│ THÀNH VIÊN   : Thành viên 1                                                                                          │
+│ TỆP THỰC THI : src/cv01_eda_and_preprocessing.py | notebooks/cv01_member1_eda_preprocessing.ipynb                   │
 │ ĐẦU VÀO      : data/raw/a10.csv                                                                                      │
 │ NHIỆM VỤ     : • Audit dữ liệu: 0% missing, 0 duplicate, thiết lập DatetimeIndex tần suất tháng (freq='MS')          │
 │                • Phân tích EDA: Biểu đồ đường (Line plot), phân rã Xu hướng (Trend) & Mùa vụ 12 tháng (Seasonality)  │
@@ -133,12 +133,12 @@
                                                     │
                                                     ▼
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
- BƯỚC 6: TỔNG HỢP BÁO CÁO NGHIỆM THU & GIẢI ĐÁP TOÀN BỘ CÂU HỎI LÝ LUẬN
+ BƯỚC 6: QUẢN TRỊ PIPELINE, TỔNG HỢP BÁO CÁO NGHIỆM THU & GIẢI ĐÁP TOÀN BỘ CÂU HỎI LÝ LUẬN
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ MÃ CÔNG VIỆC : CV06                                                                                                  │
-│ THÀNH VIÊN   : Thành viên 6                                                                                          │
-│ TỆP THỰC THI : src/cv06_report_synthesis.py | notebooks/cv06_member6_report_synthesis.ipynb                        │
+│ THÀNH VIÊN   : Hà Duy Hưng (Lead)                                                                                    │
+│ TỆP THỰC THI : src/cv06_report_synthesis.py | notebooks/cv06_hung_lead_report_synthesis.ipynb                       │
 │ ĐẦU VÀO      : Toàn bộ bảng dữ liệu trong outputs/tables/*.csv và biểu đồ trong outputs/figures/*.png               │
 │ NHIỆM VỤ     : • Tổng hợp và đối chiếu bảng so sánh hoàn chỉnh (AIC, BIC, MAE, RMSE, MAPE giữa ARIMA và SARIMA)     │
 │                • Trả lời chi tiết và khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu trong đề bài                     │
@@ -161,18 +161,18 @@
 
 | Mã CV | Thành viên | Vai trò phụ trách | Tệp mã nguồn & Notebook | Hợp đồng Đầu vào (Input) | Hợp đồng Đầu ra (Deliverables) | Câu hỏi lý luận chịu trách nhiệm |
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **CV01** | **Hà Duy Hưng (Lead)** | Quản trị Pipeline, EDA & Split 80/20 | • `src/cv01_eda_and_preprocessing.py`<br>• `notebooks/cv01_hung_eda_preprocessing.ipynb` | • `data/raw/a10.csv` | • `data/processed/train.csv`<br>• `data/processed/test.csv`<br>• `cv01_eda_timeseries.png`<br>• `cv01_monthly_seasonality_boxplot.png`<br>• `cv01_data_summary.csv`, `cv01_split_info.csv` | • Câu hỏi 1, 2, 3 (Bài 1): Xu hướng, Mùa vụ, Tính dừng trực quan. |
+| **CV01** | **Thành viên 1** | EDA, Tiền xử lý & Split 80/20 | • `src/cv01_eda_and_preprocessing.py`<br>• `notebooks/cv01_member1_eda_preprocessing.ipynb` | • `data/raw/a10.csv` | • `data/processed/train.csv`<br>• `data/processed/test.csv`<br>• `cv01_eda_timeseries.png`<br>• `cv01_monthly_seasonality_boxplot.png`<br>• `cv01_data_summary.csv`, `cv01_split_info.csv` | • Câu hỏi 1, 2, 3 (Bài 1): Xu hướng, Mùa vụ, Tính dừng trực quan. |
 | **CV02** | **Thành viên 2** | Kiểm định ADF & Sai phân xác định $d$ | • `src/cv02_stationarity_and_differencing.py`<br>• `notebooks/cv02_member2_stationarity_differencing.ipynb` | • `data/processed/train.csv` | • `data/processed/train_differenced.csv`<br>• `cv02_adf_test_summary.csv`<br>• `cv02_adf_before_after_differencing.png` | • Câu hỏi 1, 2, 3 (Bài 2): Bản chất $H_0$, ý nghĩa $p$-value.<br>• Câu hỏi 1, 2 (Bài 3): Tính dừng sau sai phân, giá trị tham số $d$. |
 | **CV03** | **Thành viên 3** | Phân tích tương quan ACF/PACF & Bậc trễ | • `src/cv03_acf_pacf_analysis.py`<br>• `notebooks/cv03_member3_acf_pacf_analysis.ipynb` | • `data/processed/train_differenced.csv` | • `cv03_acf_pacf_plots.png`<br>• `cv03_lag_correlation_analysis.png`<br>• `cv03_candidate_orders.csv` | • Câu hỏi 1, 2, 3 (Bài 4): Điểm cắt cụt ACF/PACF, đề xuất bộ tham số $(p, d, q)$ khởi tạo. |
 | **CV04** | **Thành viên 4** | Xây dựng mô hình tiêu chuẩn ARIMA(p,d,q) | • `src/cv04_arima_model.py`<br>• `notebooks/cv04_member4_arima_model.ipynb` | • `train.csv`, `test.csv`<br>• `cv03_candidate_orders.csv` | • `outputs/models/arima_model.pkl`<br>• `cv04_arima_metrics.csv`<br>• `cv04_residual_stats.csv`<br>• `cv04_arima_residual_diag.png`<br>• `cv04_arima_forecast_vs_actual.png` | • Câu hỏi 1–5 (Bài 5): Tại sao không shuffle, ý nghĩa $p, d, q$, hội tụ, kiểm định phần dư White Noise. |
 | **CV05** | **Thành viên 5** | Xây dựng mô hình mùa vụ SARIMA & Benchmark | • `src/cv05_sarima_model.py`<br>• `notebooks/cv05_member5_sarima_model.ipynb` | • `train.csv`, `test.csv`<br>• `arima_model.pkl`<br>• `cv04_arima_metrics.csv` | • `outputs/models/sarima_model.pkl`<br>• `cv05_sarima_metrics.csv`<br>• `cv05_model_benchmark_table.csv`<br>• `cv05_sarima_forecast_vs_actual.png`<br>• `cv05_arima_vs_sarima_comparison.png` | • Câu hỏi 6–9 (Bài 5): Dự báo bám xu hướng, vị trí sai lệch lớn nhất, độ nhạy outlier, ý nghĩa RMSE. |
-| **CV06** | **Thành viên 6** | Tổng hợp Báo cáo & Lập luận toàn diện | • `src/cv06_report_synthesis.py`<br>• `notebooks/cv06_member6_report_synthesis.ipynb` | • Toàn bộ CSV trong `outputs/tables/`<br>• Toàn bộ PNG trong `outputs/figures/` | • `docs/BAO_CAO_LAB02_NHOM7.md`<br>• `outputs/tables/final_summary_report.csv`<br>• `outputs/figures/cv06_summary_dashboard.png` | • Hợp nhất và phản biện khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu của bài Lab. |
+| **CV06** | **Hà Duy Hưng (Lead)** | Quản trị Pipeline, Tổng hợp Báo cáo & Lập luận toàn diện | • `src/cv06_report_synthesis.py`<br>• `notebooks/cv06_hung_lead_report_synthesis.ipynb` | • Toàn bộ CSV trong `outputs/tables/`<br>• Toàn bộ PNG trong `outputs/figures/` | • `docs/BAO_CAO_LAB02_NHOM7.md`<br>• `outputs/tables/final_summary_report.csv`<br>• `outputs/figures/cv06_summary_dashboard.png` | • Hợp nhất và phản biện khoa học toàn bộ 12 câu hỏi lý luận chuyên sâu của bài Lab. |
 
 ---
 
 ## 3. CHI TIẾT KỸ THUẬT TỪNG BƯỚC THỰC HIỆN
 
-### 3.1. Bước 1 — Quản trị Pipeline, EDA & Split Dữ liệu (CV01 - Hà Duy Hưng Lead)
+### 3.1. Bước 1 — EDA, Tiền xử lý & Split Dữ liệu (CV01 - Thành viên 1)
 * **Tiền xử lý chuỗi thời gian:**
   * Đọc `data/raw/a10.csv`, kiểm tra kiểu dữ liệu của `date` và ép kiểu sang `pd.to_datetime()`.
   * Đặt `date` làm `DatetimeIndex`, gán tần suất chu kỳ tháng đầu tháng: `df.index.freq = 'MS'`.
@@ -231,10 +231,14 @@
     - So sánh AIC, BIC, Train Time, Test MAE, Test RMSE, Test MAPE.
     - Phân tích sự vượt trội của SARIMA trong việc nắm bắt đỉnh nhọn doanh số tháng 1 hàng năm.
 
-### 3.6. Bước 6 — Tổng hợp Báo cáo & Lập luận Chuyên sâu (CV06 - Thành viên 6)
+### 3.6. Bước 6 — Quản trị Pipeline, Tổng hợp Báo cáo & Lập luận Chuyên sâu (CV06 - Hà Duy Hưng Lead)
+* **Quản trị Pipeline & Tích hợp liên tục:**
+  * Điều phối tiến độ các thành viên 1 đến 5, đảm bảo hợp đồng giao tiếp dữ liệu (I/O contracts) chuẩn xác giữa các bước.
+  * Kiểm duyệt mã nguồn, loại bỏ hoàn toàn hiện tượng rò rỉ dữ liệu (Lookahead bias), chuẩn hóa định dạng kết quả.
 * **Tổng kết nghiệm thu:**
   * Nạp toàn bộ kết quả thực nghiệm từ `outputs/tables/` và `outputs/figures/`.
   * Soạn thảo báo cáo kỹ thuật hoàn chỉnh: `docs/BAO_CAO_LAB02_NHOM7.md`.
+  * Thiết kế Dashboard trực quan hóa tổng kết toàn diện (`outputs/figures/cv06_summary_dashboard.png`).
 * **Giải đáp chi tiết toàn bộ câu hỏi lý luận chuyên sâu:**
   1. *EDA:* Chuỗi có trend tăng mạnh, chu kỳ mùa vụ 12 tháng rõ rệt, phương sai mở rộng dần, chuỗi gốc không thể dừng.
   2. *ADF Test:* $H_0$ là chuỗi không dừng (có nghiệm đơn vị); $p$-value là xác suất quan sát được mẫu dữ liệu nếu $H_0$ đúng; với mức ý nghĩa $5\%$, $p \ge 0.05$ không thể bác bỏ $H_0$.
@@ -265,12 +269,12 @@ time-series-lab2/
 │   └── BAO_CAO_LAB02_NHOM7.md                        # Báo cáo kỹ thuật tổng kết nghiệm thu (CV06 xuất bản)
 │
 ├── notebooks/                                        # 6 Jupyter Notebooks dành cho 6 thành viên thực nghiệm
-│   ├── cv01_hung_eda_preprocessing.ipynb             # Notebook của Hà Duy Hưng (Lead)
+│   ├── cv01_member1_eda_preprocessing.ipynb          # Notebook của Thành viên 1
 │   ├── cv02_member2_stationarity_differencing.ipynb  # Notebook của Thành viên 2
 │   ├── cv03_member3_acf_pacf_analysis.ipynb          # Notebook của Thành viên 3
 │   ├── cv04_member4_arima_model.ipynb                # Notebook của Thành viên 4
 │   ├── cv05_member5_sarima_model.ipynb               # Notebook của Thành viên 5
-│   └── cv06_member6_report_synthesis.ipynb           # Notebook của Thành viên 6
+│   └── cv06_hung_lead_report_synthesis.ipynb         # Notebook của Hà Duy Hưng (Lead)
 │
 ├── outputs/
 │   ├── figures/                                      # Biểu đồ trực quan hóa độ phân giải cao (DPI 150)
@@ -301,12 +305,12 @@ time-series-lab2/
 │       └── final_summary_report.csv                  # Bảng số liệu tổng hợp nghiệm thu cuối cùng
 │
 ├── src/                                              # 6 Python scripts module hóa độc lập
-│   ├── cv01_eda_and_preprocessing.py                 # Script CV01 (Hưng Lead)
+│   ├── cv01_eda_and_preprocessing.py                 # Script CV01 (Thành viên 1)
 │   ├── cv02_stationarity_and_differencing.py         # Script CV02 (Thành viên 2)
 │   ├── cv03_acf_pacf_analysis.py                     # Script CV03 (Thành viên 3)
 │   ├── cv04_arima_model.py                           # Script CV04 (Thành viên 4)
 │   ├── cv05_sarima_model.py                          # Script CV05 (Thành viên 5)
-│   └── cv06_report_synthesis.py                      # Script CV06 (Thành viên 6)
+│   └── cv06_report_synthesis.py                      # Script CV06 (Hà Duy Hưng Lead)
 │
 └── tests/
     └── .gitkeep                                      # Kiểm thử tự động tính toàn vẹn của pipeline
@@ -359,3 +363,4 @@ python src/cv06_report_synthesis.py
 5. **Đồng bộ hóa tên gọi và tính tái lập (Reproducibility):**
    * Cố định `random_state = 42` ở mọi bước cần sinh số ngẫu nhiên.
    * Toàn bộ biểu đồ xuất bản phải lưu ở độ phân giải cao ($\text{DPI} = 150$), định dạng PNG, phông chữ hỗ trợ Unicode (`DejaVu Sans` hoặc `Arial`).
+
