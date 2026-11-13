@@ -1,0 +1,5 @@
+Feature,ADF_Statistic,p_value,Lags_Used,Critical_Value_5%,Stationary
+load,-14.0925,0.0,45,-2.8617,YES
+temp,-2.7467,0.0663,47,-2.8617,NO
+humidity,-4.6401,0.0001,47,-2.8617,YES
+wind_speed,-3.0317,0.032,47,-2.8617,YES
