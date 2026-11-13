@@ -157,6 +157,51 @@
 
 ---
 
+## 1.1. CHIẾN LƯỢC THỰC THI SONG SONG (PARALLEL EXECUTION STRATEGY)
+
+Để tối ưu hóa thời gian hoàn thành của 6 thành viên, Pipeline được thiết kế theo cơ chế **Phân tầng hướng hợp đồng dữ liệu (Data-Contract Phasing)**, cho phép **làm song song tới 85% khối lượng công việc**:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 PHA 1: KHỞI TẠO HỢP ĐỒNG DỮ LIỆU (2 PHÚT)                               │
+│                         Lead Hưng / Thành viên 1 sinh train.csv (80%) & test.csv (20%)                  │
+└────────────────────────────────────────────────────┬────────────────────────────────────────────────────┘
+                                                     │ (Giải phóng điểm nghẽn - Unblock 100%)
+                     ┌───────────────────────────────┼───────────────────────────────┐
+                     ▼                               ▼                               ▼
+┌───────────────────────────────┐   ┌───────────────────────────────┐   ┌───────────────────────────────┐
+│ LUỒNG THỐNG KÊ & EDA (SONG²)  │   │ LUỒNG MÔ HÌNH HÓA (SONG SONG) │   │ LUỒNG LÝ LUẬN & BÁO CÁO (SONG)│
+├───────────────────────────────┤   ├───────────────────────────────┤   ├───────────────────────────────┤
+│ • CV01: EDA & Boxplot 12 tháng│   │ • CV04: Fit ARIMA(p,d,q)      │   │ • CV06 (Lead Hưng):           │
+│ • CV02: Kiểm định ADF & d=1   │   │   Residuals White Noise       │   │   Khung Báo cáo Markdown &    │
+│ • CV03: Vẽ ACF/PACF 40 lags,  │   │   Dự báo 41 tháng tập Test    │   │   Giải đáp phần lớn lý luận   │
+│   nhận diện spikes mùa vụ     │   │ • CV05: Fit SARIMA(p,d,q)[12] │   │   toán học của 12 câu hỏi     │
+│                               │   │   Dự báo 41 tháng tập Test    │   │                               │
+└───────────────┬───────────────┘   └───────────────┬───────────────┘   └───────────────┬───────────────┘
+                │                                   │                                   │
+                └───────────────────────────────────┼───────────────────────────────────┘
+                                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                PHA 3: CỔNG HỘI TỤ NGHIỆM THU (SYNC GATE - 10 PHÚT)                      │
+│ • CV05: Ghép cv04_arima_metrics.csv vào cv05_model_benchmark_table.csv & vẽ biểu đồ đối chuẩn 2 mô hình │
+│ • CV06: Điền số liệu thực nghiệm chính xác vào BAO_CAO_LAB02_NHOM7.md & xuất bản Dashboard tổng kết     │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Bảng phân định tính chất Tuần tự vs Song song chi tiết:
+
+| Mã CV | Thành viên phụ trách | Tính chất thực thi | Phụ thuộc đầu vào (Prerequisites) | Khả năng chạy song song |
+| :---: | :--- | :---: | :--- | :--- |
+| **CV01 (Split)** | Thành viên 1 (hoặc Lead) | **Tuần tự (Cổng 1)** | `data/raw/a10.csv` | Chạy đầu tiên trong 2 phút để tạo `train.csv` và `test.csv`. |
+| **CV01 (EDA)** | Thành viên 1 | **Song song 100%** | `train.csv` | Chạy song song độc lập với CV02, CV03, CV04, CV05, CV06. |
+| **CV02** | Thành viên 2 | **Song song 100%** | `train.csv` | Lấy sai phân `diff(1)` và kiểm định ADF; chạy song song với tất cả các bước khác. |
+| **CV03** | Thành viên 3 | **Song song 100%** | `train.csv` | Đọc `train.csv`, tính `diff(1)` và vẽ ACF/PACF 40 lags; không cần đợi CV02. |
+| **CV04** | Thành viên 4 | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện các mô hình $\text{ARIMA}(1,1,1), (2,1,1)$; chạy hoàn toàn song song với SARIMA. |
+| **CV05** | Thành viên 5 | **Song song 100%** | `train.csv`, `test.csv` | Huấn luyện $\text{SARIMA}(1,1,1)(0,1,1)_{12}$; chỉ cần đợi CV04 ở bước cuối để ghép bảng Benchmark. |
+| **CV06** | **Hà Duy Hưng (Lead)** | **Song song từ đầu** | Đề bài `DE_BAI_LAB02.md` | Soạn khung báo cáo và giải quyết 12 câu hỏi lý thuyết; chỉ đợi bảng metrics ở bước nghiệm thu cuối. |
+
+---
+
 ## 2. MA TRẬN PHÂN CÔNG NHIỆM VỤ CHI TIẾT (WORKLOAD MATRIX)
 
 | Mã CV | Thành viên | Vai trò phụ trách | Tệp mã nguồn & Notebook | Hợp đồng Đầu vào (Input) | Hợp đồng Đầu ra (Deliverables) | Câu hỏi lý luận chịu trách nhiệm |
@@ -320,7 +365,8 @@ time-series-lab2/
 
 ## 5. THỨ TỰ THỰC THI LIÊN TỤC QUA DÒNG LỆNH (CLI EXECUTION)
 
-Các thành viên hoặc AI Agent hỗ trợ có thể thực thi tuần tự pipeline thông qua Terminal tại thư mục `time-series-lab2/`:
+### Cách 1: Thực thi tuần tự từng bước (Sequential Mode)
+Dành cho việc kiểm tra từng bước hoặc chạy trên một terminal duy nhất:
 
 ```bash
 # Điều hướng vào thư mục bài thực hành
@@ -342,6 +388,27 @@ python src/cv04_arima_model.py
 python src/cv05_sarima_model.py
 
 # Bước 6: Tổng hợp toàn bộ bảng biểu, biểu đồ và xuất bản Báo cáo nghiệm thu Markdown
+python src/cv06_report_synthesis.py
+```
+
+### Cách 2: Thực thi song song tốc độ cao (Fast-track Parallel Mode)
+Tận dụng kiến trúc không đồng bộ (Asynchronous / Parallel Jobs) để chạy cùng lúc các bước độc lập sau khi Bước 1 tạo xong dữ liệu:
+
+```powershell
+# Pha 1: Mở cổng dữ liệu (Bắt buộc chạy đầu tiên - 2 phút)
+python src/cv01_eda_and_preprocessing.py
+
+# Pha 2: Chạy song song 4 luồng độc lập (PowerShell Background Jobs)
+$j2 = Start-Job { Set-Location e:\Chuỗi_TG\time-series-lab2; python src/cv02_stationarity_and_differencing.py }
+$j3 = Start-Job { Set-Location e:\Chuỗi_TG\time-series-lab2; python src/cv03_acf_pacf_analysis.py }
+$j4 = Start-Job { Set-Location e:\Chuỗi_TG\time-series-lab2; python src/cv04_arima_model.py }
+$j5 = Start-Job { Set-Location e:\Chuỗi_TG\time-series-lab2; python src/cv05_sarima_model.py }
+
+# Đợi các luồng huấn luyện và phân tích hoàn tất
+Wait-Job $j2, $j3, $j4, $j5
+Receive-Job $j2, $j3, $j4, $j5
+
+# Pha 3: Nghiệm thu và xuất bản Báo cáo Kỹ thuật (Lead Hưng)
 python src/cv06_report_synthesis.py
 ```
 
