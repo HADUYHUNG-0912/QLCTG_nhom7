@@ -144,3 +144,4 @@ if __name__ == "__main__":
     print(f"[OK] Danh sách ứng viên:\n{candidates.to_string()}")
 
     print("[DONE] CV03 hoàn tất. Chuyển cv03_candidate_orders.csv cho CV04 & CV05.")
+

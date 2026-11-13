@@ -222,3 +222,4 @@ if __name__ == "__main__":
     pd.DataFrame([metrics]).to_csv(os.path.join(TABLE_DIR, "cv05_sarima_metrics.csv"), index=False)
 
     print("[DONE] CV05 hoàn tất. Chuyển cv05_model_benchmark_table.csv cho CV06 (Lead).")
+

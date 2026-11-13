@@ -199,3 +199,4 @@ if __name__ == "__main__":
     pd.DataFrame([metrics]).to_csv(os.path.join(TABLE_DIR, "cv04_arima_metrics.csv"), index=False)
 
     print("[DONE] CV04 hoàn tất. Chuyển arima_model.pkl & cv04_arima_metrics.csv cho CV05.")
+

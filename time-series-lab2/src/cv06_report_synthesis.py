@@ -180,3 +180,4 @@ if __name__ == "__main__":
     export_report(summary, answers_md)
     print("[OK] Đã xuất bản docs/BAO_CAO_LAB02_NHOM7.md")
     print("[DONE] CV06 hoàn tất. Pipeline Lab 02 đã hoàn chỉnh toàn bộ!")
+
