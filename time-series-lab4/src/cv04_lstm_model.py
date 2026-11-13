@@ -1,7 +1,7 @@
 # ============================================================
 # AI_AGENT_INSTRUCTIONS
 # ============================================================
-# THÀNH VIÊN  : CV04 – Trâm
+# THÀNH VIÊN  : CV04 – Châm
 # DEADLINE    : 12/11
 # NHIỆM VỤ   : Xây dựng mô hình LSTM (Deep Learning)
 #

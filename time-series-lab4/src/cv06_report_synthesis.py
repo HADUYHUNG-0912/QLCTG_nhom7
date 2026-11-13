@@ -1,7 +1,7 @@
 # ============================================================
 # AI_AGENT_INSTRUCTIONS
 # ============================================================
-# THÀNH VIÊN  : CV06 – Phương
+# THÀNH VIÊN  : CV06 – Khải
 # DEADLINE    : 14/11
 # NHIỆM VỤ   : Tổng hợp báo cáo + trả lời 6 câu hỏi lý luận
 #

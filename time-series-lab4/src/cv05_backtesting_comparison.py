@@ -1,7 +1,7 @@
 # ============================================================
 # AI_AGENT_INSTRUCTIONS
 # ============================================================
-# THÀNH VIÊN  : CV05 – Hiệp
+# THÀNH VIÊN  : CV05 – Hoàng
 # DEADLINE    : 12/11
 # NHIỆM VỤ   : Walk-forward Backtesting và so sánh 3 mô hình
 #

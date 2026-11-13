@@ -53,7 +53,7 @@ Tuần 2 (13/11 – 14/11)
 | **CV01** | **Hà Duy Hưng (Lead)** | `main` | EDA, Preprocessing, Lag Features | [`src/cv01_eda_and_preprocessing.py`](src/cv01_eda_and_preprocessing.py) | **05/11** | 🟢 **Đã hoàn thành** |
 | **CV02** | **Hiệp** | `main` | Mô hình VAR (Statistical Baseline) | [`src/cv02_var_model.py`](src/cv02_var_model.py) | **08/11** | 🟢 **Đã hoàn thành** |
 | **CV03** | **Phương** | `main` | Mô hình XGBoost (Machine Learning) | [`src/cv03_xgboost_model.py`](src/cv03_xgboost_model.py) | **08/11** | 🟢 **Đã hoàn thành** |
-| **CV04** | **Trâm (Châm)** | `tram-lab04` | Mô hình LSTM (Deep Learning) | [`src/cv04_lstm_model.py`](src/cv04_lstm_model.py) | **12/11** | 🟡 **Đang thực hiện** |
+| **CV04** | **Châm** | `cham-lab04` | Mô hình LSTM (Deep Learning) | [`src/cv04_lstm_model.py`](src/cv04_lstm_model.py) | **12/11** | 🟡 **Đang thực hiện** |
 | **CV05** | **Hoàng** | `hoang-lab04` | Walk-forward Backtesting + So sánh | [`src/cv05_backtesting_comparison.py`](src/cv05_backtesting_comparison.py) | **12/11** | ⏳ **Sẵn sàng thực hiện** |
 | **CV06** | **Khải** | `khai-lab04` | Tổng hợp báo cáo + Câu hỏi lý luận | [`src/cv06_report_synthesis.py`](src/cv06_report_synthesis.py) | **14/11** | ⏳ **Kế hoạch** |
 
