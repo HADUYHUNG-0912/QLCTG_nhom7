@@ -1,0 +1,13 @@
+metric,value
+observations,204
+columns,1
+missing_values,0
+missing_rate_pct,0.0
+duplicate_dates,0
+start_date,1991-07-01
+end_date,2008-06-01
+frequency,<MonthBegin>
+value_min,2.81452
+value_max,29.665356
+value_mean,10.694429582156861
+value_std,5.956997805897404
