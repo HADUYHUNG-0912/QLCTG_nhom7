@@ -54,7 +54,7 @@
  BƯỚC T3A: STATISTICAL (VAR)             BƯỚC T3B: ML (XGBOOST)                  BƯỚC T3C: DEEP LEARNING (LSTM)     
 ════════════════════════════════════    ════════════════════════════════════    ════════════════════════════════════
 ┌──────────────────────────────────┐    ┌──────────────────────────────────┐    ┌──────────────────────────────────┐
-│ MÃ CÔNG VIỆC : CV02 (HOÀN THÀNH 🟢)│  │ MÃ CÔNG VIỆC : CV03 (HOÀN THÀNH 🟢)│  │ MÃ CÔNG VIỆC : CV04 (ĐANG LÀM 🟡) │
+│ MÃ CÔNG VIỆC : CV02 (HOÀN THÀNH 🟢)│  │ MÃ CÔNG VIỆC : CV03 (HOÀN THÀNH 🟢)│  │ MÃ CÔNG VIỆC : CV04 (HOÀN THÀNH 🟢)│
 │ THÀNH VIÊN   : Hiệp              │    │ THÀNH VIÊN   : Phương            │    │ THÀNH VIÊN   : Châm              │
 │ NHÁNH GIT    : main              │    │ NHÁNH GIT    : main              │    │ NHÁNH GIT    : cham-lab04        │
 │ SCRIPT:                          │    │ SCRIPT:                          │    │ SCRIPT:                          │
@@ -214,7 +214,7 @@
 | **Training (T1-T2)** | **CV01** | **Hà Duy Hưng (Lead)** | `main` | Quản trị Pipeline, EDA, Scaling & 96 Lags | • [`src/cv01_eda_and_preprocessing.py`](../src/cv01_eda_and_preprocessing.py)<br>• [`notebooks/cv01_hung_eda_preprocessing.ipynb`](../notebooks/cv01_hung_eda_preprocessing.ipynb) | • `data/raw/energy_weather.csv` | • `data/processed/train.csv`, `val.csv`, `test.csv`<br>• `data/processed/train_lag.csv`, `val_lag.csv`, `test_lag.csv`<br>• `data/processed/scaler.pkl`<br>• 5 biểu đồ EDA & 4 bảng thống kê | 🟢 **Hoàn thành** |
 | **Training (T3A)** | **CV02** | **Hiệp** | `main` | Statistical Baseline (**VAR Model**) | • [`src/cv02_var_model.py`](../src/cv02_var_model.py)<br>• [`notebooks/cv02_hiep_var_model.ipynb`](../notebooks/cv02_hiep_var_model.ipynb) | • `train.csv`, `val.csv`, `test.csv`<br>• `scaler.pkl` | • `outputs/models/var_model.pkl`<br>• `outputs/tables/cv02_var_metrics.csv`<br>• `outputs/tables/cv02_var_lag_selection.csv`<br>• `outputs/tables/cv02_adf_test_results.csv`<br>• `outputs/figures/cv02_aic_bic_lag_selection.png`<br>• `outputs/figures/cv02_var_actual_vs_predicted.png` | 🟢 **Hoàn thành** |
 | **Training (T3B)** | **CV03** | **Phương** | `main` | Machine Learning (**XGBoost Regressor**) | • [`src/cv03_xgboost_model.py`](../src/cv03_xgboost_model.py)<br>• [`notebooks/cv03_phuong_xgboost_model.ipynb`](../notebooks/cv03_phuong_xgboost_model.ipynb) | • `train.csv`, `val.csv`, `test.csv`<br>• `scaler.pkl` | • `outputs/models/xgboost_model.json`<br>• `outputs/tables/cv03_xgb_metrics.csv`<br>• `outputs/tables/cv03_xgb_feature_importance.csv`<br>• `cv03_xgb_learning_curve.png`<br>• `cv03_xgb_feature_importance.png`<br>• `cv03_xgb_forecast_vs_actual.png` | 🟢 **Hoàn thành** |
-| **Training (T3C)** | **CV04** | **Châm** | `cham-lab04` | Deep Learning (**LSTM Neural Net**) | • [`src/cv04_lstm_model.py`](../src/cv04_lstm_model.py)<br>• [`notebooks/cv04_cham_lstm_model.ipynb`](../notebooks/cv04_cham_lstm_model.ipynb) | • `train.csv`, `val.csv`, `test.csv`<br>• `scaler.pkl` | • `outputs/models/lstm_model.keras`<br>• `outputs/tables/cv04_lstm_metrics.csv`<br>• `cv04_lstm_learning_curve.png`<br>• `cv04_lstm_actual_vs_predicted.png` | 🟡 **Đang thực hiện** |
+| **Training (T3C)** | **CV04** | **Châm** | `cham-lab04` | Deep Learning (**LSTM Neural Net**) | • [`src/cv04_lstm_model.py`](../src/cv04_lstm_model.py)<br>• [`notebooks/cv04_cham_lstm_model.ipynb`](../notebooks/cv04_cham_lstm_model.ipynb) | • `train.csv`, `val.csv`, `test.csv`<br>• `scaler.pkl` | • `outputs/models/lstm_model.keras`<br>• `outputs/tables/cv04_lstm_metrics.csv`<br>• `cv04_lstm_learning_curve.png`<br>• `cv04_lstm_actual_vs_predicted.png` | 🟢 **Hoàn thành** |
 | **Inference (I1-I5)** | **CV05** | **Hoàng** | `hoang-lab04` | **Walk-forward Backtesting** & Đối chuẩn | • [`src/cv05_backtesting_comparison.py`](../src/cv05_backtesting_comparison.py)<br>• [`notebooks/cv05_hoang_backtesting.ipynb`](../notebooks/cv05_hoang_backtesting.ipynb) | • `test.csv`, `scaler.pkl`<br>• 3 Model Artifacts<br>• 3 bảng Metrics | • `outputs/tables/cv05_final_comparison.csv`<br>• `cv05_actual_vs_all_models.png`<br>• `cv05_error_heatmap_by_hour.png`<br>• `cv05_model_comparison_bar.png` | ⏳ **Sẵn sàng thực hiện** |
 | **Inference (I6)** | **CV06** | **Khải** | `khai-lab04` | **Báo cáo tổng hợp** & 6 câu hỏi lý luận | • [`src/cv06_report_synthesis.py`](../src/cv06_report_synthesis.py)<br>• [`notebooks/cv06_khai_report_synthesis.ipynb`](../notebooks/cv06_khai_report_synthesis.ipynb) | • Tất cả `outputs/tables/*.csv`<br>• Tất cả `outputs/figures/*.png` | • `docs/BAO_CAO_LAB4_NHOM7.md`<br>• `outputs/tables/cv06_final_model_comparison.csv`<br>• `outputs/figures/cv06_summary_dashboard.png`<br>• Lời giải 6 câu hỏi chuyên sâu | ⏳ **Kế hoạch** |
 
@@ -262,7 +262,7 @@ python src/cv02_var_model.py
 # 3. CV03 (Phương): Tạo Rolling Features an toàn và huấn luyện XGBoost Regressor [ĐÃ XONG 🟢]
 python src/cv03_xgboost_model.py
 
-# 4. CV04 (Châm): Xây dựng Tensor 3D (N, 24, 4) và huấn luyện mạng LSTM [ĐANG THỰC HIỆN 🟡]
+# 4. CV04 (Châm): Xây dựng Tensor 3D (N, 24, 4) và huấn luyện mạng LSTM [ĐÃ XONG 🟢]
 python src/cv04_lstm_model.py
 
 # ── GIAI ĐOẠN 2: INFERENCE & EVALUATION PHASE ─────────────────────────────────────
