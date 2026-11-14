@@ -10,11 +10,11 @@
 #   - data/processed/scaler.pkl
 #
 # OUTPUT CONTRACT:
-#   - outputs/models/lstm_model.h5                  (model đã train)
+#   - outputs/models/lstm_model.keras                  (model đã train)
 #   - outputs/models/lstm_model_best.h5             (best checkpoint)
-#   - outputs/tables/lstm_metrics.csv               (RMSE, MAE, MAPE trên test)
-#   - outputs/figures/lstm_learning_curve.png
-#   - outputs/figures/lstm_forecast_vs_actual.png
+#   - outputs/tables/cv04_lstm_metrics.csv, lstm_metrics.csv (CV06)
+#   - outputs/figures/cv04_lstm_learning_curve.png, lstm_learning_curve.png (CV06)
+#   - outputs/figures/cv04_lstm_actual_vs_predicted.png
 #
 # LƯU Ý QUAN TRỌNG:
 #   - lookback=24: mỗi sample là cửa sổ 24 bước (24 giờ) × 4 features
@@ -35,6 +35,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pickle
 from pathlib import Path
+from shutil import copyfile
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # TensorFlow / Keras
@@ -45,8 +46,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
 # Cố định seed cho tính tái lập
-tf.random.set_seed(42)
-np.random.seed(42)
+tf.keras.utils.set_random_seed(42)
 
 # ----------------------------------------------------------
 # Định nghĩa đường dẫn
@@ -152,7 +152,7 @@ def step2_build_lstm(lookback: int = 24, n_features: int = 4) -> Sequential:
 
     model.compile(
         optimizer = Adam(learning_rate=0.001),
-        loss      = "mse",
+        loss      = tf.keras.losses.MeanSquaredError(),
         metrics   = ["mae"],
     )
 
@@ -213,7 +213,7 @@ def step3_train(model: Sequential,
         batch_size      = 64,
         callbacks       = callbacks,
         shuffle         = False,  # QUAN TRỌNG: KHÔNG shuffle với time-series
-        verbose         = 1,
+        verbose         = 2,
     )
 
     best_epoch = np.argmin(history.history["val_loss"]) + 1
@@ -234,7 +234,7 @@ def step3_train(model: Sequential,
 # ----------------------------------------------------------
 def step4_evaluate(model: Sequential,
                    X_test: np.ndarray, y_test: np.ndarray,
-                   scaler) -> dict:
+                   scaler, test_dates):
     """
     Dự báo trên tập test, inverse transform về original scale, tính metrics.
 
@@ -248,10 +248,12 @@ def step4_evaluate(model: Sequential,
     X_test  : np.ndarray  shape (N, lookback, n_features)
     y_test  : np.ndarray  shape (N,)  – giá trị scaled
     scaler  : StandardScaler
+    test_dates : DatetimeIndex – mốc thời gian của từng nhãn test
 
     Returns
     -------
-    metrics : dict  {"RMSE": ..., "MAE": ..., "MAPE": ...}
+    metrics, y_true, y_pred : tuple
+        Các chỉ số và hai mảng phụ tải ở đơn vị gốc.
     """
     print("=" * 60)
     print("[STEP 4] Evaluate LSTM – Tập Test")
@@ -281,16 +283,16 @@ def step4_evaluate(model: Sequential,
 
     # --- Vẽ Forecast vs Actual ---
     fig, ax = plt.subplots(figsize=(14, 4))
-    ax.plot(y_true, label="Actual Load",      color="steelblue", linewidth=1.0)
-    ax.plot(y_pred, label="LSTM Forecast",    color="purple",    linewidth=0.8, linestyle="--")
+    ax.plot(test_dates, y_true, label="Actual Load",      color="steelblue", linewidth=1.0)
+    ax.plot(test_dates, y_pred, label="LSTM Forecast",    color="purple",    linewidth=0.8, linestyle="--")
     ax.set_title("LSTM: Dự báo vs Thực tế – Tập Test")
-    ax.set_xlabel("Bước thời gian")
+    ax.set_xlabel("Thời điểm dự báo")
     ax.set_ylabel("Load (original scale)")
     ax.legend(); ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / "lstm_forecast_vs_actual.png", dpi=150, bbox_inches="tight")
+    fig.savefig(FIGURES_DIR / "cv04_lstm_actual_vs_predicted.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"  Đã lưu: {FIGURES_DIR / 'lstm_forecast_vs_actual.png'}")
+    print(f"  Đã lưu: {FIGURES_DIR / 'cv04_lstm_actual_vs_predicted.png'}")
 
     print("[STEP 4 DONE]\n")
     return metrics, y_true, y_pred
@@ -338,71 +340,38 @@ def step5_plot_learning_curve(history) -> None:
         axes[1].legend(); axes[1].grid(alpha=0.3)
 
     fig.tight_layout()
-    out = FIGURES_DIR / "lstm_learning_curve.png"
+    out = FIGURES_DIR / "cv04_lstm_learning_curve.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
+    copyfile(out, FIGURES_DIR / "lstm_learning_curve.png")
     print(f"  Đã lưu learning curve: {out}")
-
-    # --- Phân tích overfitting ---
-    gap = np.array(val_loss) - np.array(train_loss)
-    max_gap_epoch = int(np.argmax(gap)) + 1
-    print(f"  Khoảng cách val-train loss lớn nhất tại epoch {max_gap_epoch} "
-          f"(gap={gap.max():.6f})")
-    if gap[-1] > gap[0] * 2:
-        print("  [CẢNH BÁO] Có dấu hiệu OVERFITTING rõ – xem xét tăng Dropout hoặc giảm model.")
-    else:
-        print("  [OK] Không có dấu hiệu overfitting nghiêm trọng.")
-
 
 # ----------------------------------------------------------
 # STEP 6: Câu hỏi lý luận về LSTM
 # ----------------------------------------------------------
-def step6_answer_questions() -> dict:
-    """
-    Skeleton câu hỏi lý luận liên quan LSTM.
+def step6_answer_questions(history, metrics):
+    """Diễn giải kết quả CV04 từ lịch sử huấn luyện và tập test."""
+    train_loss = np.asarray(history.history["loss"])
+    val_loss = np.asarray(history.history["val_loss"])
+    best = int(np.argmin(val_loss))
+    final = len(val_loss) - 1
 
-    CV04 phải hoàn thiện nội dung.
-
-    Returns
-    -------
-    answers : dict
-    """
-    answers = {}
-
-    # --- Q1: LSTM học được chu kỳ nào trong dữ liệu? ---
-    answers["Q1_LSTM_cycles"] = """
-    TODO (CV04):
-    - Chu kỳ ngày (24h): điện tiêu thụ cao buổi sáng/chiều, thấp ban đêm
-    - Chu kỳ tuần (168h): cuối tuần vs ngày thường
-    - LSTM với lookback=24 học được chu kỳ ngắn (24h)
-    - Để học chu kỳ tuần cần lookback=168 hoặc thêm time features (giờ, ngày_trong_tuần)
-    - ...
-    """
-
-    # --- Q2: LSTM có bị overfitting không và cách xử lý? ---
-    answers["Q2_LSTM_overfitting"] = """
-    TODO (CV04):
-    - Quan sát learning curve: nếu val_loss tăng sau N epoch → overfitting
-    - EarlyStopping đã giúp dừng tại best epoch
-    - Các giải pháp: tăng Dropout, giảm LSTM units, thêm L2 regularization
-    - Dữ liệu ít: data augmentation hoặc giảm độ phức tạp model
-    - ...
-    """
-
-    # --- Q3: Sự khác biệt giữa ML (XGBoost) và DL (LSTM) ---
-    answers["Q3_ML_vs_DL"] = """
-    TODO (CV04):
-    - XGBoost: flat vector feature, không có memory state, nhanh hơn
-    - LSTM: sequence model, có hidden state (memory), học temporal dependency tự nhiên
-    - DL cần nhiều dữ liệu và compute hơn ML
-    - Trong bài toán này, ai tốt hơn? So sánh RMSE/MAE/MAPE từ Step 4 vs XGBoost
-    - ...
-    """
-
-    for q, a in answers.items():
-        print(f"\n  [{q}]\n{a}")
-
-    return answers
+    print("\nChu kỳ. Cửa sổ 24 giờ chứa một chu kỳ ngày và cho LSTM quan sát")
+    print("diễn biến phụ tải và thời tiết theo giờ. Cần kiểm định riêng để")
+    print("kết luận về chu kỳ tuần 168 giờ, chẳng hạn thử cửa sổ 168 giờ.")
+    print(f"\nOverfitting. Epoch tốt nhất là {best + 1}/{final + 1}.")
+    print(f"Train/validation MSE tại epoch tốt nhất: {train_loss[best]:.6f}/{val_loss[best]:.6f}.")
+    print(f"Train/validation MSE tại epoch cuối: {train_loss[final]:.6f}/{val_loss[final]:.6f}.")
+    if train_loss[final] < train_loss[best] and val_loss[final] > val_loss[best]:
+        print("Train loss giảm trong khi validation loss tăng sau epoch tốt nhất,")
+        print("cho thấy dấu hiệu overfitting. EarlyStopping khôi phục trọng số tốt nhất.")
+    else:
+        print("Hai mốc này chưa cho thấy train loss giảm đồng thời validation loss tăng.")
+    print("Mô hình dùng Dropout 0.2 ở hai lớp để kiểm soát overfitting.")
+    print("\nSo sánh. XGBoost nhận vector lag và các thống kê rolling được")
+    print("tạo trước. LSTM nhận chuỗi 24 × 4 theo thứ tự giờ; trạng thái ẩn")
+    print("tóm tắt các bước đã quan sát trong cửa sổ.")
+    print(f"Metrics LSTM trên test ở đơn vị gốc: {metrics}.")
 
 
 # ----------------------------------------------------------
@@ -434,8 +403,11 @@ def main():
     print("=" * 60)
 
     X_train, y_train = step1_build_sequences(df_train[FEATURES].values, lookback=LOOKBACK)
-    X_val,   y_val   = step1_build_sequences(df_val[FEATURES].values,   lookback=LOOKBACK)
-    X_test,  y_test  = step1_build_sequences(df_test[FEATURES].values,  lookback=LOOKBACK)
+    # Lấy quan sát đã có trước mốc dự báo để giữ đủ các nhãn val/test.
+    val_context = pd.concat([df_train.tail(LOOKBACK), df_val])
+    test_context = pd.concat([df_val.tail(LOOKBACK), df_test])
+    X_val, y_val = step1_build_sequences(val_context[FEATURES].values, lookback=LOOKBACK)
+    X_test, y_test = step1_build_sequences(test_context[FEATURES].values, lookback=LOOKBACK)
 
     print(f"  Train: X={X_train.shape}, y={y_train.shape}")
     print(f"  Val  : X={X_val.shape},   y={y_val.shape}")
@@ -448,17 +420,19 @@ def main():
     model, history = step3_train(model, X_train, y_train, X_val, y_val)
 
     # Lưu model cuối
-    model_path = MODELS_DIR / "lstm_model.h5"
+    model_path = MODELS_DIR / "lstm_model.keras"
     model.save(str(model_path))
     print(f"  Đã lưu model cuối: {model_path}")
 
     # --- Step 4: Evaluate ---
-    metrics, y_true, y_pred = step4_evaluate(model, X_test, y_test, scaler)
-    pd.DataFrame([metrics]).to_csv(TABLES_DIR / "lstm_metrics.csv", index=False)
-    print(f"  Đã lưu metrics: {TABLES_DIR / 'lstm_metrics.csv'}")
+    metrics, _, _ = step4_evaluate(model, X_test, y_test, scaler, df_test.index)
+    metrics_table = pd.DataFrame([{"Model": "LSTM", **metrics}])
+    for filename in ("cv04_lstm_metrics.csv", "lstm_metrics.csv"):
+        metrics_table.to_csv(TABLES_DIR / filename, index=False)
+        print(f"  Đã lưu metrics: {TABLES_DIR / filename}")
 
     # --- Step 6: Câu hỏi lý luận ---
-    answers = step6_answer_questions()
+    step6_answer_questions(history, metrics)
 
     print("\n" + "=" * 60)
     print("  [CV04 DONE] LSTM pipeline hoàn tất.")
