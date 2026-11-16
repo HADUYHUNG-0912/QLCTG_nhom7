@@ -24,124 +24,112 @@
 #   [5] Lưu hình ảnh với dpi=150 và bbox_inches='tight'.
 # =============================================================================
 
-import pandas as pd
+from itertools import product
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-import os
-
-# ---------------------------------------------------------------------------
-# 0. THIẾT LẬP ĐƯỜNG DẪN GỐC
-# ---------------------------------------------------------------------------
-ROOT      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROC_DIR  = os.path.join(ROOT, "data", "processed")
-FIG_DIR   = os.path.join(ROOT, "outputs", "figures")
-TABLE_DIR = os.path.join(ROOT, "outputs", "tables")
-
-TRAIN_CSV = os.path.join(PROC_DIR, "train.csv")
-
-for d in [FIG_DIR, TABLE_DIR]:
-    os.makedirs(d, exist_ok=True)
+import pandas as pd
+from statsmodels.tsa.stattools import acf, pacf
 
 
-# ---------------------------------------------------------------------------
-# 1. NẠP & CHUẨN BỊ CHUỖI DỪNG
-# ---------------------------------------------------------------------------
-def load_differenced_train(path: str) -> pd.Series:
-    """
-    Đọc train.csv, lấy sai phân bậc 1 (d=1) tại chỗ.
-    Trả về pd.Series Δy_t (đã dropna).
-
-    Lưu ý: CV03 tự tính diff() — không phụ thuộc vào output của CV02.
-    """
-    # TODO: df = pd.read_csv(path, index_col='date', parse_dates=True)
-    #       return df['value'].diff(1).dropna()
-    raise NotImplementedError("Thành viên 3 cài đặt tại đây")
+ROOT = Path(__file__).resolve().parents[1]
+TRAIN_CSV = ROOT / "data" / "processed" / "train.csv"
+FIG_DIR = ROOT / "outputs" / "figures"
+TABLE_DIR = ROOT / "outputs" / "tables"
+SEASONAL_LAGS = (12, 24, 36)
 
 
-# ---------------------------------------------------------------------------
-# 2. VẼ ĐỒ THỊ ACF & PACF (40 LAGS)
-# ---------------------------------------------------------------------------
-def plot_acf_pacf(series: pd.Series, lags: int = 40) -> None:
-    """
-    Vẽ ACF và PACF trên 2 subplot theo chiều dọc.
-
-    QUY TẮC ĐỌC ACF / PACF (Box-Jenkins):
-      • PACF cắt cụt tại lag p → Mô hình AR(p)
-      • ACF  cắt cụt tại lag q → Mô hình MA(q)
-      • Cả hai suy giảm dần   → Mô hình ARMA(p, q)
-      • Gai nhọn tại lag 12, 24, 36 → Có thành phần mùa vụ → SARIMA
-
-    Lưu: outputs/figures/cv03_acf_pacf_plots.png
-    """
-    # TODO: fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 8))
-    #       plot_acf(series,  lags=lags, ax=ax1, alpha=0.05, title='ACF — Hàm tự tương quan (40 lags)')
-    #       plot_pacf(series, lags=lags, ax=ax2, alpha=0.05, method='ywm', title='PACF — Hàm tự tương quan riêng phần (40 lags)')
-    raise NotImplementedError("Thành viên 3 cài đặt tại đây")
+def load_differenced_train(path: Path) -> pd.Series:
+    """Đọc tập train theo tháng và lấy sai phân bậc một."""
+    train = pd.read_csv(path, index_col="date", parse_dates=["date"]).sort_index()
+    expected = pd.date_range(train.index.min(), periods=len(train), freq="MS")
+    if not train.index.equals(expected) or train["value"].isna().any():
+        raise ValueError("Tập train phải có một giá trị hợp lệ cho mỗi tháng liên tiếp.")
+    return train["value"].diff().dropna()
 
 
-# ---------------------------------------------------------------------------
-# 3. PHÂN TÍCH GIA NHỌN MÙA VỤ (SEASONAL SPIKE DETECTION)
-# ---------------------------------------------------------------------------
-def plot_lag_analysis(series: pd.Series, seasonal_lags=None) -> None:
-    """
-    Vẽ biểu đồ lag plot nhấn mạnh các lag mùa vụ 12, 24, 36.
-    Đánh dấu trực quan các cột vượt ngưỡng tin cậy ±1.96/√N.
-
-    Lưu: outputs/figures/cv03_lag_correlation_analysis.png
-    """
-    if seasonal_lags is None:
-        seasonal_lags = [12, 24, 36]
-    # TODO: Dùng autocorr() hoặc acf() từ statsmodels
-    #       Tính dải tin cậy: conf_interval = 1.96 / (len(series) ** 0.5)
-    #       Tô màu đỏ các cột tại lag 12, 24, 36 để nhận diện spikes mùa vụ
-    raise NotImplementedError("Thành viên 3 cài đặt tại đây")
+def lag_correlations(series: pd.Series, lags: int = 40) -> pd.DataFrame:
+    """Tính ACF và PACF (Yule–Walker) cho các lag từ 1 đến lags."""
+    return pd.DataFrame(
+        {
+            "ACF": acf(series, nlags=lags, fft=True)[1:],
+            "PACF": pacf(series, nlags=lags, method="ywm")[1:],
+        },
+        index=pd.RangeIndex(1, lags + 1, name="Lag"),
+    )
 
 
-# ---------------------------------------------------------------------------
-# 4. LẬP DANH SÁCH BỘ THAM SỐ ỨNG VIÊN (p, d, q)
-# ---------------------------------------------------------------------------
+def plot_acf_pacf(series: pd.Series, lags: int = 40) -> Path:
+    correlations = lag_correlations(series, lags)
+    bound = 1.96 / len(series) ** 0.5
+    fig, axes = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
+    for ax, label in zip(axes, correlations.columns):
+        ax.axhspan(-bound, bound, color="#dbeafe", label="Ngưỡng 95%")
+        ax.axhline(0, color="#64748b", linewidth=0.8)
+        ax.stem(correlations.index, correlations[label], basefmt=" ")
+        ax.set_ylabel(label)
+        ax.legend(loc="upper right")
+    axes[-1].set_xlabel("Độ trễ (tháng)")
+    axes[-1].set_xticks(range(0, lags + 1, 4))
+    fig.suptitle("ACF và PACF của chuỗi a10 sau sai phân bậc một")
+    return save_figure(fig, "cv03_acf_pacf_plots.png")
+
+
+def plot_lag_analysis(series: pd.Series, seasonal_lags=SEASONAL_LAGS) -> Path:
+    correlations = lag_correlations(series)["ACF"]
+    bound = 1.96 / len(series) ** 0.5
+    colors = ["#b45309" if lag in seasonal_lags else "#2563eb" for lag in correlations.index]
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    ax.axhspan(-bound, bound, color="#dbeafe", label="Ngưỡng 95%")
+    ax.axhline(0, color="#64748b", linewidth=0.8)
+    ax.bar(correlations.index, correlations, color=colors)
+    for lag in seasonal_lags:
+        value = correlations.loc[lag]
+        ax.annotate(f"{value:.3f}", (lag, value), xytext=(0, 5),
+                    textcoords="offset points", ha="center")
+    ax.set(title="Tương quan mùa vụ tại các lag 12, 24 và 36",
+           xlabel="Độ trễ (tháng)", ylabel="ACF", ylim=(-0.4, 1.0))
+    ax.legend(loc="upper right")
+    return save_figure(fig, "cv03_lag_correlation_analysis.png")
+
+
+def save_figure(fig: plt.Figure, filename: str) -> Path:
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    path = FIG_DIR / filename
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return path
+
+
 def generate_candidate_orders(p_max: int = 2, d: int = 1, q_max: int = 2) -> pd.DataFrame:
-    """
-    Sinh danh sách các bộ tham số (p, d, q) ứng viên theo quy tắc Box-Jenkins.
-    Khuyến nghị bắt đầu với p ≤ 2 và q ≤ 2.
-
-    Args:
-        p_max : Bậc AR tối đa (từ phân tích PACF).
-        d     : Bậc sai phân đã xác định = 1.
-        q_max : Bậc MA tối đa (từ phân tích ACF).
-
-    Returns:
-        pd.DataFrame với các cột: [p, d, q, Ghi chú]
-    Lưu: outputs/tables/cv03_candidate_orders.csv
-    """
-    # TODO: Tạo DataFrame với itertools.product(range(p_max+1), [d], range(q_max+1))
-    #       Ghi chú: (1,1,1) là mô hình khởi điểm kinh điển cho a10.csv
-    raise NotImplementedError("Thành viên 3 cài đặt tại đây")
+    """Liệt kê ứng viên nhỏ để CV04 kiểm tra, ưu tiên hai cấu hình phù hợp."""
+    orders = list(product(range(p_max + 1), [d], range(q_max + 1)))
+    preferred = {
+        (1, d, 1): "Khởi điểm gọn; ACF và PACF đều vượt ngưỡng tại lag 1.",
+        (2, d, 1): "Thử thêm một bậc AR; PACF vượt ngưỡng tại lag 2.",
+    }
+    orders.sort(key=lambda order: order not in preferred)
+    candidates = pd.DataFrame(
+        [(*order, preferred.get(order, "Ứng viên đối chiếu")) for order in orders],
+        columns=["p", "d", "q", "Ghi chú"],
+    )
+    TABLE_DIR.mkdir(parents=True, exist_ok=True)
+    candidates.to_csv(TABLE_DIR / "cv03_candidate_orders.csv", index=False)
+    return candidates
 
 
-# ---------------------------------------------------------------------------
-# MAIN ENTRY POINT
-# ---------------------------------------------------------------------------
+def main() -> None:
+    if not TRAIN_CSV.is_file():
+        raise SystemExit(
+            "Thiếu data/processed/train.csv. Chạy CV01 hoặc mở notebook CV03 "
+            "để tạo tập train tạm từ a10.csv."
+        )
+    series = load_differenced_train(TRAIN_CSV)
+    plot_acf_pacf(series)
+    plot_lag_analysis(series)
+    print(f"Chuỗi sai phân: {len(series)} quan sát.")
+    print(generate_candidate_orders().to_string(index=False))
+
+
 if __name__ == "__main__":
-    print("=" * 70)
-    print("CV03 — Phân tích ACF / PACF & Đề xuất bậc (p, q) (Thành viên 3)")
-    print("=" * 70)
-
-    # Bước 1: Nạp chuỗi dừng
-    diff_series = load_differenced_train(TRAIN_CSV)
-    print(f"[OK] Chuỗi sau sai phân: {len(diff_series)} quan sát")
-
-    # Bước 2: Vẽ ACF/PACF 40 lags
-    plot_acf_pacf(diff_series, lags=40)
-    print("[OK] Đã lưu biểu đồ ACF/PACF 40 lags.")
-
-    # Bước 3: Phân tích lag mùa vụ
-    plot_lag_analysis(diff_series, seasonal_lags=[12, 24, 36])
-    print("[OK] Đã lưu biểu đồ phân tích gai nhọn mùa vụ.")
-
-    # Bước 4: Lập danh sách bộ tham số ứng viên
-    candidates = generate_candidate_orders(p_max=2, d=1, q_max=2)
-    print(f"[OK] Danh sách ứng viên:\n{candidates.to_string()}")
-
-    print("[DONE] CV03 hoàn tất. Chuyển cv03_candidate_orders.csv cho CV04 & CV05.")
-
+    main()
