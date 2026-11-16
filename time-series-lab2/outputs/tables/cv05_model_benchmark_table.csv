@@ -1,0 +1,3 @@
+Model,AIC,BIC,Train_Time_s,MAE,RMSE,MAPE,LB_pvalue_lag12,LB_pvalue_lag24,White_Noise,Nhận xét
+"ARIMA(1, 1, 1)",582.4674,591.7301,0.5313,3.6667,4.6242,18.0386,3.0594833971787442e-24,1.5208180380246574e-38,False,"Baseline phi mùa vụ: hội tụ phẳng (~17.54), bỏ sót hoàn toàn chu kỳ s=12 (LB p@12 << 0.05)."
+"SARIMA(1, 1, 1)x(0, 1, 1, 12)",229.4541,241.1047,0.2126,1.4727,1.9107,8.4818,0.1806,0.5842,True,"Mô hình tối ưu: triệt tiêu tự tương quan mùa vụ, giảm 59.8% MAE, giảm 58.7% RMSE và giảm 9.56 điểm % MAPE."
