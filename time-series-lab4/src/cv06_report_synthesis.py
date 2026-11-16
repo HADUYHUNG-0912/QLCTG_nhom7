@@ -88,7 +88,7 @@ def generate_summary_table(results: dict) -> pd.DataFrame:
     """
     Tổng hợp RMSE, MAE, MAPE của 3 mô hình thành 1 bảng so sánh duy nhất.
 
-    Đọc từ: var_metrics.csv, xgb_metrics.csv, lstm_metrics.csv
+    Ưu tiên kết quả trên cùng tập test từ CV05. Dùng bảng từng mô hình khi chưa chạy CV05.
 
     Returns
     -------
@@ -97,6 +97,12 @@ def generate_summary_table(results: dict) -> pd.DataFrame:
     print("=" * 60)
     print("[generate_summary_table] Tổng hợp bảng so sánh")
     print("=" * 60)
+
+    if "cv05_final_comparison" in results:
+        summary_df = results["cv05_final_comparison"].set_index("Model")
+        summary_df.to_csv(TABLES_DIR / "final_summary.csv")
+        print(summary_df.to_string())
+        return summary_df
 
     rows = []
     model_map = {
@@ -437,9 +443,9 @@ def write_markdown_report(all_sections: dict, summary_df: pd.DataFrame) -> None:
         f"",
         summary_md,
         f"",
-        f"![Comparison Overlay](../outputs/figures/comparison_overlay.png)",
+        f"![Comparison Overlay](../outputs/figures/cv05_actual_vs_all_models.png)",
         f"",
-        f"![Error Heatmap by Hour](../outputs/figures/error_heatmap_by_hour.png)",
+        f"![Error Heatmap by Hour](../outputs/figures/cv05_error_heatmap_by_hour.png)",
         f"",
         f"---",
         f"",

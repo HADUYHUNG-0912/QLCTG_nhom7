@@ -37,6 +37,7 @@ warnings.filterwarnings("ignore")
 
 import pickle
 from pathlib import Path
+from time import perf_counter
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -137,12 +138,14 @@ def step2_train_xgboost(X_train: pd.DataFrame, y_train: pd.Series,
         verbosity          = 1,
     )
 
+    started = perf_counter()
     model.fit(
         X_train, y_train,
         eval_set = [(X_train, y_train), (X_val, y_val)],
         verbose  = 100,
     )
 
+    model.train_time_seconds = perf_counter() - started
     evals_result = model.evals_result()
     train_rmse = evals_result["validation_0"]["rmse"]
     val_rmse   = evals_result["validation_1"]["rmse"]
@@ -381,7 +384,7 @@ def main():
 
     # --- Step 3: Đánh giá trên tập Test ---
     metrics, y_true, y_pred = step3_evaluate(model, X_test, y_test, scaler)
-    metrics_df = pd.DataFrame([metrics])
+    metrics_df = pd.DataFrame([{**metrics, "TrainTime(s)": model.train_time_seconds}])
     metrics_df.to_csv(TABLES_DIR / "cv03_xgb_metrics.csv", index=False)
     metrics_df.to_csv(TABLES_DIR / "xgb_metrics.csv", index=False)
     print(f"  Đã lưu metrics: {TABLES_DIR / 'cv03_xgb_metrics.csv'}")

@@ -1,536 +1,255 @@
-# ============================================================
-# AI_AGENT_INSTRUCTIONS
-# ============================================================
-# THÀNH VIÊN  : CV05 – Hoàng
-# DEADLINE    : 12/11
-# NHIỆM VỤ   : Walk-forward Backtesting và so sánh 3 mô hình
-#
-# INPUT CONTRACT:
-#   - data/processed/train.csv, val.csv, test.csv   (scaled, DatetimeIndex)
-#   - data/processed/scaler.pkl
-#   - outputs/models/var_model.pkl
-#   - outputs/models/xgb_model.json
-#   - outputs/models/lstm_model_best.h5
-#   - outputs/tables/var_metrics.csv, xgb_metrics.csv, lstm_metrics.csv
-#
-# OUTPUT CONTRACT:
-#   - outputs/tables/comparison_table.csv           (bảng so sánh 3 mô hình)
-#   - outputs/figures/comparison_overlay.png        (4 đường: Actual, VAR, XGBoost, LSTM)
-#   - outputs/figures/error_heatmap_by_hour.png     (heatmap sai số theo giờ)
-#   - outputs/figures/backtesting_walkforward.png   (tùy chọn: kết quả từng fold)
-#
-# LƯU Ý QUAN TRỌNG:
-#   - Walk-forward: KHÔNG nhìn trước – history chỉ gồm dữ liệu đã xảy ra
-#   - Đo thời gian train (TrainTime) và inference (InferTime) cho mỗi mô hình
-#   - Đánh giá theo từng giờ trong ngày để phát hiện pattern lỗi
-# ============================================================
+"""CV05 — benchmark one-step-ahead trên cùng tập test cho VAR, XGBoost, LSTM."""
 
-import sys
-sys.stdout.reconfigure(encoding="utf-8")
+import pickle
+from pathlib import Path
+from shutil import copyfile
+from time import perf_counter
 
-import warnings
-warnings.filterwarnings("ignore")
+import matplotlib
 
+matplotlib.use("Agg")
+
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import pickle
-import time
-from pathlib import Path
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-
-# statsmodels
-from statsmodels.tsa.vector_ar.var_model import VAR, VARResultsWrapper
-
-# XGBoost
 from xgboost import XGBRegressor
 
-# TensorFlow / Keras
-import tensorflow as tf
+from cv03_xgboost_model import FEATURES, LAG, TARGET, step1_build_flat_features
 
-# ----------------------------------------------------------
-# Định nghĩa đường dẫn
-# ----------------------------------------------------------
-BASE_DIR     = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent
 
-PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
-MODELS_DIR    = PROJECT_ROOT / "outputs" / "models"
-FIGURES_DIR   = PROJECT_ROOT / "outputs" / "figures"
-TABLES_DIR    = PROJECT_ROOT / "outputs" / "tables"
-
-for d in [FIGURES_DIR, TABLES_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
-
-FEATURES   = ["load", "temp", "humidity", "wind_speed"]
-TARGET     = "load"
+ROOT = Path(__file__).resolve().parents[1]
+PROCESSED = ROOT / "data" / "processed"
+MODELS = ROOT / "outputs" / "models"
+TABLES = ROOT / "outputs" / "tables"
+FIGURES = ROOT / "outputs" / "figures"
 TARGET_IDX = FEATURES.index(TARGET)
-LOOKBACK   = 24   # phải khớp với cv04
-LAG_XGB    = 24   # phải khớp với cv03
+METRICS_FILES = {
+    "VAR": "var_metrics.csv",
+    "XGBoost": "xgb_metrics.csv",
+    "LSTM": "lstm_metrics.csv",
+}
+COLORS = {"VAR": "#2573a7", "XGBoost": "#c36a16", "LSTM": "#884aa0"}
 
 
-# ----------------------------------------------------------
-# Helpers chung
-# ----------------------------------------------------------
-def _inv_load(arr_1d: np.ndarray, scaler) -> np.ndarray:
-    """
-    Inverse transform cho mảng 1D (chỉ cột load).
-    Tạo dummy array 4 cột, đặt giá trị vào cột TARGET_IDX, inverse, lấy lại.
-    """
-    dummy = np.zeros((len(arr_1d), len(FEATURES)))
-    dummy[:, TARGET_IDX] = arr_1d
-    return scaler.inverse_transform(dummy)[:, TARGET_IDX]
+def load_splits():
+    splits = [
+        pd.read_csv(PROCESSED / f"{name}.csv", index_col=0, parse_dates=True)[FEATURES]
+        for name in ("train", "val", "test")
+    ]
+    for name, split in zip(("train", "val", "test"), splits):
+        if split.empty or not np.isfinite(split.to_numpy()).all():
+            raise ValueError(f"Tập {name} rỗng hoặc có giá trị không hợp lệ.")
+    index = pd.concat(splits).index
+    if (not isinstance(index, pd.DatetimeIndex) or index.hasnans
+            or not ((index[1:] - index[:-1]) == pd.Timedelta(hours=1)).all()):
+        raise ValueError("Train, val và test phải nối tiếp theo giờ, không trùng hoặc khuyết mốc.")
+    return splits
 
 
-def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    """Tính RMSE, MAE, MAPE."""
-    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-    mae  = mean_absolute_error(y_true, y_pred)
-    mask = y_true != 0
-    mape = np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
-    return {"RMSE": round(rmse, 4), "MAE": round(mae, 4), "MAPE": round(mape, 4)}
+def load_lstm():
+    import tensorflow as tf
+
+    for filename in ("lstm_model.keras", "lstm_model_best.h5"):
+        path = MODELS / filename
+        if path.is_file():
+            return tf, tf.keras.models.load_model(path, compile=False)
+    raise FileNotFoundError("Thiếu mô hình LSTM. Chạy src/cv04_lstm_model.py trước.")
 
 
-def _build_xgb_features_single(history_df: pd.DataFrame, lag: int = 24) -> pd.Series:
-    """
-    Tạo feature vector cho XGBoost từ lịch sử gần nhất (dùng trong walk-forward).
-
-    Cần ít nhất `lag+25` hàng trong history_df.
-
-    Parameters
-    ----------
-    history_df : pd.DataFrame  (scaled, 4 cột FEATURES)
-    lag        : int
-
-    Returns
-    -------
-    feat_series : pd.Series  (vector feature 1 bước)
-    """
-    feat = {}
-
-    # Lag features
-    for col in FEATURES:
-        for k in range(1, lag + 1):
-            feat[f"{col}_lag{k}"] = history_df[col].iloc[-k]
-
-    # Rolling features (dùng shift=1 → tính trên lịch sử thực)
-    load_hist = history_df[TARGET]
-    feat["rolling_mean_6h"]  = load_hist.iloc[-7:-1].mean()   # 6 giá trị trước t
-    feat["rolling_std_24h"]  = load_hist.iloc[-25:-1].std()   # 24 giá trị trước t
-
-    # Trend
-    if len(history_df) >= 26:
-        feat["load_trend"] = float(history_df[TARGET].iloc[-1]) - float(history_df[TARGET].iloc[-25])
+def var_inputs(model, history, test):
+    """Nhận dạng sai phân từ dữ liệu đã fit, xác minh với train + val."""
+    fitted = np.asarray(model.endog)
+    if list(model.names) != FEATURES:
+        raise ValueError("Thứ tự biến của VAR khác dữ liệu CV01.")
+    if fitted.shape == history.shape and np.allclose(fitted, history):
+        differenced = False
+    elif len(fitted) == len(history) - 1 and np.allclose(fitted, np.diff(history, axis=0)):
+        differenced = True
     else:
-        feat["load_trend"] = 0.0
+        raise ValueError("VAR không khớp train + val hiện tại. Chạy lại CV02.")
 
-    return pd.Series(feat)
-
-
-# ----------------------------------------------------------
-# Walk-forward VAR
-# ----------------------------------------------------------
-def walk_forward_var(fitted_var: VARResultsWrapper,
-                     df_train_stat: pd.DataFrame,
-                     df_test: pd.DataFrame,
-                     scaler,
-                     differenced: bool,
-                     df_train_original: pd.DataFrame = None):
-    """
-    Walk-forward one-step-ahead forecasting với VAR.
-
-    Tại mỗi bước t:
-      1. Dùng p bước cuối của history (dạng stationary)
-      2. Dự báo 1 bước
-      3. Cập nhật history với giá trị THỰC tế (không phải dự báo)
-
-    Parameters
-    ----------
-    fitted_var      : VARResultsWrapper
-    df_train_stat   : pd.DataFrame  (train đã stationary, làm history ban đầu)
-    df_test         : pd.DataFrame  (test chưa sai phân, đã scale)
-    scaler          : StandardScaler
-    differenced     : bool
-    df_train_original : pd.DataFrame  (cần nếu differenced=True)
-
-    Returns
-    -------
-    y_true, y_pred : np.ndarray  (original scale)
-    infer_time     : float  (tổng thời gian inference, giây)
-    """
-    print("[walk_forward_var] Đang chạy...")
-
-    p = fitted_var.k_ar
-    history_stat = df_train_stat.values[-p:].copy()   # shape (p, 4)
-
-    y_pred_stat = []
-    t0 = time.time()
-
-    for i in range(len(df_test)):
-        # Dự báo 1 bước
-        forecast = fitted_var.forecast(y=history_stat, steps=1)  # (1, 4)
-        y_pred_stat.append(forecast[0])
-
-        # Cập nhật history với giá trị THỰC tế (teacher forcing)
-        if differenced:
-            # TODO (CV05): Tính giá trị stationary thực tế của bước i
-            # actual_stat = df_test_stat.iloc[i].values  ← cần df_test_stat
-            actual_stat = np.zeros(len(FEATURES))   # placeholder
-        else:
-            actual_stat = df_test.iloc[i].values
-
-        history_stat = np.vstack([history_stat[1:], actual_stat])
-
-    infer_time = time.time() - t0
-    y_pred_stat = np.array(y_pred_stat)   # (N, 4)
-
-    # TODO (CV05): Inverse differencing nếu differenced=True
-    if differenced:
-        # last_val = df_train_original.values[-1]
-        # y_pred_scaled = np.cumsum(y_pred_stat, axis=0) + last_val
-        pass
-    else:
-        y_pred_scaled = y_pred_stat
-
-    # Inverse transform → original scale, chỉ lấy load
-    y_pred = _inv_load(y_pred_scaled[:, TARGET_IDX], scaler)
-    y_true = _inv_load(df_test[TARGET].values, scaler)
-
-    print(f"  VAR walk-forward: {len(y_pred)} bước, inference time={infer_time:.2f}s")
-    return y_true, y_pred, infer_time
+    levels = np.concatenate((history, test))
+    stationary = np.diff(levels, axis=0) if differenced else levels
+    order = model.k_ar
+    if order < 1 or len(fitted) < order:
+        raise ValueError("Bậc trễ VAR không đủ để chạy walk-forward.")
+    offset = len(history) - int(differenced)
+    windows = (stationary[end - order:end] for end in range(offset, offset + len(test)))
+    anchors = levels[len(history) - 1:-1, TARGET_IDX] if differenced else np.zeros(len(test))
+    return windows, anchors
 
 
-# ----------------------------------------------------------
-# Walk-forward XGBoost
-# ----------------------------------------------------------
-def walk_forward_xgboost(model_xgb: XGBRegressor,
-                          df_train: pd.DataFrame,
-                          df_test: pd.DataFrame,
-                          scaler,
-                          lag: int = LAG_XGB):
-    """
-    Walk-forward one-step-ahead forecasting với XGBoost.
-
-    Xây dựng feature vector từ lịch sử (train + các bước test đã xảy ra),
-    predict 1 bước, cập nhật history với giá trị THỰC (teacher forcing).
-
-    Parameters
-    ----------
-    model_xgb : XGBRegressor
-    df_train  : pd.DataFrame  (scaled, làm history ban đầu)
-    df_test   : pd.DataFrame  (scaled)
-    scaler    : StandardScaler
-    lag       : int
-
-    Returns
-    -------
-    y_true, y_pred : np.ndarray  (original scale)
-    infer_time     : float
-    """
-    print("[walk_forward_xgboost] Đang chạy...")
-
-    # Khởi tạo history từ cuối train (cần ít nhất lag+25 hàng)
-    min_hist = lag + 25
-    history_df = df_train.iloc[-min_hist:].copy()
-
-    y_pred_scaled = []
-    t0 = time.time()
-
-    for i in range(len(df_test)):
-        # Tạo feature vector
-        feat = _build_xgb_features_single(history_df, lag=lag)
-        X_single = feat.values.reshape(1, -1)
-
-        # Dự báo
-        pred = model_xgb.predict(X_single)[0]
-        y_pred_scaled.append(pred)
-
-        # Cập nhật history với giá trị THỰC
-        new_row = df_test.iloc[[i]].copy()
-        history_df = pd.concat([history_df, new_row]).iloc[-min_hist:]
-
-    infer_time = time.time() - t0
-    y_pred_scaled = np.array(y_pred_scaled)
-
-    y_pred = _inv_load(y_pred_scaled, scaler)
-    y_true = _inv_load(df_test[TARGET].values, scaler)
-
-    print(f"  XGBoost walk-forward: {len(y_pred)} bước, inference time={infer_time:.2f}s")
-    return y_true, y_pred, infer_time
+def timed_predictions(predict_one, windows, count):
+    """Warm-up bằng cửa sổ đầu, sau đó đo từng lần gọi dự báo một mẫu."""
+    first = next(windows)
+    predict_one(first)
+    predictions = np.empty(count)
+    total = 0.0
+    start = perf_counter()
+    predictions[0] = predict_one(first)
+    total += perf_counter() - start
+    for i, window in enumerate(windows, start=1):
+        start = perf_counter()
+        predictions[i] = predict_one(window)
+        total += perf_counter() - start
+    return predictions, total
 
 
-# ----------------------------------------------------------
-# Walk-forward LSTM
-# ----------------------------------------------------------
-def walk_forward_lstm(model_lstm,
-                       df_train: pd.DataFrame,
-                       df_test: pd.DataFrame,
-                       scaler,
-                       lookback: int = LOOKBACK):
-    """
-    Walk-forward one-step-ahead forecasting với LSTM.
+def backtest(train, val, test, scaler):
+    with (MODELS / "var_model.pkl").open("rb") as handle:
+        var = pickle.load(handle)
+    xgb = XGBRegressor()
+    xgb.load_model(MODELS / "xgb_model.json")
+    tf, lstm = load_lstm()
 
-    Tại mỗi bước t:
-      1. Lấy lookback bước cuối của history → tensor (1, lookback, 4)
-      2. Predict → 1 giá trị load_scaled
-      3. Cập nhật history với giá trị THỰC
+    history = pd.concat([train, val])
+    n_test = len(test)
+    lookback = int(lstm.input_shape[1])
+    if lstm.input_shape[2] != len(FEATURES) or len(history) < max(LAG + 1, lookback):
+        raise ValueError("Lịch sử hoặc kích thước đầu vào của LSTM/XGBoost không hợp lệ.")
 
-    Parameters
-    ----------
-    model_lstm : keras Model
-    df_train   : pd.DataFrame  (scaled, làm history ban đầu)
-    df_test    : pd.DataFrame  (scaled)
-    scaler     : StandardScaler
-    lookback   : int
+    # Với nhãn test tại i, mọi cửa sổ kết thúc ở i-1. Giá trị thực ở i
+    # chỉ được đưa vào cửa sổ cho i+1. Trọng số mô hình cố định qua test.
+    var_windows, anchors = var_inputs(var, history.to_numpy(), test.to_numpy())
+    xgb_context = pd.concat([history.tail(LAG + 1), test])
+    xgb_features = step1_build_flat_features(xgb_context, lag=LAG).loc[test.index]
+    trained_columns = xgb.get_booster().feature_names or list(xgb_features.drop(columns="load_t0"))
+    xgb_matrix = xgb_features[trained_columns].to_numpy(dtype=np.float32)
+    if not np.isfinite(xgb_matrix).all() or "load_t0" in trained_columns:
+        raise ValueError("Đặc trưng XGBoost không hợp lệ cho benchmark.")
 
-    Returns
-    -------
-    y_true, y_pred : np.ndarray  (original scale)
-    infer_time     : float
-    """
-    print("[walk_forward_lstm] Đang chạy...")
+    sequence_data = pd.concat([history.tail(lookback), test]).to_numpy(dtype=np.float32)
+    lstm_windows = (sequence_data[i:i + lookback][None, :, :] for i in range(n_test))
+    lstm_infer = tf.function(lambda window: lstm(window, training=False))
 
-    # History khởi tạo từ lookback bước cuối của train
-    history = df_train[FEATURES].values[-lookback:].copy()  # (lookback, 4)
-
-    y_pred_scaled = []
-    t0 = time.time()
-
-    for i in range(len(df_test)):
-        # Tensor input: (1, lookback, n_features)
-        X_input = history[-lookback:][np.newaxis, :, :]   # (1, lookback, 4)
-
-        # Predict
-        pred_scaled = model_lstm.predict(X_input, verbose=0)[0, 0]
-        y_pred_scaled.append(pred_scaled)
-
-        # Cập nhật history với giá trị THỰC (teacher forcing)
-        actual_row = df_test[FEATURES].iloc[i].values   # shape (4,)
-        history = np.vstack([history[1:], actual_row])  # cuộn cửa sổ
-
-    infer_time = time.time() - t0
-    y_pred_scaled = np.array(y_pred_scaled)
-
-    y_pred = _inv_load(y_pred_scaled, scaler)
-    y_true = _inv_load(df_test[TARGET].values, scaler)
-
-    print(f"  LSTM walk-forward: {len(y_pred)} bước, inference time={infer_time:.2f}s")
-    return y_true, y_pred, infer_time
+    predictors = {
+        "VAR": (lambda window: var.forecast(window, steps=1)[0, TARGET_IDX], var_windows),
+        "XGBoost": (lambda window: xgb.predict(window)[0], (row[None, :] for row in xgb_matrix)),
+        "LSTM": (lambda window: float(lstm_infer(window).numpy()[0, 0]), lstm_windows),
+    }
+    actual = scaler.inverse_transform(test.to_numpy())[:, TARGET_IDX]
+    forecasts = pd.DataFrame({"Thực tế": actual}, index=test.index)
+    timings = {}
+    for name, (predict_one, windows) in predictors.items():
+        print(f"Dự báo {name}: {n_test} bước...", flush=True)
+        scaled, timings[name] = timed_predictions(predict_one, windows, n_test)
+        if name == "VAR":
+            scaled += anchors
+        forecasts[name] = scaled * scaler.scale_[TARGET_IDX] + scaler.mean_[TARGET_IDX]
+    if not np.isfinite(forecasts.to_numpy()).all():
+        raise ValueError("Benchmark gặp dự báo hoặc phụ tải không hữu hạn.")
+    return forecasts, timings
 
 
-# ----------------------------------------------------------
-# So sánh 3 mô hình
-# ----------------------------------------------------------
-def compare_models(results_var: dict, results_xgb: dict, results_lstm: dict) -> pd.DataFrame:
-    """
-    Tạo bảng so sánh tổng hợp 3 mô hình: RMSE, MAE, MAPE, InferTime.
-
-    Parameters
-    ----------
-    results_var, results_xgb, results_lstm : dict
-        Mỗi dict chứa: {"y_true", "y_pred", "infer_time", "train_time"}
-
-    Returns
-    -------
-    comparison_df : pd.DataFrame
-    """
-    print("=" * 60)
-    print("[compare_models] Tạo bảng so sánh")
-    print("=" * 60)
-
+def summarize(forecasts, timings):
+    actual = forecasts["Thực tế"]
+    valid_mape = actual != 0
     rows = []
-    for model_name, res in [("VAR", results_var), ("XGBoost", results_xgb), ("LSTM", results_lstm)]:
-        m = _compute_metrics(res["y_true"], res["y_pred"])
+    for name, filename in METRICS_FILES.items():
+        path = TABLES / filename
+        train_seconds = np.nan
+        if path.is_file():
+            metrics = pd.read_csv(path)
+            if not metrics.empty and "TrainTime(s)" in metrics:
+                train_seconds = metrics["TrainTime(s)"].iloc[0]
+        if pd.isna(train_seconds):
+            print(f"{name}: chạy lại script huấn luyện để ghi TrainTime(s).")
+        error = forecasts[name] - actual
         rows.append({
-            "Model"      : model_name,
-            "RMSE"       : m["RMSE"],
-            "MAE"        : m["MAE"],
-            "MAPE (%)"   : m["MAPE"],
-            "InferTime(s)": round(res.get("infer_time", 0.0), 3),
-            "TrainTime(s)": round(res.get("train_time", 0.0), 3),
+            "Model": name,
+            "RMSE": np.sqrt((error ** 2).mean()),
+            "MAE": error.abs().mean(),
+            "MAPE (%)": (error[valid_mape] / actual[valid_mape]).abs().mean() * 100,
+            "TrainTime(s)": train_seconds,
+            "InferTime(s)": timings[name],
+            "InferTime(ms/step)": timings[name] * 1000 / len(forecasts),
+            "TestSamples": len(forecasts),
         })
-
-    comparison_df = pd.DataFrame(rows).set_index("Model")
-    print(comparison_df.to_string())
-    comparison_df.to_csv(TABLES_DIR / "comparison_table.csv")
-    print(f"\n  Đã lưu: {TABLES_DIR / 'comparison_table.csv'}")
-    return comparison_df
+    return pd.DataFrame(rows).sort_values("RMSE", ignore_index=True)
 
 
-# ----------------------------------------------------------
-# Vẽ Overlay Plot
-# ----------------------------------------------------------
-def plot_comparison(results_dict: dict, df_test_index) -> None:
-    """
-    Vẽ overlay: Actual, VAR, XGBoost, LSTM trên cùng 1 trục.
-
-    Parameters
-    ----------
-    results_dict : dict  {"VAR": res_var, "XGBoost": res_xgb, "LSTM": res_lstm}
-    df_test_index : DatetimeIndex  (trục X thời gian)
-    """
-    print("=" * 60)
-    print("[plot_comparison] Vẽ overlay comparison")
-    print("=" * 60)
-
-    colors = {"Actual": "black", "VAR": "steelblue", "XGBoost": "darkorange", "LSTM": "purple"}
-    linestyles = {"Actual": "-", "VAR": "--", "XGBoost": "-.", "LSTM": ":"}
-    linewidths = {"Actual": 1.2, "VAR": 0.8, "XGBoost": 0.8, "LSTM": 0.8}
-
-    fig, ax = plt.subplots(figsize=(16, 5))
-
-    # Actual (từ VAR – cùng y_true)
-    y_true = list(results_dict.values())[0]["y_true"]
-    idx = df_test_index[:len(y_true)]
-
-    ax.plot(idx, y_true, label="Actual", color=colors["Actual"],
-            linewidth=linewidths["Actual"], linestyle=linestyles["Actual"])
-
-    for model_name, res in results_dict.items():
-        ax.plot(idx, res["y_pred"], label=model_name,
-                color=colors[model_name],
-                linewidth=linewidths[model_name],
-                linestyle=linestyles[model_name])
-
-    ax.set_title("Backtesting Walk-Forward: So sánh 3 mô hình vs Thực tế (Load)")
-    ax.set_xlabel("Thời gian")
-    ax.set_ylabel("Load (original scale)")
-    ax.legend(loc="upper right")
-    ax.grid(alpha=0.3)
-    fig.tight_layout()
-    out = FIGURES_DIR / "comparison_overlay.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  Đã lưu: {out}")
+def save_figure(figure, filename, legacy=None):
+    path = FIGURES / filename
+    figure.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(figure)
+    if legacy:
+        copyfile(path, FIGURES / legacy)
 
 
-# ----------------------------------------------------------
-# Heatmap sai số theo giờ trong ngày
-# ----------------------------------------------------------
-def plot_error_heatmap_by_hour(results_dict: dict, df_test: pd.DataFrame) -> None:
-    """
-    Vẽ heatmap MAE trung bình theo giờ trong ngày (0-23) cho mỗi mô hình.
-
-    Heatmap giúp phát hiện mô hình nào yếu vào giờ cao điểm (6-9h, 18-22h).
-
-    Parameters
-    ----------
-    results_dict : dict  {"VAR": res, "XGBoost": res, "LSTM": res}
-    df_test      : pd.DataFrame  (cần DatetimeIndex để lấy .hour)
-    """
-    print("=" * 60)
-    print("[plot_error_heatmap_by_hour] Vẽ heatmap sai số theo giờ")
-    print("=" * 60)
-
-    n = len(list(results_dict.values())[0]["y_true"])
-    hours = df_test.index[:n].hour   # Series giờ trong ngày
-
-    heatmap_data = {}
-    for model_name, res in results_dict.items():
-        abs_err = np.abs(res["y_true"] - res["y_pred"])
-        hour_df = pd.DataFrame({"hour": hours, "abs_err": abs_err})
-        heatmap_data[model_name] = hour_df.groupby("hour")["abs_err"].mean()
-
-    heatmap_df = pd.DataFrame(heatmap_data)   # shape (24, 3)
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-    import seaborn as sns
-    sns.heatmap(heatmap_df.T, annot=True, fmt=".1f", cmap="YlOrRd",
-                xticklabels=range(24), yticklabels=heatmap_df.columns,
-                ax=ax, cbar_kws={"label": "MAE trung bình"})
-    ax.set_title("Heatmap sai số trung bình (MAE) theo giờ trong ngày")
-    ax.set_xlabel("Giờ trong ngày (0–23)")
-    ax.set_ylabel("Mô hình")
-    fig.tight_layout()
-    out = FIGURES_DIR / "error_heatmap_by_hour.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  Đã lưu: {out}")
+def plot_overlay(forecasts):
+    fig, axes = plt.subplots(2, 1, figsize=(13, 7), layout="constrained")
+    styles = {"Thực tế": "-", "VAR": "--", "XGBoost": "-.", "LSTM": ":"}
+    colors = {"Thực tế": "#20262e", **COLORS}
+    for ax, frame, title in zip(
+        axes, (forecasts, forecasts.head(168)), ("Toàn bộ tập test", "7 ngày đầu tập test")
+    ):
+        for name, color in colors.items():
+            ax.plot(frame.index, frame[name], label=name, color=color,
+                    linestyle=styles[name], linewidth=1.2)
+        locator = mdates.AutoDateLocator()
+        ax.xaxis.set_major_locator(locator)
+        ax.xaxis.set_major_formatter(mdates.ConciseDateFormatter(locator))
+        ax.set(title=title, ylabel="Phụ tải (MW)")
+        ax.grid(alpha=0.2)
+    axes[0].legend(ncols=4, frameon=False)
+    fig.suptitle("CV05 — Dự báo trước 1 giờ và phụ tải thực tế", fontweight="bold")
+    save_figure(fig, "cv05_actual_vs_all_models.png", "comparison_overlay.png")
 
 
-# ----------------------------------------------------------
-# MAIN
-# ----------------------------------------------------------
+def plot_heatmap(forecasts):
+    error = forecasts[list(COLORS)].sub(forecasts["Thực tế"], axis=0).abs()
+    by_hour = error.groupby(error.index.hour).mean().reindex(range(24)).T
+    fig, ax = plt.subplots(figsize=(13, 3), layout="constrained")
+    image = ax.imshow(by_hour.to_numpy(), cmap="YlOrRd", aspect="auto")
+    ax.set_xticks(range(24))
+    ax.set_yticks(range(len(by_hour)), by_hour.index)
+    ax.set(title="CV05 — Sai số tuyệt đối trung bình theo giờ", xlabel="Giờ trong ngày")
+    for row, values in enumerate(by_hour.to_numpy()):
+        for hour, value in enumerate(values):
+            if np.isfinite(value):
+                color = "white" if image.norm(value) > 0.65 else "#222222"
+                ax.text(hour, row, f"{value:.0f}", ha="center", va="center", color=color, fontsize=8)
+    fig.colorbar(image, ax=ax, label="MAE (MW)")
+    save_figure(fig, "cv05_error_heatmap_by_hour.png", "error_heatmap_by_hour.png")
+
+
+def plot_benchmark(comparison):
+    fig, axes = plt.subplots(2, 3, figsize=(12, 6.5), layout="constrained")
+    panels = [
+        ("RMSE", "RMSE (MW)", 1), ("MAE", "MAE (MW)", 1), ("MAPE (%)", "MAPE (%)", 2),
+        ("TrainTime(s)", "Huấn luyện (s)", 3),
+        ("InferTime(ms/step)", "Dự báo (ms/bước)", 3),
+    ]
+    for ax, (column, title, decimals) in zip(axes.flat, panels):
+        values = comparison[column]
+        bars = ax.bar(comparison["Model"], values, color=comparison["Model"].map(COLORS))
+        labels = [f"{v:.{decimals}f}" if pd.notna(v) else "Chưa đo" for v in values]
+        ax.bar_label(bars, labels=labels, padding=3, fontsize=9)
+        ax.set_title(title)
+        ax.margins(y=0.23)
+        ax.set_axisbelow(True)
+        ax.grid(axis="y", alpha=0.2)
+    axes.flat[-1].axis("off")
+    fig.suptitle("CV05 — Benchmark VAR, XGBoost và LSTM", fontweight="bold")
+    save_figure(fig, "cv05_model_comparison_bar.png")
+
+
 def main():
-    """
-    Pipeline chính cho CV05: Walk-forward Backtesting & Comparison.
-    """
-    print("\n" + "=" * 60)
-    print("  CV05 – BACKTESTING & COMPARISON PIPELINE")
-    print("=" * 60 + "\n")
-
-    # --- Load dữ liệu ---
-    df_train = pd.read_csv(PROCESSED_DIR / "train.csv", index_col=0, parse_dates=True)
-    df_val   = pd.read_csv(PROCESSED_DIR / "val.csv",   index_col=0, parse_dates=True)
-    df_test  = pd.read_csv(PROCESSED_DIR / "test.csv",  index_col=0, parse_dates=True)
-
-    with open(PROCESSED_DIR / "scaler.pkl", "rb") as f:
-        scaler = pickle.load(f)
-
-    df_train_full = pd.concat([df_train, df_val])
-    print(f"  Train (full) shape : {df_train_full.shape}")
-    print(f"  Test shape         : {df_test.shape}\n")
-
-    # --- Load models ---
-    print("[INFO] Load các mô hình đã train...")
-
-    with open(MODELS_DIR / "var_model.pkl", "rb") as f:
-        fitted_var = pickle.load(f)
-    print("  ✓ VAR model loaded")
-
-    model_xgb = XGBRegressor()
-    model_xgb.load_model(str(MODELS_DIR / "xgb_model.json"))
-    print("  ✓ XGBoost model loaded")
-
-    model_lstm = tf.keras.models.load_model(str(MODELS_DIR / "lstm_model_best.h5"))
-    print("  ✓ LSTM model loaded\n")
-
-    # --- Load train times từ metrics (nếu đã lưu) ---
-    # TODO (CV05): Lưu train time vào CSV khi train mỗi mô hình để load ở đây
-    train_times = {"VAR": 0.0, "XGBoost": 0.0, "LSTM": 0.0}   # placeholder
-
-    # --- Walk-forward backtesting ---
-
-    # VAR (cần df_train_stationary)
-    # TODO (CV05): Chạy lại ADF test trên df_train_full để có df_train_full_stat
-    # Tạm thời dùng df_train_full không sai phân:
-    df_train_full_stat = df_train_full.copy()
-    differenced        = False
-
-    y_true_var, y_pred_var, infer_var = walk_forward_var(
-        fitted_var, df_train_full_stat, df_test,
-        scaler, differenced, df_train_full
-    )
-
-    y_true_xgb, y_pred_xgb, infer_xgb = walk_forward_xgboost(
-        model_xgb, df_train_full, df_test, scaler, lag=LAG_XGB
-    )
-
-    y_true_lstm, y_pred_lstm, infer_lstm = walk_forward_lstm(
-        model_lstm, df_train_full, df_test, scaler, lookback=LOOKBACK
-    )
-
-    # Kết quả
-    results_var  = {"y_true": y_true_var,  "y_pred": y_pred_var,
-                    "infer_time": infer_var,  "train_time": train_times["VAR"]}
-    results_xgb  = {"y_true": y_true_xgb,  "y_pred": y_pred_xgb,
-                    "infer_time": infer_xgb,  "train_time": train_times["XGBoost"]}
-    results_lstm = {"y_true": y_true_lstm, "y_pred": y_pred_lstm,
-                    "infer_time": infer_lstm, "train_time": train_times["LSTM"]}
-
-    # --- Bảng so sánh ---
-    comparison_df = compare_models(results_var, results_xgb, results_lstm)
-
-    # --- Vẽ overlay plot ---
-    results_dict = {"VAR": results_var, "XGBoost": results_xgb, "LSTM": results_lstm}
-    plot_comparison(results_dict, df_test.index)
-
-    # --- Heatmap sai số theo giờ ---
-    plot_error_heatmap_by_hour(results_dict, df_test)
-
-    print("\n" + "=" * 60)
-    print("  [CV05 DONE] Backtesting & Comparison hoàn tất.")
-    print("=" * 60)
+    train, val, test = load_splits()
+    with (PROCESSED / "scaler.pkl").open("rb") as handle:
+        scaler = pickle.load(handle)
+    forecasts, timings = backtest(train, val, test, scaler)
+    comparison = summarize(forecasts, timings)
+    TABLES.mkdir(parents=True, exist_ok=True)
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    table = TABLES / "cv05_final_comparison.csv"
+    comparison.to_csv(table, index=False, float_format="%.6f")
+    copyfile(table, TABLES / "comparison_table.csv")
+    plot_overlay(forecasts)
+    plot_heatmap(forecasts)
+    plot_benchmark(comparison)
+    print(comparison.to_string(index=False))
 
 
 if __name__ == "__main__":

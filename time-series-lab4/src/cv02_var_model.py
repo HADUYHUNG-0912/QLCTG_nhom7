@@ -37,6 +37,7 @@ warnings.filterwarnings("ignore")
 
 import pickle
 from pathlib import Path
+from time import perf_counter
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -219,7 +220,9 @@ def step3_fit_var(df_train_stationary: pd.DataFrame, p_opt: int):
     print("=" * 60)
 
     var_model = VAR(df_train_stationary)
+    started = perf_counter()
     fitted_model = var_model.fit(maxlags=p_opt, ic=None)
+    fitted_model.train_time_seconds = perf_counter() - started
 
     summary = fitted_model.summary()
     summary_path = TABLES_DIR / "var_model_summary.txt"
@@ -360,7 +363,7 @@ def main():
     print("[METRICS] VAR – Đánh giá trên tập Test")
     print("=" * 60)
     metrics = compute_metrics(y_true, y_pred)
-    metrics_df = pd.DataFrame([metrics])
+    metrics_df = pd.DataFrame([{**metrics, "TrainTime(s)": fitted_model.train_time_seconds}])
     metrics_df.to_csv(TABLES_DIR / "cv02_var_metrics.csv", index=False)
     metrics_df.to_csv(TABLES_DIR / "var_metrics.csv", index=False)
     print(f"  Đã lưu: {TABLES_DIR / 'cv02_var_metrics.csv'}")
