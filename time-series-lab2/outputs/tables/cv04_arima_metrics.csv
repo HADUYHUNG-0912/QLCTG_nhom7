@@ -1,0 +1,2 @@
+model,p,d,q,AIC,BIC,train_time_sec,converged,candidate_source,implementation,selected,MAE,RMSE,MAPE,train_n,test_n,test_start,test_end
+"ARIMA(1, 1, 1)",1,1,1,582.4673518389845,591.7301408446817,0.5313163000000714,True,fallback_cv04,numpy_exact_arma_likelihood,True,3.6666924310533946,4.624215534033137,18.03860310160444,163,41,2005-02-01,2008-06-01
