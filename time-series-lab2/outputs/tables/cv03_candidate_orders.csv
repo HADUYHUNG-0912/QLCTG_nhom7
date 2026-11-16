@@ -1,0 +1,10 @@
+p,d,q,Ghi chú
+1,1,1,Khởi điểm gọn; ACF và PACF đều vượt ngưỡng tại lag 1.
+2,1,1,Thử thêm một bậc AR; PACF vượt ngưỡng tại lag 2.
+0,1,0,Ứng viên đối chiếu
+0,1,1,Ứng viên đối chiếu
+0,1,2,Ứng viên đối chiếu
+1,1,0,Ứng viên đối chiếu
+1,1,2,Ứng viên đối chiếu
+2,1,0,Ứng viên đối chiếu
+2,1,2,Ứng viên đối chiếu
