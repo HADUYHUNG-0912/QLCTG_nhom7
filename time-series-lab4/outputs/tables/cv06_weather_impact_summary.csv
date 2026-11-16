@@ -1,0 +1,4 @@
+Weather_Variable,Pearson_r_with_Load,Spearman_rho_with_Load,XGB_24Lags_Total_Gain,XGB_Share_Total_Gain(%),Top_Lag_Feature,Top_Lag_Rank_Overall,Top_Lag_Gain,Physical_Mechanism
+temp,0.4377,0.2998,23.4617,5.54,temp_lag2,7,4.8937,Tác động trực tiếp mạnh nhất (phi tuyến U-Curve: sưởi HDD <15°C & làm mát CDD >20°C)
+humidity,-0.6174,-0.5142,22.5586,5.32,humidity_lag18,12,2.6807,"Tác động thứ cấp & tương tác nhiệt-ẩm (Heat Index khi T>24°C, H>65%; đối xứng ngược với nhiệt độ)"
+wind_speed,0.1171,0.0785,7.8792,1.86,wind_speed_lag5,75,0.406,"Tác động yếu nhất (biến động ngắn hạn phân phối Weibull, ít chi phối phụ tải nền)"
