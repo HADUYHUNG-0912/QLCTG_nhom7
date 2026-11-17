@@ -47,8 +47,12 @@ for d in [FIG_DIR, TABLE_DIR]:
 # ---------------------------------------------------------------------------
 def load_train(path: str) -> pd.Series:
     """Đọc train.csv và trả về pd.Series với DatetimeIndex."""
-    # TODO: pd.read_csv(path, index_col='date', parse_dates=True)['value']
-    raise NotImplementedError("Thành viên 2 cài đặt tại đây")
+    df = pd.read_csv(path, index_col="date", parse_dates=True)
+    series = pd.to_numeric(df["value"], errors="raise")
+    series.index = pd.DatetimeIndex(series.index)
+    series = series.sort_index()
+    series.name = "value"
+    return series
 
 
 # ---------------------------------------------------------------------------
@@ -68,9 +72,17 @@ def run_adf_test(series: pd.Series, label: str = "Chuỗi") -> dict:
     Returns:
         dict: {'adf_stat', 'p_value', 'n_lags', 'crit_1pct', 'crit_5pct', 'crit_10pct', 'is_stationary'}
     """
-    # TODO: result = adfuller(series.dropna(), autolag='AIC')
-    #       Trả về: adf_stat = result[0], p_value = result[1], crit = result[4]
-    raise NotImplementedError("Thành viên 2 cài đặt tại đây")
+    result = adfuller(series.dropna(), autolag="AIC")
+    crit = result[4]
+    return {
+        "adf_stat": float(result[0]),
+        "p_value": float(result[1]),
+        "n_lags": int(result[2]),
+        "crit_1pct": float(crit["1%"]),
+        "crit_5pct": float(crit["5%"]),
+        "crit_10pct": float(crit["10%"]),
+        "is_stationary": bool(result[1] < 0.05)
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -89,9 +101,14 @@ def apply_differencing(series: pd.Series, d: int = 1) -> pd.Series:
     Returns:
         pd.Series đã sai phân (dropna() đã được áp dụng).
     """
-    # TODO: diff_series = series.diff(d).dropna()
-    #       diff_series.to_csv(OUT_DIFF, header=True)
-    raise NotImplementedError("Thành viên 2 cài đặt tại đây")
+    if d < 1:
+        raise ValueError("Bậc sai phân d phải >= 1")
+    diff_series = series.copy()
+    for _ in range(d):
+        diff_series = diff_series.diff().dropna()
+    diff_series.name = "value"
+    diff_series.to_csv(OUT_DIFF, index_label="date")
+    return diff_series
 
 
 # ---------------------------------------------------------------------------
@@ -104,11 +121,36 @@ def plot_before_after(original: pd.Series, differenced: pd.Series) -> None:
       (b) Chuỗi sau sai phân bậc 1 — dao động ổn định quanh 0.
     Lưu: outputs/figures/cv02_adf_before_after_differencing.png
     """
-    # TODO: fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=False)
-    #       ax1.plot(original.index, original, color='steelblue')
-    #       ax2.plot(differenced.index, differenced, color='darkorange')
-    #       ax2.axhline(0, linestyle='--', color='gray', alpha=0.7)
-    raise NotImplementedError("Thành viên 2 cài đặt tại đây")
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1, figsize=(12, 8), sharex=False
+    )
+    ax1.plot(original.index, original, color="steelblue")
+    ax1.set_title("Chuỗi Train gốc")
+    ax1.set_ylabel("Giá trị")
+    ax1.grid(alpha=0.3)
+
+    ax2.plot(
+        differenced.index, differenced,
+        color="darkorange"
+    )
+    ax2.axhline(
+        0, linestyle="--", color="gray", alpha=0.7
+    )
+    ax2.set_title("Chuỗi sau sai phân bậc 1 (d=1)")
+    ax2.set_xlabel("Thời gian")
+    ax2.set_ylabel("Sai phân")
+    ax2.grid(alpha=0.3)
+
+    fig.tight_layout()
+    fig.savefig(
+        os.path.join(
+            FIG_DIR,
+            "cv02_adf_before_after_differencing.png"
+        ),
+        dpi=150,
+        bbox_inches="tight"
+    )
+    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -119,9 +161,17 @@ def save_adf_summary(result_raw: dict, result_diff: dict) -> None:
     Lưu bảng so sánh kết quả ADF trước và sau sai phân.
     outputs/tables/cv02_adf_test_summary.csv
     """
-    # TODO: pd.DataFrame([result_raw, result_diff], index=['Chuỗi gốc', 'Chuỗi sai phân'])
-    #       .to_csv(os.path.join(TABLE_DIR, 'cv02_adf_test_summary.csv'))
-    raise NotImplementedError("Thành viên 2 cài đặt tại đây")
+    df = pd.DataFrame(
+        [result_raw, result_diff],
+        index=["Chuỗi gốc", "Chuỗi sai phân d=1"]
+    )
+    df.index.name = "series"
+    df.to_csv(
+        os.path.join(
+            TABLE_DIR, "cv02_adf_test_summary.csv"
+        ),
+        encoding="utf-8-sig"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -152,4 +202,3 @@ if __name__ == "__main__":
     plot_before_after(train, train_diff)
     save_adf_summary(res_raw, res_diff)
     print("[DONE] CV02 hoàn tất. Chuyển train_differenced.csv cho CV03.")
-
